@@ -1,0 +1,55 @@
+services:
+  workcontainer:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: socomarca_php
+    restart: unless-stopped
+    user: developer:developer
+    working_dir: /var/www/html
+    volumes:
+      - .:/var/www/html:cached
+    networks:
+      - socomarca
+    depends_on:
+      - db
+    expose:
+      - 9000
+  web:
+    image: nginx:alpine
+    container_name: socomarca_web
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    volumes:
+      - .:/var/www/html
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+    networks:
+      - socomarca
+    depends_on:
+      - workcontainer
+  db:
+    image: postgres
+    restart: unless-stopped
+    shm_size: 128mb
+    # or set shared memory limit when deploy via swarm stack
+    volumes:
+     - type: tmpfs
+       target: /dev/shm
+       tmpfs:
+         size: 134217728 # 128*2^20 bytes = 128Mb
+    environment:
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_DATABASE}
+    ports:
+      - "5432:5432"
+    networks:
+      - socomarca
+
+volumes:
+  socomarca_data:
+    name: socomarca_data
+
+networks:
+  socomarca:
