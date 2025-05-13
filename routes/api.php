@@ -14,16 +14,20 @@ Route::post('/login', [AuthController::class, 'login'])->name('login');
 
 Route::middleware('throttle:6,1')->group(function () {
     Route::post('/forgot-password', [PasswordResetController::class, 'forgotPassword'])->name('password.email');
-    //Route::post('/reset-password', [PasswordResetController::class, 'resetPassword'])->name('password.reset');
+    
     Route::post('/verify-token', [PasswordResetController::class, 'verifyToken'])->name('password.verify');
 
-    Route::get('/reset-password', [PasswordResetController::class, 'resetPasswordByRut'])->name('password.reset');
-    Route::post('/verify-token', [PasswordResetController::class, 'verifyTokenByRut'])->name('password.verify');
+    // Route::get('/reset-password', [PasswordResetController::class, 'resetPasswordByRut'])->name('password.reset');
+    // Route::post('/verify-token', [PasswordResetController::class, 'verifyTokenByRut'])->name('password.verify');
 });
 
 // Rutas protegidas
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+    Route::post('/change-password', [PasswordResetController::class, 'changePassword'])->name('password.change');
+    Route::get('/password-status', [PasswordResetController::class, 'checkPasswordStatus'])->name('password.status');
+    
     Route::get('/me', [AuthController::class, 'me'])->name('me');
     
     // Rutas para administradores

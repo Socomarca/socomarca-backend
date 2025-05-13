@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Illuminate\Auth\Events\PasswordReset;
+use App\Mail\TemporaryPasswordMail;
+use Illuminate\Support\Facades\Mail; 
 
 class PasswordResetController extends Controller
 {
@@ -37,30 +39,85 @@ class PasswordResetController extends Controller
             ], 404);
         }
 
-        // Enviar el enlace de restablecimiento
-         $status = Password::sendResetLink(
-            ['email' => $user->email]
-        );
+        // Generar contraseña temporal alfanumérica de 8 caracteres
+        $temporaryPassword = Str::random(8);
 
-        // envio al log en desarrollo
+        // Actualizar la contraseña del usuario en la base de datos
+        $user->password = Hash::make($temporaryPassword);
+        $user->password_changed_at = null; // Para forzar el cambio de contraseña en el próximo login
+        $user->save();
 
-        if ($status === Password::RESET_LINK_SENT) {
-            return response()->json([
-                'status' => true,
-                'message' => 'Se ha enviado un correo electrónico con el enlace para restablecer tu contraseña',
+        // Enviar email con la contraseña temporal
+        Mail::to($user->email)->send(new TemporaryPasswordMail($user, $temporaryPassword));
 
-            ]);
-        }
 
-        return response()->json([
-            'status' => false,
-            'message' => 'No se pudo enviar el enlace de restablecimiento',
-            'errors' => ['email' => [trans($status)]]
-        ], 400);
+       return response()->json([
+            'status' => true,
+            'message' => 'Se ha enviado un correo electrónico con una contraseña temporal'
+        ]);
     }
 
 
+    /**
+     * Cambiar contraseña (requiere autenticación)
+     */
+    public function changePassword(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'current_password' => 'required|string',
+            'password' => 'required|string|min:8|confirmed|different:current_password',
+        ]);
 
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Error de validación',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        $user = $request->user();
+
+        // Verificar que la contraseña actual sea correcta
+        if (!Hash::check($request->current_password, $user->password)) {
+            return response()->json([
+                'status' => false,
+                'message' => 'La contraseña actual es incorrecta',
+                'errors' => ['current_password' => ['La contraseña actual es incorrecta']]
+            ], 400);
+        }
+
+        // Actualizar la contraseña
+        $user->password = Hash::make($request->password);
+        $user->password_changed_at = Carbon::now();
+        $user->save();
+
+        // Opcionalmente, revocar todos los tokens excepto el actual
+        if ($request->has('revoke_all_tokens') && $request->revoke_all_tokens) {
+            $user->tokens()->where('id', '!=', $request->user()->currentAccessToken()->id)->delete();
+        }
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Contraseña actualizada correctamente'
+        ]);
+    }
+
+    /**
+     * Verificar si el usuario necesita cambiar su contraseña
+     */
+    public function checkPasswordStatus(Request $request)
+    {
+        $user = $request->user();
+        $needsChange = $user->password_changed_at === null;
+
+        return response()->json([
+            'status' => true,
+            'data' => [
+                'needs_password_change' => $needsChange
+            ]
+        ]);
+    }
  
 
     /**
