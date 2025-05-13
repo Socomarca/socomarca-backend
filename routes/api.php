@@ -10,7 +10,7 @@ Route::get('/user', function (Request $request) {
 })->middleware('auth:sanctum');
 
 Route::post('/login', [AuthController::class, 'login'])->name('login');
-Route::post('/register', [AuthController::class, 'register']);
+//Route::post('/register', [AuthController::class, 'register']);
 
 Route::middleware('throttle:6,1')->group(function () {
     Route::post('/forgot-password', [PasswordResetController::class, 'forgotPassword'])->name('password.email');
