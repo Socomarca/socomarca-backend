@@ -11,13 +11,14 @@ use Illuminate\Support\Str;
 use Illuminate\Auth\Events\PasswordReset;
 use App\Mail\TemporaryPasswordMail;
 use Illuminate\Support\Facades\Mail; 
+use App\Rules\ValidateRut;
 
 class PasswordResetController extends Controller
 {
     public function forgotPassword(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'rut' => 'required|exists:users,rut',
+            'rut' => ['required|exists:users,rut', new ValidateRut()],
         ]);
 
         if ($validator->fails()) {
@@ -131,7 +132,7 @@ class PasswordResetController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'token' => 'required',
-            'rut' => 'required|exists:users,rut',
+            'rut' => ['required|exists:users,rut', new ValidateRut()],
         ]);
 
         if ($validator->fails()) {
@@ -183,7 +184,7 @@ class PasswordResetController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'token' => 'required',
-            'rut' => 'required|exists:users,rut',
+            'rut' => ['required|exists:users,rut', new ValidateRut()],
             'password' => 'required|string|min:8|confirmed',
         ]);
 

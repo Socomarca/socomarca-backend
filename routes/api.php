@@ -10,15 +10,13 @@ Route::get('/user', function (Request $request) {
 })->middleware('auth:sanctum');
 
 Route::post('/auth/token', [AuthController::class, 'login'])->name('login');
-//Route::post('/register', [AuthController::class, 'register']);
+
 
 Route::middleware('throttle:6,1')->group(function () {
     Route::post('/auth/restore', [PasswordResetController::class, 'forgotPassword'])->name('password.email');
     
     Route::post('/verify-token', [PasswordResetController::class, 'verifyToken'])->name('password.verify');
 
-    // Route::get('/reset-password', [PasswordResetController::class, 'resetPasswordByRut'])->name('password.reset');
-    // Route::post('/verify-token', [PasswordResetController::class, 'verifyTokenByRut'])->name('password.verify');
 });
 
 // Rutas protegidas
