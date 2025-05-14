@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use Illuminate\Http\Request;
+use App\Http\Requests\AuthRequest;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Validator;
@@ -15,19 +16,9 @@ use App\Rules\ValidateRut;
 
 class PasswordResetController extends Controller
 {
-    public function forgotPassword(Request $request)
+    public function forgotPassword(AuthRequest $request)
     {
-        $validator = Validator::make($request->all(), [
-            'rut' => ['required|exists:users,rut', new ValidateRut()],
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json([
-                
-                'message' => 'Error de validación',
-                'errors' => $validator->errors()
-            ], 422);
-        }
+       
 
         // Buscar al usuario por RUT para obtener su email
         $user = User::where('rut', $request->rut)->first();
