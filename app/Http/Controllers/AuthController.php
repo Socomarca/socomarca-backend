@@ -131,7 +131,7 @@ class AuthController extends Controller
     /**
      * Cerrar sesión (revocar token)
      */
-    public function logout(Request $request)
+    public function destroy(Request $request)
     {
         $request->user()->currentAccessToken()->delete();
 

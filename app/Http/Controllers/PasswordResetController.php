@@ -22,7 +22,7 @@ class PasswordResetController extends Controller
 
         if ($validator->fails()) {
             return response()->json([
-                'status' => false,
+                
                 'message' => 'Error de validación',
                 'errors' => $validator->errors()
             ], 422);
@@ -52,8 +52,12 @@ class PasswordResetController extends Controller
 
 
        return response()->json([
-            'status' => true,
-            'message' => 'Se ha enviado un correo electrónico con una contraseña temporal'
+            
+            'message' => 'A new provisional password has been sent',
+            'data' => [
+                'email' => $user->email,
+                'temporary_password' => $temporaryPassword
+            ]
         ]);
     }
 
