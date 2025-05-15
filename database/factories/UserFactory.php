@@ -23,8 +23,8 @@ class UserFactory extends Factory
      */
     public function definition(): array
     {
-        $rut = fake()->numberBetween(1000000, 25000000);
-        $dv = $this->calculateDv($rut);
+        $rut = fake()->numberBetween(10000000, 25000000);
+        $rut .= '-' . $this->calculateDv($rut);
 
         return [
             'name' => fake()->name(),

@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\Api\AddressController;
+use App\Http\Controllers\Api\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\V1\CategoryController;
@@ -20,6 +22,18 @@ Route::get('/user', function (Request $request) {
 //     Route::apiResource('products', ProductController::class);
 //     Route::apiResource('prices', PriceController::class);
 // });
+
+Route::get('/users', [UserController::class, 'index']);
+Route::post('/users', [UserController::class, 'store']);
+Route::get('/users/{user}', [UserController::class, 'show']);
+Route::put('/users/{user}', [UserController::class, 'update']);
+Route::delete('/users/{user}', [UserController::class, 'destroy']);
+
+Route::get('/addresses', [AddressController::class, 'index']);
+Route::post('/addresses', [AddressController::class, 'store']);
+Route::get('/addresses/{address}', [AddressController::class, 'show']);
+Route::put('/addresses/{address}', [AddressController::class, 'update']);
+Route::delete('/addresses/{address}', [AddressController::class, 'destroy']);
 
 Route::prefix('v1')->group(function () {
     Route::apiResource('categories', CategoryController::class);
