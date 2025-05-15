@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\Api\AddressController;
+use App\Http\Controllers\Api\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -38,3 +40,14 @@ Route::middleware('auth:sanctum')->group(function () {
 Route::apiResource('brands', BrandController::class)->only(['index']);
 
 Route::apiResource('prices', PriceController::class)->only(['index']);
+Route::get('/users', [UserController::class, 'index']);
+Route::post('/users', [UserController::class, 'store']);
+Route::get('/users/{user}', [UserController::class, 'show']);
+Route::put('/users/{user}', [UserController::class, 'update']);
+Route::delete('/users/{user}', [UserController::class, 'destroy']);
+
+Route::get('/addresses', [AddressController::class, 'index']);
+Route::post('/addresses', [AddressController::class, 'store']);
+Route::get('/addresses/{address}', [AddressController::class, 'show']);
+Route::put('/addresses/{address}', [AddressController::class, 'update']);
+Route::delete('/addresses/{address}', [AddressController::class, 'destroy']);
