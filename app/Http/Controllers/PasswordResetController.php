@@ -85,7 +85,7 @@ class PasswordResetController extends Controller
 
         // Actualizar la contraseña
         $user->password = Hash::make($request->password);
-        $user->password_changed_at = Carbon::now();
+        $user->password_changed_at = \Carbon\Carbon::now();
         $user->save();
 
         // Opcionalmente, revocar todos los tokens excepto el actual
