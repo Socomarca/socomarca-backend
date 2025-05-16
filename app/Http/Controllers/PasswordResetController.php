@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use Illuminate\Http\Request;
-use App\Http\Requests\AuthRequest;
+use App\Http\Requests\PasswordRequest;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Validator;
@@ -18,20 +18,11 @@ use Illuminate\Support\Facades\DB;
 
 class PasswordResetController extends Controller
 {
-    public function forgotPassword(AuthRequest $request)
+    public function forgotPassword(PasswordRequest $request)
     {
 
 
-        // Buscar al usuario por RUT para obtener su email
-        $user = User::where('rut', $request->rut)->first();
-
-        if (!$user) {
-            return response()->json([
-                'status' => false,
-                'message' => 'No se encontró usuario',
-                'errors' => ['rut' => ['Usuario no encontrado']]
-            ], 404);
-        }
+        $user = $request->user;
 
         // Generar contraseña temporal alfanumérica de 8 caracteres
         $temporaryPassword = Str::random(8);
