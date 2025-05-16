@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\CategoryIdRequest;
 use App\Http\Requests\ProductIdRequest;
 use Illuminate\Http\Request;
 use App\Models\Product;
@@ -21,10 +22,11 @@ class ProductController extends Controller
 
     }
 
-    public function byCategory(Request $request, $categoryId)
-{
-    $products = Product::where('category_id', $categoryId)->paginate(20);
-    return response()->json($products);
-}
+    public function byCategory(CategoryIdRequest $request)
+    {
+        $categoryId = $request->id;
+        $products = Product::where('category_id', $categoryId)->paginate(20);
+        return response()->json($products);
+    }
 
 }

@@ -39,7 +39,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('/products', [ProductController::class,'index'])->name('products.index');
     Route::get('/products/{id}', [ProductController::class,'show'])->name('products.show');
-    Route::get('/products/category/{categoryId}', [ProductController::class, 'byCategory'])->name('products.byCategory');
+    Route::get('/products/category/{id}', [ProductController::class, 'byCategory'])->name('products.byCategory');
     
 });
 
