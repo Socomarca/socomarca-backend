@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Models\Category;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\CategoryIdRequest;
 use Illuminate\Http\Request;
 
 class CategoryController extends Controller
@@ -13,9 +14,10 @@ class CategoryController extends Controller
         return Category::all();
     }
 
-    public function show(Category $category)
+    public function show(CategoryIdRequest $request)
     {
-        return $category;
+        $category = Category::find($request->id);
+        return response()->json($category);
     }
 
 }
