@@ -32,6 +32,18 @@ Route::prefix('auth')->group(function () {
 });
 
 Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/users', [UserController::class, 'index']);
+    Route::post('/users', [UserController::class, 'store']);
+    Route::get('/users/{id}', [UserController::class, 'show']);
+    Route::put('/users/{id}', [UserController::class, 'update']);
+    Route::delete('/users/{id}', [UserController::class, 'destroy']);
+
+    Route::get('/addresses', [AddressController::class, 'index']);
+    Route::post('/addresses', [AddressController::class, 'store']);
+    Route::get('/addresses/{id}', [AddressController::class, 'show']);
+    Route::put('/addresses/{id}', [AddressController::class, 'update']);
+    Route::delete('/addresses/{id}', [AddressController::class, 'destroy']);
+
     Route::get('/categories', [CategoryController::class,'index'])->name('categories.index');
     Route::get('/categories/{id}', [CategoryController::class,'show'])->name('categories.show');
     Route::get('/subcategories', [SubcategoryController::class,'index'])->name('subcategories.index');
@@ -46,14 +58,3 @@ Route::middleware('auth:sanctum')->group(function () {
 Route::apiResource('brands', BrandController::class)->only(['index']);
 
 Route::apiResource('prices', PriceController::class)->only(['index']);
-Route::get('/users', [UserController::class, 'index']);
-Route::post('/users', [UserController::class, 'store']);
-Route::get('/users/{user}', [UserController::class, 'show']);
-Route::put('/users/{user}', [UserController::class, 'update']);
-Route::delete('/users/{user}', [UserController::class, 'destroy']);
-
-Route::get('/addresses', [AddressController::class, 'index']);
-Route::post('/addresses', [AddressController::class, 'store']);
-Route::get('/addresses/{address}', [AddressController::class, 'show']);
-Route::put('/addresses/{address}', [AddressController::class, 'update']);
-Route::delete('/addresses/{address}', [AddressController::class, 'destroy']);

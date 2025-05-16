@@ -4,8 +4,8 @@ namespace App\Http\Controllers\Api;
 
 use App\Models\Category;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\CategoryIdRequest;
-use Illuminate\Http\Request;
+use App\Http\Requests\ShowCategoryRequest;
+use Illuminate\Support\Facades\DB;
 
 class CategoryController extends Controller
 {
@@ -14,10 +14,22 @@ class CategoryController extends Controller
         return Category::all();
     }
 
-    public function show(CategoryIdRequest $request)
+    public function show(ShowCategoryRequest $showRequest, $id)
     {
-        $category = Category::find($request->id);
-        return response()->json($category);
-    }
+        $showRequest->validated();
 
+        if (!DB::table('categories')->where('id', $id)->exists())
+        {
+            return response()->json(
+            [
+                'message' => 'The selected category in params is invalid.',
+                'errors' => array(
+                    'category' => array('The selected category in params is invalid.'))
+            ], 422);
+        }
+
+        $resources = Category::where('id', $id)->get();
+
+        return response()->json(['resources' => $resources]);
+    }
 }

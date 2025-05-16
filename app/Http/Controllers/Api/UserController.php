@@ -49,7 +49,7 @@ class UserController extends Controller
             [
                 'message' => 'The selected user in params is invalid.',
                 'errors' => array(
-                    'toll_company' => array('The selected user in params is invalid.'))
+                    'user' => array('The selected user in params is invalid.'))
             ], 422);
         }
 
@@ -68,7 +68,7 @@ class UserController extends Controller
             [
                 'message' => 'The selected user in params is invalid.',
                 'errors' => array(
-                    'toll_company' => array('The selected user in params is invalid.'))
+                    'user' => array('The selected user in params is invalid.'))
             ], 422);
         }
 
@@ -96,7 +96,7 @@ class UserController extends Controller
             [
                 'message' => 'The selected user in params is invalid.',
                 'errors' => array(
-                    'toll_company' => array('The selected user in params is invalid.'))
+                    'user' => array('The selected user in params is invalid.'))
             ], 422);
         }
 

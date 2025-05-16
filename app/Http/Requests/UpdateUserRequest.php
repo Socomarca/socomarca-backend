@@ -24,7 +24,7 @@ class UpdateUserRequest extends FormRequest
     {
         return
         [
-            'user' => 'bail|integer',
+            'id' => 'bail|integer',
             'name' => 'bail|required|string',
             'email' => ['bail', 'required', 'email', Rule::unique('users')->ignore($this->route('user'))],
             'phone' => 'bail|required|integer|digits:9',
@@ -38,7 +38,7 @@ class UpdateUserRequest extends FormRequest
     {
         $this->merge(
         [
-            'user' => $this->route('user'),
+            'id' => $this->route('id'),
         ]);
     }
 }

@@ -58,7 +58,7 @@ class AddressController extends Controller
             [
                 'message' => 'The selected address in params is invalid.',
                 'errors' => array(
-                    'toll_company' => array('The selected address in params is invalid.'))
+                    'address' => array('The selected address in params is invalid.'))
             ], 422);
         }
 
@@ -79,7 +79,7 @@ class AddressController extends Controller
             [
                 'message' => 'The selected address in params is invalid.',
                 'errors' => array(
-                    'toll_company' => array('The selected address in params is invalid.'))
+                    'address' => array('The selected address in params is invalid.'))
             ], 422);
         }
 
@@ -116,7 +116,7 @@ class AddressController extends Controller
             [
                 'message' => 'The selected address in params is invalid.',
                 'errors' => array(
-                    'toll_company' => array('The selected address in params is invalid.'))
+                    'address' => array('The selected address in params is invalid.'))
             ], 422);
         }
 
