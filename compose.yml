@@ -47,6 +47,18 @@ services:
     networks:
       - socomarca
 
+  pgadmin:
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: "admin@admin.com"
+      PGADMIN_DEFAULT_PASSWORD: "admin"
+    ports:
+      - "80:80"
+    networks:
+      - socomarca
+    depends_on:
+      - db
+
 volumes:
   socomarca_data:
     name: socomarca_data

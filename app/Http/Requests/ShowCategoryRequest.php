@@ -4,7 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class ShowAddressRequest extends FormRequest
+class ShowCategoryRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -23,7 +23,7 @@ class ShowAddressRequest extends FormRequest
     {
         return
         [
-            'address' => 'bail|integer',
+            'id' => 'bail|integer',
         ];
     }
 
@@ -31,7 +31,7 @@ class ShowAddressRequest extends FormRequest
     {
         $this->merge(
         [
-            'address' => $this->route('address'),
+            'id' => $this->route('id'),
         ]);
     }
 }

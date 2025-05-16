@@ -26,7 +26,7 @@ class AddressFactory extends Factory
             'address_line1' => fake()->streetAddress(),
             'address_line2' => fake()->secondaryAddress(),
             'municipality_id' => $municipalityId,
-            'postal_code' => fake()->numberBetween(2000000, 2999999), // 2200055
+            'postal_code' => fake()->numberBetween(2000000, 2999999),
             'is_default' => fake()->boolean(),
             'type' => fake()->randomElement(['billing', 'shipping']),
             'phone' => fake()->numberBetween(777777777, 999999999),
