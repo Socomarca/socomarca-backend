@@ -1,11 +1,12 @@
 <?php
 
+use App\Models\Category;
 use App\Models\User;
 
 /**
  * Prueba de respuesta exitosa.
  */
-test('validate_category_status_ok', function ()
+test('validate_status_code_200', function ()
 {
     $user = User::factory()->create();
 
@@ -19,15 +20,17 @@ test('validate_category_status_ok', function ()
 /**
  * Prueba que valida que el campo category en params es obligatorio.
  */
-test('validate_category_is_required', function ()
+test('validate_id_is_required', function ()
 {
     $user = User::factory()->create();
 
-    $category = '1';
+    Category::factory()->create();
+
+    $id = '1';
 
     $response = $this->actingAs($user, 'sanctum')
         ->withHeaders(['Accept' => 'application/json'])
-        ->get('/api/categories/' . $category);
+        ->get('/api/categories/' . $id);
 
     $response->assertStatus(200);
 });
@@ -35,12 +38,12 @@ test('validate_category_is_required', function ()
 /**
  * Prueba que valida que el token sea obligatorio.
  */
-test('validate_bearer_token', function ()
+test('validate_token', function ()
 {
-    $category = '1';
+    $id = '1';
 
     $response = $this->withHeaders(['Accept' => 'application/json'])
-        ->get('/api/categories/' . $category);
+        ->get('/api/categories/' . $id);
 
     $response->assertStatus(401);
 });
@@ -48,12 +51,12 @@ test('validate_bearer_token', function ()
 /**
  * Prueba que valida que el campo category en params sea un entero.
  */
-test('validate_category_is_integer', function ()
+test('validate_id_is_integer', function ()
 {
-    $category = 'a';
+    $id = 'a';
 
     $response = $this->withHeaders(['Accept' => 'application/json'])
-        ->get('/api/categories/' . $category);
+        ->get('/api/categories/' . $id);
 
     $response->assertStatus(401);
 });
@@ -61,15 +64,15 @@ test('validate_category_is_integer', function ()
 /**
  * Prueba que valida que el campo category en params sea válido en la base de datos.
  */
-test('validate_category_is_invalid', function ()
+test('validate_category_not_found', function ()
 {
     $user = User::factory()->create();
 
-    $category = '999';
+    $id = '999';
 
     $response = $this->actingAs($user, 'sanctum')
         ->withHeaders(['Accept' => 'application/json'])
-        ->get('/api/categories/' . $category);
+        ->get('/api/categories/' . $id);
 
-    $response->assertStatus(422);
+    $response->assertStatus(404);
 });

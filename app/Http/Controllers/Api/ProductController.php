@@ -23,10 +23,8 @@ class ProductController extends Controller
         {
             return response()->json(
             [
-                'message' => 'The selected product in params is invalid.',
-                'errors' => array(
-                    'product' => array('The selected product in params is invalid.'))
-            ], 422);
+                'message' => 'Product not found.',
+            ], 404);
         }
 
         $resources = Product::where('id', $id)->get();

@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\Addresses;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class ProductIdRequest extends FormRequest
+class DestroyRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -21,22 +21,16 @@ class ProductIdRequest extends FormRequest
      */
     public function rules(): array
     {
-        return [
-            'id' => ['required', 'integer', 'exists:products,id'],
+        return
+        [
+            'id' => 'bail|integer',
         ];
     }
 
-    public function messages(): array
+    protected function prepareForValidation()
     {
-        return [
-            'id.required' => 'El ID del producto es obligatorio.',
-            'id.integer' => 'El ID debe ser un número entero.',
-            'id.exists' => 'El producto no existe.',
-        ];
-    }
-    public function validationData()
-    {
-        return array_merge($this->all(), [
+        $this->merge(
+        [
             'id' => $this->route('id'),
         ]);
     }

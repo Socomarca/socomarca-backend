@@ -22,10 +22,8 @@ class CategoryController extends Controller
         {
             return response()->json(
             [
-                'message' => 'The selected category in params is invalid.',
-                'errors' => array(
-                    'category' => array('The selected category in params is invalid.'))
-            ], 422);
+                'message' => 'Category not found.',
+            ], 404);
         }
 
         $resources = Category::where('id', $id)->get();

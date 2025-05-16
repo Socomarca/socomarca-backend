@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\Users;
 
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Password;
 
-class UpdateUserRequest extends FormRequest
+class StoreRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -24,21 +24,13 @@ class UpdateUserRequest extends FormRequest
     {
         return
         [
-            'id' => 'bail|integer',
             'name' => 'bail|required|string',
-            'email' => ['bail', 'required', 'email', Rule::unique('users')->ignore($this->route('user'))],
+            'email' => 'bail|required|email|unique:users,email',
+            'password' => ['bail', 'required', 'confirmed', Password::min(8)->letters()->numbers()],
             'phone' => 'bail|required|integer|digits:9',
             'rut' => 'bail|required|string|max:10|min:10',
             'business_name' => 'bail|required|string',
             'is_active' => 'bail|required|boolean',
         ];
-    }
-
-    protected function prepareForValidation()
-    {
-        $this->merge(
-        [
-            'id' => $this->route('id'),
-        ]);
     }
 }
