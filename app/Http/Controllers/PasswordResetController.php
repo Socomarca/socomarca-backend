@@ -13,6 +13,7 @@ use Illuminate\Auth\Events\PasswordReset;
 use App\Mail\TemporaryPasswordMail;
 use Illuminate\Support\Facades\Mail; 
 use App\Rules\ValidateRut;
+use Carbon\Carbon;
 
 class PasswordResetController extends Controller
 {
@@ -85,7 +86,7 @@ class PasswordResetController extends Controller
 
         // Actualizar la contraseña
         $user->password = Hash::make($request->password);
-        $user->password_changed_at = Carbon::now();
+        $user->password_changed_at = \Carbon\Carbon::now();
         $user->save();
 
         // Opcionalmente, revocar todos los tokens excepto el actual
