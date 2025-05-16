@@ -24,7 +24,7 @@ class UpdateUserRequest extends FormRequest
     {
         return
         [
-            'user' => 'bail|integer',
+            'id' => 'bail|integer',
             'name' => 'bail|required|string',
             'email' => 'bail|required|email|unique:users,email',
             'email' => ['bail', 'required', 'email', Rule::unique('users')->ignore($this->route('user'))],

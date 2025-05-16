@@ -9,6 +9,7 @@ use App\Models\Brand;
 use App\Models\Product;
 use App\Models\Price;
 use App\Models\User;
+use App\Models\Region;
 use Illuminate\Support\Str;
 
 class DatabaseSeeder extends Seeder
@@ -16,6 +17,7 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call([
+            RegionSeeder::class,
             UserSeeder::class,
             CategorySeeder::class,
             SubcategorySeeder::class,
