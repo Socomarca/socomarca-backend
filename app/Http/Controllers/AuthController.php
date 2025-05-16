@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\User;
+
 use Carbon\Carbon;
 use App\Http\Requests\AuthRequest;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
+
 
 class AuthController extends Controller
 {
@@ -19,24 +19,13 @@ class AuthController extends Controller
      */
     public function login(AuthRequest $request)
     {
-        $user = User::where('rut', $request->rut)->first();
+        $user = $request->auth_user;
 
-        if (!$user || !Hash::check($request->password, $user->password)) {
-            abort(401, "Unauthorized");
-        }
-
-        if (!$user->is_active) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Tu cuenta está desactivada. Por favor contacta con soporte.'
-            ], 403);
-        }
-
-        // Actualizar última vez de inicio de sesión
         $user->update([
             'last_login' => Carbon::now()
         ]);
 
+    
         // Crear token con el nombre del dispositivo
 
         $tokenName = $request->device_name ?? 'unknown-device';
@@ -47,15 +36,17 @@ class AuthController extends Controller
         //$permissions = $user->getAllPermissions()->pluck('name');
 
         return response()->json([
-            'status' => true,
-            'message' => 'Inicio de sesión exitoso',
-            'data' => [
-                // 'user' => $user,
+            'token' => $token,
+            'user' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'rut' => $user->rut,
+                'email' => $user->email,
+            ]
                 // 'roles' => $roles,
                 // 'permissions' => $permissions,
-                'token' => $token,
-                'token_type' => 'Bearer'
-            ]
+                
+            
         ]);
     }
 

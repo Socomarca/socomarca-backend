@@ -32,9 +32,15 @@ Route::prefix('auth')->group(function () {
 });
 
 Route::middleware('auth:sanctum')->group(function () {
-    Route::apiResource('categories', CategoryController::class)->only(['index', 'show']);
-    Route::apiResource('subcategories', SubcategoryController::class)->only(['index']);
-    Route::apiResource('products', ProductController::class)->only(['index', 'show']);
+    Route::get('/categories', [CategoryController::class,'index'])->name('categories.index');
+    Route::get('/categories/{id}', [CategoryController::class,'show'])->name('categories.show');
+    Route::get('/subcategories', [SubcategoryController::class,'index'])->name('subcategories.index');
+    Route::get('/subcategories/{id}', [SubcategoryController::class,'show'])->name('subcategories.show');
+
+    Route::get('/products', [ProductController::class,'index'])->name('products.index');
+    Route::get('/products/{id}', [ProductController::class,'show'])->name('products.show');
+    Route::get('/products/category/{categoryId}', [ProductController::class, 'byCategory'])->name('products.byCategory');
+    
 });
 
 Route::apiResource('brands', BrandController::class)->only(['index']);
