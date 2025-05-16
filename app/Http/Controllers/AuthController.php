@@ -7,29 +7,22 @@ use Carbon\Carbon;
 use App\Http\Requests\AuthRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
-    
+
     /**
-     * Login con email y contraseña
+     * Obtener token de acceso con RUT y contraseña
+     * @param AuthRequest $request
+     *
+     * @return \Illuminate\Http\JsonResponse
      */
     public function login(AuthRequest $request)
     {
-        
-
         $user = User::where('rut', $request->rut)->first();
 
         if (!$user || !Hash::check($request->password, $user->password)) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Las credenciales proporcionadas son incorrectas.',
-                'errors' => [
-                    'rut' => ['Las credenciales proporcionadas son incorrectas.']
-                ]
-            ], 401);
+            abort(401, "Unauthorized");
         }
 
         if (!$user->is_active) {
@@ -45,6 +38,7 @@ class AuthController extends Controller
         ]);
 
         // Crear token con el nombre del dispositivo
+
         $tokenName = $request->device_name ?? 'unknown-device';
         $token = $user->createToken($tokenName)->plainTextToken;
 
@@ -67,34 +61,16 @@ class AuthController extends Controller
 
     /**
      * Cerrar sesión (revocar token)
+     * @param Request $request
+     *
+     * @return \Illuminate\Http\JsonResponse
      */
     public function destroy(Request $request)
     {
         $request->user()->currentAccessToken()->delete();
 
         return response()->json([
-            'status' => true,
-            'message' => 'Sesión cerrada exitosamente'
-        ]);
-    }
-
-    /**
-     * Obtener información del usuario autenticado
-     */
-    public function me(Request $request)
-    {
-        
-        $user = $request->user();
-        // $roles = $user->getRoleNames();
-        // $permissions = $user->getAllPermissions()->pluck('name');
-
-        return response()->json([
-            'status' => true,
-            'data' => [
-                'user' => $user,
-                // 'roles' => $roles,
-                // 'permissions' => $permissions
-            ]
+            'message' => 'Token deleted'
         ]);
     }
 }

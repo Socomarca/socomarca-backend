@@ -11,19 +11,20 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Illuminate\Auth\Events\PasswordReset;
 use App\Mail\TemporaryPasswordMail;
-use Illuminate\Support\Facades\Mail; 
+use Illuminate\Support\Facades\Mail;
 use App\Rules\ValidateRut;
-use Carbon\Carbon;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class PasswordResetController extends Controller
 {
     public function forgotPassword(AuthRequest $request)
     {
-       
+
 
         // Buscar al usuario por RUT para obtener su email
         $user = User::where('rut', $request->rut)->first();
-        
+
         if (!$user) {
             return response()->json([
                 'status' => false,
@@ -45,7 +46,7 @@ class PasswordResetController extends Controller
 
 
        return response()->json([
-            
+
             'message' => 'A new provisional password has been sent',
             'data' => [
                 'email' => $user->email,
@@ -115,7 +116,7 @@ class PasswordResetController extends Controller
             ]
         ]);
     }
- 
+
 
     /**
      * Verificar token por RUT en lugar de email
@@ -137,7 +138,7 @@ class PasswordResetController extends Controller
 
         // Buscar al usuario por RUT para obtener su email
         $user = User::where('rut', $request->rut)->first();
-        
+
         if (!$user) {
             return response()->json([
                 'status' => false,
@@ -147,7 +148,7 @@ class PasswordResetController extends Controller
         }
 
         // Verificar si existe una entrada en la tabla password_reset_tokens
-        $tokenData = \DB::table('password_reset_tokens')
+        $tokenData = DB::table('password_reset_tokens')
             ->where('email', $user->email)
             ->first();
 
@@ -190,7 +191,7 @@ class PasswordResetController extends Controller
 
         // Buscar al usuario por RUT para obtener su email
         $user = User::where('rut', $request->rut)->first();
-        
+
         if (!$user) {
             return response()->json([
                 'status' => false,
