@@ -34,27 +34,6 @@ class AuthRequest extends FormRequest
             'password' => [
                 'required',
                 'string',
-                function($attribute, $value, $fail) {
-                    $rut = $this->input('rut');
-                    $user = User::where('rut', $rut)->first();
-                    if (!$user) {
-                        throw new HttpResponseException(
-                            response()->json(['message' => 'Unauthorized'], 401)
-                        );
-                    }
-                    if (!Hash::check($value, $user->password)) {
-                        throw new HttpResponseException(
-                            response()->json(['message' => 'Unauthorized'], 401)
-                        );
-                    }
-                    if (!$user->is_active) {
-                        throw new HttpResponseException(
-                            response()->json(['message' => 'Unauthorized'], 403)
-                        );
-                    }
-                    // inyectar usuario validado en la request
-                    $this->merge(['auth_user' => $user]);
-                }
             ],
         ];
     }
@@ -86,5 +65,20 @@ class AuthRequest extends FormRequest
             'message' => 'Error de validación',
             'errors' => $validator->errors()
         ], 422));
+    }
+
+    protected function passedValidation()
+    {
+        $user = User::where('rut', $this->input('rut'))->first();
+        $isPasswordValid = Hash::check(
+            $this->input('password'),
+            $user->password
+        );
+
+        if (!$user || !$isPasswordValid || !$user->is_active) {
+            abort(401, 'Unauthorized');
+        }
+
+        $this->merge(['auth_user' => $user]); // Authenticated user merged into request
     }
 }
