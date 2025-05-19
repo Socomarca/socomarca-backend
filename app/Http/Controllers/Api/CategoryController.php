@@ -2,23 +2,24 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Models\Category;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\ShowCategoryRequest;
-use Illuminate\Support\Facades\DB;
+use App\Http\Requests\Category\ShowRequest;
+use App\Models\Category;
 
 class CategoryController extends Controller
 {
     public function index()
     {
-        return Category::all();
+        $data = Category::all();
+
+        return response()->json(['data' => $data]);
     }
 
-    public function show(ShowCategoryRequest $showRequest, $id)
+    public function show(ShowRequest $showRequest, $id)
     {
         $showRequest->validated();
 
-        if (!DB::table('categories')->where('id', $id)->exists())
+        if (!Category::find($id))
         {
             return response()->json(
             [
@@ -26,8 +27,8 @@ class CategoryController extends Controller
             ], 404);
         }
 
-        $resources = Category::where('id', $id)->get();
+        $data = Category::where('id', $id)->get();
 
-        return response()->json(['resources' => $resources]);
+        return $data[0];
     }
 }

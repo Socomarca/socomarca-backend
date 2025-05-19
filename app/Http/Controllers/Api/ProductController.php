@@ -3,23 +3,27 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\ShowProductRequest;
-use Illuminate\Http\Request;
+use App\Http\Requests\Product\ShowRequest;
+use App\Http\Resources\Products\ProductCollection;
 use App\Models\Product;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Http\Request;
 
 class ProductController extends Controller
 {
     public function index()
     {
-        return Product::paginate(20);
+        $products = Product::paginate(20);
+
+        $data = new ProductCollection($products);
+
+        return $data;
     }
 
-    public function show(ShowProductRequest $showRequest, $id)
+    public function show(ShowRequest $showRequest, $id)
     {
         $showRequest->validated();
 
-        if (!DB::table('products')->where('id', $id)->exists())
+        if (!Product::find($id))
         {
             return response()->json(
             [
@@ -27,9 +31,11 @@ class ProductController extends Controller
             ], 404);
         }
 
-        $resources = Product::where('id', $id)->get();
+        $product = Product::where('id', $id)->get();
 
-        return response()->json(['resources' => $resources]);
+        $data = new ProductCollection($product);
+
+        return response()->json($data[0]);
     }
 
     public function byCategory(Request $request, $categoryId)

@@ -7,17 +7,19 @@ use App\Http\Requests\Users\DestroyRequest;
 use App\Http\Requests\Users\ShowRequest;
 use App\Http\Requests\Users\StoreRequest;
 use App\Http\Requests\Users\UpdateRequest;
+use App\Http\Resources\Users\UserCollection;
 use App\Models\User;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
     public function index()
     {
-        $resources = User::all();
+        $users = User::paginate(20);
 
-        return response()->json(['resources' => $resources]);
+        $data = new UserCollection($users);
+
+        return $data;
     }
 
     public function store(StoreRequest $storeRequest)
@@ -43,7 +45,7 @@ class UserController extends Controller
     {
         $showRequest->validated();
 
-        if (!DB::table('addresses')->where('id', $id)->exists())
+        if (!User::find($id))
         {
             return response()->json(
             [
@@ -51,9 +53,11 @@ class UserController extends Controller
             ], 404);
         }
 
-        $resources = User::where('id', $id)->get();
+        $users = User::where('id', $id)->get();
 
-        return response()->json(['resources' => $resources]);
+        $data = new UserCollection($users);
+
+        return response()->json($data[0]);
     }
 
     public function update(UpdateRequest $updateRequest, $id)
@@ -78,7 +82,7 @@ class UserController extends Controller
     {
         $destroyRequest->validated();
 
-        if (!DB::table('users')->where('id', $id)->exists())
+        if (!User::find($id))
         {
             return response()->json(
             [

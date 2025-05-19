@@ -7,7 +7,7 @@ use App\Http\Requests\Addresses\DestroyRequest;
 use App\Http\Requests\Addresses\ShowRequest;
 use App\Http\Requests\Addresses\StoreRequest;
 use App\Http\Requests\Addresses\UpdateRequest;
-use App\Http\Resources\AddressCollection;
+use App\Http\Resources\Addresses\AddressCollection;
 use App\Models\Address;
 use Illuminate\Support\Facades\DB;
 
@@ -17,9 +17,9 @@ class AddressController extends Controller
     {
         $addresses = Address::all();
 
-        $resources = new AddressCollection($addresses);
+        $data = new AddressCollection($addresses);
 
-        return response()->json(['resources' => $resources]);
+        return $data;
     }
 
     public function store(StoreRequest $storeRequest)
@@ -52,7 +52,7 @@ class AddressController extends Controller
     {
         $showRequest->validated();
 
-        if (!DB::table('addresses')->where('id', $id)->exists())
+        if (!Address::find($id))
         {
             return response()->json(
             [
@@ -62,9 +62,9 @@ class AddressController extends Controller
 
         $addresses = Address::where('id', $id)->get();
 
-        $resources = new AddressCollection($addresses);
+        $data = new AddressCollection($addresses);
 
-        return response()->json(['resources' => $resources]);
+        return response()->json($data[0]);
     }
 
     public function update(UpdateRequest $updateRequest, $id)
@@ -98,7 +98,7 @@ class AddressController extends Controller
     {
         $destroyRequest->validated();
 
-        if (!DB::table('addresses')->where('id', $id)->exists())
+        if (!Address::find($id))
         {
             return response()->json(
             [
