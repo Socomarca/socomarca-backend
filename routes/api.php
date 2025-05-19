@@ -34,7 +34,7 @@ Route::prefix('auth')->group(function () {
 Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('categories', CategoryController::class)->only(['index', 'show']);
     Route::apiResource('subcategories', SubcategoryController::class)->only(['index']);
-    Route::apiResource('products', ProductController::class)->only(['index', 'show']);
+    Route::apiResource('products', ProductController::class)->only(['index', 'show', 'search']);
 });
 
 Route::apiResource('brands', BrandController::class)->only(['index']);
@@ -51,3 +51,5 @@ Route::post('/addresses', [AddressController::class, 'store']);
 Route::get('/addresses/{address}', [AddressController::class, 'show']);
 Route::put('/addresses/{address}', [AddressController::class, 'update']);
 Route::delete('/addresses/{address}', [AddressController::class, 'destroy']);
+
+//Route::get('/products/search', [ProductController::class, 'search']);
