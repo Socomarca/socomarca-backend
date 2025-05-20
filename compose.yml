@@ -48,6 +48,7 @@ services:
     networks:
       - socomarca
 
+<<<<<<< HEAD
   meilisearch:
     image: getmeili/meilisearch:v1.7
     container_name: meilisearch
@@ -59,6 +60,19 @@ services:
       - ./meili_data:/meili_data
     networks:
       - socomarca
+=======
+  pgadmin:
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: "admin@admin.com"
+      PGADMIN_DEFAULT_PASSWORD: "admin"
+    ports:
+      - "80:80"
+    networks:
+      - socomarca
+    depends_on:
+      - db
+>>>>>>> 5d05573649c997453ff410c82c133b473f27ae56
 
 volumes:
   socomarca_data:

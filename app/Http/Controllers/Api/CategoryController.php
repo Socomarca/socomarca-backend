@@ -2,20 +2,33 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Models\Category;
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
+use App\Http\Requests\Category\ShowRequest;
+use App\Models\Category;
 
 class CategoryController extends Controller
 {
     public function index()
     {
-        return Category::all();
+        $data = Category::all();
+
+        return response()->json(['data' => $data]);
     }
 
-    public function show(Category $category)
+    public function show(ShowRequest $showRequest, $id)
     {
-        return $category;
-    }
+        $showRequest->validated();
 
+        if (!Category::find($id))
+        {
+            return response()->json(
+            [
+                'message' => 'Category not found.',
+            ], 404);
+        }
+
+        $data = Category::where('id', $id)->get();
+
+        return $data[0];
+    }
 }

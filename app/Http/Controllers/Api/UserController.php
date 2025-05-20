@@ -3,24 +3,26 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\DestroyUserRequest;
-use App\Http\Requests\ShowUserRequest;
-use App\Http\Requests\StoreUserRequest;
-use App\Http\Requests\UpdateUserRequest;
+use App\Http\Requests\Users\DestroyRequest;
+use App\Http\Requests\Users\ShowRequest;
+use App\Http\Requests\Users\StoreRequest;
+use App\Http\Requests\Users\UpdateRequest;
+use App\Http\Resources\Users\UserCollection;
 use App\Models\User;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
     public function index()
     {
-        $resources = User::all();
+        $users = User::paginate(20);
 
-        return response()->json(['resources' => $resources]);
+        $data = new UserCollection($users);
+
+        return $data;
     }
 
-    public function store(StoreUserRequest $storeRequest)
+    public function store(StoreRequest $storeRequest)
     {
         $data = $storeRequest->validated();
 
@@ -39,38 +41,28 @@ class UserController extends Controller
         return response()->json(['message' => 'The user has been added']);
     }
 
-    public function show(ShowUserRequest $showRequest, $id)
+    public function show(ShowRequest $showRequest, $id)
     {
         $showRequest->validated();
 
-        if (!DB::table('users')->where('id', $id)->exists())
+        if (!User::find($id))
         {
             return response()->json(
             [
-                'message' => 'The selected user in params is invalid.',
-                'errors' => array(
-                    'toll_company' => array('The selected user in params is invalid.'))
-            ], 422);
+                'message' => 'User not found.',
+            ], 404);
         }
 
-        $resources = User::where('id', $id)->get();
+        $users = User::where('id', $id)->get();
 
-        return response()->json(['resources' => $resources]);
+        $data = new UserCollection($users);
+
+        return response()->json($data[0]);
     }
 
-    public function update(UpdateUserRequest $updateRequest, $id)
+    public function update(UpdateRequest $updateRequest, $id)
     {
         $data = $updateRequest->validated();
-
-        if (!DB::table('users')->where('id', $id)->exists())
-        {
-            return response()->json(
-            [
-                'message' => 'The selected user in params is invalid.',
-                'errors' => array(
-                    'toll_company' => array('The selected user in params is invalid.'))
-            ], 422);
-        }
 
         $user = User::find($id);
 
@@ -86,18 +78,16 @@ class UserController extends Controller
         return response()->json(['message' => 'The selected user has been updated']);
     }
 
-    public function destroy(DestroyUserRequest $destroyRequest, $id)
+    public function destroy(DestroyRequest $destroyRequest, $id)
     {
         $destroyRequest->validated();
 
-        if (!DB::table('users')->where('id', $id)->exists())
+        if (!User::find($id))
         {
             return response()->json(
             [
-                'message' => 'The selected user in params is invalid.',
-                'errors' => array(
-                    'toll_company' => array('The selected user in params is invalid.'))
-            ], 422);
+                'message' => 'User not found.',
+            ], 404);
         }
 
         $user = User::find($id);
