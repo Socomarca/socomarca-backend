@@ -12,7 +12,6 @@ class DatabaseSeeder extends Seeder
         $this->call([
             RegionSeeder::class,
             UserSeeder::class,
-
             CategorySeeder::class,
             SubcategorySeeder::class,
             BrandSeeder::class,

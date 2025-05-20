@@ -44,7 +44,7 @@ class ProductController extends Controller
         return response()->json($products);
     }
 
-    public function search(Request $request)
+    public function search(Request $request) //Meilisearch
     {
         $query = $request->input('search');
 
@@ -65,22 +65,7 @@ class ProductController extends Controller
         return response()->json($results);
     }
 
-    // public function search(Request $request)
-    // {
-        
-    //     $query = $request->input('query');
-    //     $category = $request->input('category');
-    //     $brand = $request->input('brand');
-
-    //     $products = Product::search($query)
-    //         ->get()
-    //         ->when($category, fn($products) => $products->filter(fn($p) => $p->category_id == $category))
-    //         ->when($brand, fn($products) => $products->filter(fn($p) => $p->brand_id == $brand));
-
-    //     return response()->json($products);
-    // }
-
-    // public function searchWithLevenshtein(Request $request)
+    // public function search(Request $request) //levenshtein
     // {
     //     $searchTerm = $request->input('search');
 
@@ -88,21 +73,71 @@ class ProductController extends Controller
     //         return response()->json(['message' => 'Search term is required'], 422);
     //     }
 
-    //     $products = Product::all(); // Trae todos los productos (optimizar si son muchos)
-        
-    //     // Calcular distancia de Levenshtein para cada producto
+    //     $query = Product::query();
+
+    //     if ($request->filled('category_id')) {
+    //         $query->where('category_id', $request->input('category_id'));
+    //     }
+
+    //     if ($request->filled('brand_id')) {
+    //         $query->where('brand_id', $request->input('brand_id'));
+    //     }
+
+    //     $products = $query->get();
+
     //     $results = $products->map(function ($product) use ($searchTerm) {
-    //         $distance = levenshtein(strtolower($searchTerm), strtolower($product->name));
+    //         $words = explode(' ', mb_strtolower($product->name));
+    //         $minDistance = collect($words)->map(function ($word) use ($searchTerm) {
+    //             return levenshtein($word, mb_strtolower($searchTerm));
+    //         })->min();
+
     //         return [
     //             'product' => $product,
-    //             'distance' => $distance,
+    //             'distance' => $minDistance,
+    //         ];
+    //     })->sortBy('distance')->values();
+
+    //     return response()->json($results->pluck('product')->take(10));
+    // }
+
+    // public function search(Request $request) //Similar Text
+    // {
+    //     $searchTerm = $request->input('search');
+
+    //     if (!$searchTerm) {
+    //         return response()->json(['message' => 'Search term is required'], 422);
+    //     }
+
+    //     $query = Product::query();
+
+    //     if ($request->filled('category_id')) {
+    //         $query->where('category_id', $request->input('category_id'));
+    //     }
+
+    //     if ($request->filled('brand_id')) {
+    //         $query->where('brand_id', $request->input('brand_id'));
+    //     }
+
+    //     $products = $query->get();
+
+    //     // Calcular porcentaje de similitud para cada producto
+    //     $results = $products->map(function ($product) use ($searchTerm) {
+    //         $similarity = 0;
+
+    //         // Comparamos con el nombre completo
+    //         similar_text(mb_strtolower($searchTerm), mb_strtolower($product->name), $percent);
+
+    //         return [
+    //             'product' => $product,
+    //             'similarity' => $percent,
     //         ];
     //     });
 
-    //     // Ordenar por similitud
-    //     $sorted = $results->sortBy('distance')->values();
+    //     // Ordenar de mayor a menor porcentaje de similitud
+    //     $sorted = $results->sortByDesc('similarity')->values();
 
-    //     // Solo devolver productos, puedes limitar a los 10 más parecidos
+    //     // Devolver los 10 más similares
     //     return response()->json($sorted->pluck('product')->take(10));
     // }
+
 }
