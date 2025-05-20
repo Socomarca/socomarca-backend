@@ -36,19 +36,18 @@ class RandomApiService
             // Listar el retorno (puedes usar Log o dd para debug)
             Log::info('Entidades recibidas:', $entities);
 
-            foreach ($entities as $entity) {
-                // User::updateOrCreate(
-                //     ['external_id' => $entity['IDMAEEN'] ?? null], // Usa el campo único adecuado
-                //     [
-                //         'name' => $entity['NOKOEN'] ?? '',
-                //         'email' => $entity['EMAIL'] ?? '',
-                //         // Agrega aquí otros campos relevantes de tu modelo User
-                //         // Ejemplo:
-                //         // 'rut' => $entity['KOEN'] ?? '',
-                //         // 'direccion' => $entity['DIEN'] ?? '',
-                //     ]
-                // );
-            }
+            // foreach ($entities as $entity) {
+            //     //User::updateOrCreate(
+            //         ['external_id' => $entity['IDMAEEN'] ?? null],
+            //         [
+            //             'name' => $entity['NOKOEN'] ?? '',
+            //             'email' => $entity['EMAIL'] ?? '',
+               
+            //              'rut' => $entity['KOEN'] ?? '',
+            //              'direccion' => $entity['DIEN'] ?? '',
+            //         ]
+            //     //);
+            // }
         } else {
             Log::error('Error obteniendo entidades de Random API');
         }
