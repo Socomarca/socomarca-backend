@@ -31,3 +31,20 @@ Get into php container
 ```bash
 docker compose exec -it workcontainer bash
 ```
+
+# Testing
+
+First you must create a testing DB
+```sql
+CREATE DATABASE socomarca_backend_testing;
+```
+
+Then run the migrations in the testing database
+```bash
+php artisan migrate --env=testing
+```
+
+Finally you will be able to run all the tests
+```bash
+php artisan test --env=testing
+```
