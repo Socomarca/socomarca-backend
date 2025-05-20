@@ -4,7 +4,7 @@ namespace App\Http\Requests\Addresses;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class DestroyRequest extends FormRequest
+class IndexRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -23,7 +23,7 @@ class DestroyRequest extends FormRequest
     {
         return
         [
-            'id' => 'bail|integer',
+            'user_id' => 'bail|required|integer|exists:addresses,user_id',
         ];
     }
 
@@ -31,15 +31,9 @@ class DestroyRequest extends FormRequest
     {
         return
         [
-            'id.integer' => 'The id field in params must be an integer.',
+            'user_id.required' => 'The user_id field in query params is required.',
+            'user_id.integer' => 'The user_id field in query params must be an integer.',
+            'user_id.exists' => 'The selected user in query params is invalid.',
         ];
-    }
-
-    protected function prepareForValidation()
-    {
-        $this->merge(
-        [
-            'id' => $this->route('id'),
-        ]);
     }
 }
