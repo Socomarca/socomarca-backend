@@ -12,6 +12,7 @@ use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\PriceController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PasswordResetController;
+use App\Services\Random\RandomApiService;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -58,3 +59,8 @@ Route::middleware('auth:sanctum')->group(function () {
 Route::apiResource('brands', BrandController::class)->only(['index']);
 
 Route::apiResource('prices', PriceController::class)->only(['index']);
+
+Route::get('/test-random-api', function (RandomApiService $randomApiService) {
+    $randomApiService->fetchAndUpdateUsers();
+    return 'Sincronización ejecutada. Revisa los logs.';
+});
