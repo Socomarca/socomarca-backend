@@ -3,19 +3,44 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
+use App\Http\Requests\Product\ShowRequest;
+use App\Http\Resources\Products\ProductCollection;
 use App\Models\Product;
+use Illuminate\Http\Request;
 
 class ProductController extends Controller
 {
     public function index()
     {
-        return Product::paginate(20);
+        $products = Product::paginate(20);
+
+        $data = new ProductCollection($products);
+
+        return $data;
     }
 
-    public function show(Product $product)
+    public function show(ShowRequest $showRequest, $id)
     {
-        return $product;
+        $showRequest->validated();
+
+        if (!Product::find($id))
+        {
+            return response()->json(
+            [
+                'message' => 'Product not found.',
+            ], 404);
+        }
+
+        $product = Product::where('id', $id)->get();
+
+        $data = new ProductCollection($product);
+
+        return response()->json($data[0]);
     }
 
+    public function byCategory(Request $request, $categoryId)
+    {
+        $products = Product::where('category_id', $categoryId)->paginate(20);
+        return response()->json($products);
+    }
 }

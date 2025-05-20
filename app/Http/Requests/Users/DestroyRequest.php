@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\Users;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class DestroyUserRequest extends FormRequest
+class DestroyRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -23,7 +23,7 @@ class DestroyUserRequest extends FormRequest
     {
         return
         [
-            'user' => 'bail|integer',
+            'id' => 'bail|integer',
         ];
     }
 
@@ -31,7 +31,7 @@ class DestroyUserRequest extends FormRequest
     {
         $this->merge(
         [
-            'user' => $this->route('user'),
+            'id' => $this->route('id'),
         ]);
     }
 }

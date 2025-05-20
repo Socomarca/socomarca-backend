@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\Addresses;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
-class UpdateAddressRequest extends FormRequest
+class UpdateRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -24,7 +24,7 @@ class UpdateAddressRequest extends FormRequest
     {
         return
         [
-            'address' => 'bail|integer',
+            'id' => 'bail|integer|exists:addresses,id',
             'address_line1' => 'bail|required|string',
             'address_line2' => 'bail|required|string',
             'postal_code' => 'bail|required|integer',
@@ -41,7 +41,7 @@ class UpdateAddressRequest extends FormRequest
     {
         $this->merge(
         [
-            'address' => $this->route('address'),
+            'id' => $this->route('id'),
         ]);
     }
 }
