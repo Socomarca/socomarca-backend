@@ -119,6 +119,11 @@ class Product extends Model
                     }
                     $q->where('is_active', true);
                 });
+
+                // Ordenar por precio si se solicita en el filtro
+                if (isset($filter['sort']) && in_array(strtolower($filter['sort']), ['asc', 'desc'])) {
+                    $sortByPrice = strtolower($filter['sort']);
+                }
                 continue;
             }
 
@@ -149,6 +154,16 @@ class Product extends Model
                     $query->orderBy($filter['field'], $filter['sort']);
                 }
             }
+        }
+
+        if ($sortByPrice) {
+            $query->selectRaw('products.*, MIN(prices.amount) as min_price')
+                ->leftJoin('prices', function($join) {
+                    $join->on('products.id', '=', 'prices.product_id')
+                        ->where('prices.is_active', true);
+                })
+                ->groupBy('products.id')
+                ->orderBy('min_price', $sortByPrice);
         }
         return $query;
     }
