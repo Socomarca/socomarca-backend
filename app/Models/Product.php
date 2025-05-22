@@ -73,6 +73,19 @@ class Product extends Model
         return $this->hasMany(Price::class);
     }
 
+    public function favorites()
+    {
+        return $this->hasMany(Favorite::class);
+    }
+
+    public function userFavorites($userId)
+    {
+        return $this->hasMany(Favorite::class)
+            ->whereHas('listFavorite', function ($q) use ($userId) {
+                $q->where('user_id', $userId);
+            });
+    }
+
     public function toSearchableArray()
     {
         return [
@@ -92,6 +105,23 @@ class Product extends Model
     public function scopeFilter($query, array $filters)
     {
         foreach ($filters as $filter) {
+            // Filtros especiales para precios
+            if (isset($filter['field']) && $filter['field'] === 'price') {
+                $query->whereHas('prices', function ($q) use ($filter) {
+                    if (isset($filter['min'])) {
+                        $q->where('amount', '>=', $filter['min']);
+                    }
+                    if (isset($filter['max'])) {
+                        $q->where('amount', '<=', $filter['max']);
+                    }
+                    if (isset($filter['unit'])) {
+                        $q->where('unit', $filter['unit']);
+                    }
+                    $q->where('is_active', true);
+                });
+                continue;
+            }
+
             $field = array_find($this->allowedFilters, function ($item) use ($filter) {
                 return $item['field'] === $filter['field'];
             });
