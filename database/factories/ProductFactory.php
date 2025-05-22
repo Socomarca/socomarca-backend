@@ -16,13 +16,22 @@ class ProductFactory extends Factory
      */
     public function definition()
     {
+        $brand = \App\Models\Brand::inRandomOrder()->first();
+        $category = \App\Models\Category::inRandomOrder()->first();
+        $subcategory = \App\Models\Subcategory::where('category_id', $category->id)
+            ->inRandomOrder()
+            ->first();
+        $string1 = fake()->numberBetween(10000, 99999);
+        $string2 = fake()->numberBetween(10000, 99999);
+        $sku = "SKU-{$string1}-{$string2}";
+
         return [
             'name' => $this->faker->words(3, true),
             'description' => $this->faker->paragraph(),
-            'category_id' => \App\Models\Category::factory(),
-            'subcategory_id' => \App\Models\Subcategory::factory(),
-            'brand_id' => \App\Models\Brand::factory(),
-            'sku' => $this->faker->unique()->bothify('SKU-####-???'),
+            'category_id' => $category->id,
+            'subcategory_id' => $subcategory->id,
+            'brand_id' => $brand->id,
+            'sku' => $sku,
             'status' => $this->faker->boolean(90),
         ];
     }
