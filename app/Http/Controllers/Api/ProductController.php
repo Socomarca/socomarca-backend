@@ -5,17 +5,17 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Product\ShowRequest;
 use App\Http\Resources\Products\ProductCollection;
+use App\Http\Resources\Products\ProductResource;
 use App\Models\Product;
 use Illuminate\Http\Request;
 
 class ProductController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $products = Product::paginate(20);
-
+        $perPage = $request->input('per_page', 20);
+        $products = Product::paginate($perPage);
         $data = new ProductCollection($products);
-
         return $data;
     }
 
@@ -23,7 +23,9 @@ class ProductController extends Controller
     {
         $showRequest->validated();
 
-        if (!Product::find($id))
+        $product = Product::find($id);
+
+        if (!$product)
         {
             return response()->json(
             [
@@ -31,17 +33,9 @@ class ProductController extends Controller
             ], 404);
         }
 
-        $product = Product::where('id', $id)->get();
+        $data = new ProductResource($product);
 
-        $data = new ProductCollection($product);
-
-        return response()->json($data[0]);
-    }
-
-    public function byCategory(Request $request, $categoryId)
-    {
-        $products = Product::where('category_id', $categoryId)->paginate(20);
-        return response()->json($products);
+        return $data;
     }
 
     /**

@@ -40,10 +40,6 @@ class Product extends Model
             'operators' => ['=', '!=',],
         ],
         [
-            'field' => 'price',
-            'operators' => ['=', '!=', '>', '<', '>=', '<='],
-        ],
-        [
             'field' => 'name',
             'operators' => ['=', '!=', 'LIKE', 'NOT LIKE', 'fulltext'],
         ],
@@ -55,7 +51,6 @@ class Product extends Model
      */
     protected $allowedSorts = [
         'name',
-        'price',
         'created_at',
         'updated_at',
     ];
