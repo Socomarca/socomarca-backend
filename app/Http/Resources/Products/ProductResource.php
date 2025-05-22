@@ -24,12 +24,13 @@ class ProductResource extends JsonResource
 
         return
         [
-            'id' => $id,
+            'id' => $this->id,
             'name' => $this->name,
             'description' => $this->description,
-            'category' => Category::where('id', $categoryId)->first(),
-            'subcategory' => Subcategory::where('id', $subcategoryId)->first(),
-            'brand' => Brand::where('id', $brandId)->first(),
+            'category' => $this->category,
+            'subcategory' => $this->subcategory,
+            'brand' => $this->brand,
+            'price' => 1000,
             'sku' => $this->sku,
             'status' => $this->status,
             'created_at' => $this->created_at,

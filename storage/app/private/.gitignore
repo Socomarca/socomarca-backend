@@ -1,2 +1,5 @@
 *
 !.gitignore
+!/fake_seed_data
+!/fake_seed_data/*
+!/fake_seed_data/.gitignore

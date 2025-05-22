@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Category\ShowRequest;
+use App\Http\Resources\Categories\CategoryCollection;
+use App\Http\Resources\Categories\CategoryResource;
 use App\Models\Category;
 
 class CategoryController extends Controller
@@ -12,14 +14,15 @@ class CategoryController extends Controller
     {
         $data = Category::all();
 
-        return response()->json(['data' => $data]);
+        return new CategoryCollection($data);
     }
 
     public function show(ShowRequest $showRequest, $id)
     {
         $showRequest->validated();
+        $category = Category::find($id);
 
-        if (!Category::find($id))
+        if (!$category)
         {
             return response()->json(
             [
@@ -27,8 +30,6 @@ class CategoryController extends Controller
             ], 404);
         }
 
-        $data = Category::where('id', $id)->get();
-
-        return $data[0];
+        return new CategoryResource($category);
     }
 }
