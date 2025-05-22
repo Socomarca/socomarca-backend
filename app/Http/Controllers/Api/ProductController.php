@@ -44,100 +44,24 @@ class ProductController extends Controller
         return response()->json($products);
     }
 
-    public function search(Request $request) //Meilisearch
+    /**
+     * Search products by filters
+     *
+     * @param Request $request
+     *
+     * @return ProductCollection
+     */
+    public function search(Request $request)
     {
-        $query = $request->input('search');
+        $perPage = $request->input('per_page', 20);
+        $filters = $request->input('filters');
+        $result = Product::select("products.*")
+            ->filter($filters)
+            ->paginate($perPage);
 
-        if (!$query) {
-            return response()->json(['message' => 'Search term is required'], 422);
-        }
+        $data = new ProductCollection($result);
 
-        $results = Product::search($query)->get();
-
-        if ($request->filled('category_id')) {
-            $results = $results->where('category_id', $request->input('category_id'));
-        }
-
-        if ($request->filled('brand_id')) {
-            $results = $results->where('brand_id', $request->input('brand_id'));
-        }
-
-        return response()->json($results);
+        return $data;
     }
-
-    // public function search(Request $request) //levenshtein
-    // {
-    //     $searchTerm = $request->input('search');
-
-    //     if (!$searchTerm) {
-    //         return response()->json(['message' => 'Search term is required'], 422);
-    //     }
-
-    //     $query = Product::query();
-
-    //     if ($request->filled('category_id')) {
-    //         $query->where('category_id', $request->input('category_id'));
-    //     }
-
-    //     if ($request->filled('brand_id')) {
-    //         $query->where('brand_id', $request->input('brand_id'));
-    //     }
-
-    //     $products = $query->get();
-
-    //     $results = $products->map(function ($product) use ($searchTerm) {
-    //         $words = explode(' ', mb_strtolower($product->name));
-    //         $minDistance = collect($words)->map(function ($word) use ($searchTerm) {
-    //             return levenshtein($word, mb_strtolower($searchTerm));
-    //         })->min();
-
-    //         return [
-    //             'product' => $product,
-    //             'distance' => $minDistance,
-    //         ];
-    //     })->sortBy('distance')->values();
-
-    //     return response()->json($results->pluck('product')->take(10));
-    // }
-
-    // public function search(Request $request) //Similar Text
-    // {
-    //     $searchTerm = $request->input('search');
-
-    //     if (!$searchTerm) {
-    //         return response()->json(['message' => 'Search term is required'], 422);
-    //     }
-
-    //     $query = Product::query();
-
-    //     if ($request->filled('category_id')) {
-    //         $query->where('category_id', $request->input('category_id'));
-    //     }
-
-    //     if ($request->filled('brand_id')) {
-    //         $query->where('brand_id', $request->input('brand_id'));
-    //     }
-
-    //     $products = $query->get();
-
-    //     // Calcular porcentaje de similitud para cada producto
-    //     $results = $products->map(function ($product) use ($searchTerm) {
-    //         $similarity = 0;
-
-    //         // Comparamos con el nombre completo
-    //         similar_text(mb_strtolower($searchTerm), mb_strtolower($product->name), $percent);
-
-    //         return [
-    //             'product' => $product,
-    //             'similarity' => $percent,
-    //         ];
-    //     });
-
-    //     // Ordenar de mayor a menor porcentaje de similitud
-    //     $sorted = $results->sortByDesc('similarity')->values();
-
-    //     // Devolver los 10 más similares
-    //     return response()->json($sorted->pluck('product')->take(10));
-    // }
 
 }
