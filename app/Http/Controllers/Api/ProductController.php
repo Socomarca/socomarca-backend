@@ -48,12 +48,23 @@ class ProductController extends Controller
     public function search(Request $request)
     {
         $perPage = $request->input('per_page', 20);
-        $filters = $request->input('filters');
+        $filters = $request->input('filters', []);
         $result = Product::select("products.*")
             ->filter($filters)
             ->paginate($perPage);
 
-        $data = new ProductCollection($result);
+        $priceFilter = collect($filters)->firstWhere('field', 'price');
+        $minPrice = $priceFilter['min'] ?? null;
+        $maxPrice = $priceFilter['max'] ?? null;
+        $unit     = $priceFilter['unit'] ?? null;
+
+        $data = new ProductCollection($result)->additional([
+        'filters' => [
+            'min_price' => $minPrice,
+            'max_price' => $maxPrice,
+            'unit' => $unit,
+        ]
+    ]);;
 
         return $data;
     }
