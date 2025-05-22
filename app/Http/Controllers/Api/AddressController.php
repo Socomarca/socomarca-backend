@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Addresses\DestroyRequest;
+use App\Http\Requests\Addresses\IndexRequest;
 use App\Http\Requests\Addresses\ShowRequest;
 use App\Http\Requests\Addresses\StoreRequest;
 use App\Http\Requests\Addresses\UpdateRequest;
@@ -13,9 +14,13 @@ use Illuminate\Support\Facades\DB;
 
 class AddressController extends Controller
 {
-    public function index()
+    public function index(IndexRequest $indexRequest)
     {
-        $addresses = Address::all();
+        $data = $indexRequest->validated();
+
+        $userId = $indexRequest->user_id;
+
+        $addresses = Address::where('user_id', $userId)->get();
 
         $data = new AddressCollection($addresses);
 
