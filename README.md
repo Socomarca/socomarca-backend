@@ -31,3 +31,29 @@ Get into php container
 ```bash
 docker compose exec -it workcontainer bash
 ```
+
+
+## Sync products
+
+*Order is important, categories must be synced before products.*
+
+Start queue worker
+```bash
+docker compose exec workcontainer php artisan queue:work
+```
+
+Sync categories
+```bash
+docker compose exec workcontainer php artisan random:sync-categories
+```
+
+Sync products
+```bash
+docker compose exec workcontainer php artisan random:sync-products
+```
+
+
+Sync prices
+```bash
+docker compose exec workcontainer php artisan random:sync-prices
+```

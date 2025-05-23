@@ -9,7 +9,7 @@ class Subcategory extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['category_id', 'name', 'description'];
+    protected $fillable = ['category_id', 'name', 'description', 'code', 'level', 'key'];
 
     public function category()
     {

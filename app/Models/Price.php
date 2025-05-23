@@ -11,7 +11,9 @@ class Price extends Model
 
     protected $fillable = [
         'product_id',
-        'amount',
+        'price_list_id',
+        'unit',
+        'price',
         'valid_from',
         'valid_to',
         'is_active',
