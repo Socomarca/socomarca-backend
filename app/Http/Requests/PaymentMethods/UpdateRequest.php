@@ -11,7 +11,7 @@ class UpdateRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -21,8 +21,26 @@ class UpdateRequest extends FormRequest
      */
     public function rules(): array
     {
-        return [
-            //
+        return
+        [
+            'id' => 'bail|integer|exists:payment_methods,id',
+            'active' => 'bail|required|boolean',
         ];
+    }
+
+    public function messages()
+    {
+        return
+        [
+            'id.integer' => 'The id field in params must be an integer.',
+        ];
+    }
+
+    protected function prepareForValidation()
+    {
+        $this->merge(
+        [
+            'id' => $this->route('id'),
+        ]);
     }
 }

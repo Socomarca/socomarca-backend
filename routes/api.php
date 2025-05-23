@@ -15,6 +15,7 @@ use App\Http\Controllers\PasswordResetController;
 use App\Http\Controllers\Api\ListFavoriteController;
 use App\Http\Controllers\Api\FavoriteController;
 use App\Http\Controllers\Api\CartController;
+use App\Http\Controllers\Api\PaymentMethodController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -76,3 +77,6 @@ Route::post('/carts', [CartController::class, 'store']);
 Route::get('/carts/{id}', [CartController::class, 'show']);
 Route::put('/carts/{id}', [CartController::class, 'update']);
 Route::delete('/carts/{id}', [CartController::class, 'destroy']);
+
+Route::get('/payment-methods', [PaymentMethodController::class, 'index']);
+Route::put('/payment-methods/{id}', [PaymentMethodController::class, 'update']);
