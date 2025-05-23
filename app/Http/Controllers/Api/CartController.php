@@ -1,0 +1,85 @@
+<?php
+
+namespace App\Http\Controllers\Api;
+
+use App\Http\Controllers\Controller;
+use App\Http\Requests\Carts\DestroyRequest;
+use App\Http\Requests\Carts\IndexRequest;
+use App\Http\Requests\Carts\ShowRequest;
+use App\Http\Requests\Carts\StoreRequest;
+use App\Http\Requests\Carts\UpdateRequest;
+use App\Http\Resources\Carts\CartCollection;
+use App\Models\Cart;
+
+class CartController extends Controller
+{
+    public function index(IndexRequest $indexRequest)
+    {
+        $data = $indexRequest->validated();
+
+        $userId = $indexRequest->user_id;
+
+        $carts = Cart::where('user_id', $userId)->get();
+
+        $data = new CartCollection($carts);
+
+        return $data;
+    }
+
+    public function store(StoreRequest $storeRequest)
+    {
+        $data = $storeRequest->validated();
+
+        $cart = new Cart;
+
+        $cart->user_id = $data['user_id'];
+        $cart->product_id = $data['product_id'];
+        $cart->quantity = $data['quantity'];
+        $cart->price = $data['price'];
+
+        $cart->save();
+
+        return response()->json(['message' => 'The product in the cart has been added'], 201);
+    }
+
+
+    public function update(UpdateRequest $updateRequest, $id)
+    {
+        $data = $updateRequest->validated();
+
+        $cart = Cart::find($id);
+        if (!$cart)
+        {
+            return response()->json(
+            [
+                'message' => 'Product not found.',
+            ], 404);
+        }
+
+        $cart->quantity = $data['quantity'];
+        $cart->price = $data['price'];
+
+        $cart->save();
+
+        return response()->json(['message' => 'The selected product has been updated']);
+
+    }
+
+    public function destroy(DestroyRequest $destroyRequest, $id)
+    {
+        $destroyRequest->validated();
+
+        $cart = Cart::find($id);
+        if (!$cart)
+        {
+            return response()->json(
+            [
+                'message' => 'Product not found.',
+            ], 404);
+        }
+
+        $cart->delete();
+
+        return response()->json(['message' => 'The selected product has been deleted']);
+    }
+}

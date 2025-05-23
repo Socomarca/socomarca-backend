@@ -11,14 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('favorites', function (Blueprint $table) {
+        Schema::create('order_items', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->foreignId('order_id')->constrained()->onDelete('cascade');
             $table->foreignId('product_id')->constrained()->onDelete('cascade');
+            $table->string('unit')->nullable();
+            $table->smallInteger('quantity');
+            $table->decimal('price', 10, 2);            
+            // $table->decimal('subtotal', 10, 2);
             $table->timestamps();
-            
-            // Evitar duplicados
-            $table->unique(['user_id', 'product_id']);
         });
     }
 
@@ -27,6 +28,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('favorites');
+        Schema::dropIfExists('order_items');
     }
 };
