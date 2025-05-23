@@ -12,6 +12,8 @@ use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\PriceController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PasswordResetController;
+use App\Http\Controllers\Api\ListFavoriteController;
+use App\Http\Controllers\Api\FavoriteController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -52,8 +54,26 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::resource('products', ProductController::class)->only(['index', 'show']);
     Route::post('/products/search', [ProductController::class, 'search'])->name('products.search');
 
+    // Route::get('/favorites', [FavoriteController::class, 'index']);
+    // Route::post('/favorites', [FavoriteController::class, 'store']);
+    // Route::delete('/favorites/{product}', [FavoriteController::class, 'destroy']);
+
 });
 
 Route::apiResource('brands', BrandController::class)->only(['index']);
 
 Route::apiResource('prices', PriceController::class)->only(['index']);
+
+// Route::prefix('/lists-favorites')->group(function () {
+Route::get('/lists-favorites', [ListFavoriteController::class, 'index']);
+Route::post('/lists-favorites', [ListFavoriteController::class, 'store']);
+Route::get('/lists-favorites/{id}', [ListFavoriteController::class, 'show']);
+Route::put('/lists-favorites/{id}', [ListFavoriteController::class, 'update']);
+Route::delete('/lists-favorites/{id}', [ListFavoriteController::class, 'destroy']);
+// });
+
+Route::get('/favorites', [FavoriteController::class, 'index']);
+Route::post('/favorites', [FavoriteController::class, 'store']);
+// Route::get('/favorites/{id}', [FavoriteController::class, 'show']);
+// Route::put('/favorites', [FavoriteController::class, 'update']);
+Route::delete('/favorites/{id}', [FavoriteController::class, 'destroy']);
