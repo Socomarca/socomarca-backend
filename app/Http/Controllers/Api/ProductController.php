@@ -3,19 +3,59 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
+use App\Http\Requests\Product\ShowRequest;
+use App\Http\Resources\Products\ProductCollection;
+use App\Http\Resources\Products\ProductResource;
 use App\Models\Product;
+use Illuminate\Http\Request;
 
 class ProductController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        return Product::paginate(20);
+        $perPage = $request->input('per_page', 20);
+        $products = Product::paginate($perPage);
+        $data = new ProductCollection($products);
+        return $data;
     }
 
-    public function show(Product $product)
+    public function show(ShowRequest $showRequest, $id)
     {
-        return $product;
+        $showRequest->validated();
+
+        $product = Product::find($id);
+
+        if (!$product)
+        {
+            return response()->json(
+            [
+                'message' => 'Product not found.',
+            ], 404);
+        }
+
+        $data = new ProductResource($product);
+
+        return $data;
+    }
+
+    /**
+     * Search products by filters
+     *
+     * @param Request $request
+     *
+     * @return ProductCollection
+     */
+    public function search(Request $request)
+    {
+        $perPage = $request->input('per_page', 20);
+        $filters = $request->input('filters');
+        $result = Product::select("products.*")
+            ->filter($filters)
+            ->paginate($perPage);
+
+        $data = new ProductCollection($result);
+
+        return $data;
     }
 
 }

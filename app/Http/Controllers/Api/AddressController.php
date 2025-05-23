@@ -3,26 +3,31 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\DestroyAddressRequest;
-use App\Http\Requests\ShowAddressRequest;
-use App\Http\Requests\StoreAddressRequest;
-use App\Http\Requests\UpdateAddressRequest;
-use App\Http\Resources\AddressCollection;
+use App\Http\Requests\Addresses\DestroyRequest;
+use App\Http\Requests\Addresses\IndexRequest;
+use App\Http\Requests\Addresses\ShowRequest;
+use App\Http\Requests\Addresses\StoreRequest;
+use App\Http\Requests\Addresses\UpdateRequest;
+use App\Http\Resources\Addresses\AddressCollection;
 use App\Models\Address;
 use Illuminate\Support\Facades\DB;
 
 class AddressController extends Controller
 {
-    public function index()
+    public function index(IndexRequest $indexRequest)
     {
-        $addresses = Address::all();
+        $data = $indexRequest->validated();
 
-        $resources = new AddressCollection($addresses);
+        $userId = $indexRequest->user_id;
 
-        return response()->json(['resources' => $resources]);
+        $addresses = Address::where('user_id', $userId)->get();
+
+        $data = new AddressCollection($addresses);
+
+        return $data;
     }
 
-    public function store(StoreAddressRequest $storeRequest)
+    public function store(StoreRequest $storeRequest)
     {
         $data = $storeRequest->validated();
 
@@ -48,40 +53,28 @@ class AddressController extends Controller
         return response()->json(['message' => 'The address has been added']);
     }
 
-    public function show(ShowAddressRequest $showRequest, $id)
+    public function show(ShowRequest $showRequest, $id)
     {
         $showRequest->validated();
 
-        if (!DB::table('addresses')->where('id', $id)->exists())
+        if (!Address::find($id))
         {
             return response()->json(
             [
-                'message' => 'The selected address in params is invalid.',
-                'errors' => array(
-                    'toll_company' => array('The selected address in params is invalid.'))
-            ], 422);
+                'message' => 'Address not found.',
+            ], 404);
         }
 
         $addresses = Address::where('id', $id)->get();
 
-        $resources = new AddressCollection($addresses);
+        $data = new AddressCollection($addresses);
 
-        return response()->json(['resources' => $resources]);
+        return response()->json($data[0]);
     }
 
-    public function update(UpdateAddressRequest $updateRequest, $id)
+    public function update(UpdateRequest $updateRequest, $id)
     {
         $data = $updateRequest->validated();
-
-        if (!DB::table('addresses')->where('id', $id)->exists())
-        {
-            return response()->json(
-            [
-                'message' => 'The selected address in params is invalid.',
-                'errors' => array(
-                    'toll_company' => array('The selected address in params is invalid.'))
-            ], 422);
-        }
 
         $data['is_default'] === true &&
             DB::table('addresses')
@@ -106,18 +99,16 @@ class AddressController extends Controller
 
     }
 
-    public function destroy(DestroyAddressRequest $destroyRequest, $id)
+    public function destroy(DestroyRequest $destroyRequest, $id)
     {
         $destroyRequest->validated();
 
-        if (!DB::table('addresses')->where('id', $id)->exists())
+        if (!Address::find($id))
         {
             return response()->json(
             [
-                'message' => 'The selected address in params is invalid.',
-                'errors' => array(
-                    'toll_company' => array('The selected address in params is invalid.'))
-            ], 422);
+                'message' => 'Address not found.',
+            ], 404);
         }
 
         $address = Address::find($id);

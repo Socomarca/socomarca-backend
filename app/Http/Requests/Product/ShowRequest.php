@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\Product;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class DestroyAddressRequest extends FormRequest
+class ShowRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -23,7 +23,15 @@ class DestroyAddressRequest extends FormRequest
     {
         return
         [
-            'address' => 'bail|integer',
+            'id' => 'bail|integer',
+        ];
+    }
+
+    public function messages()
+    {
+        return
+        [
+            'id.integer' => 'The id field in params must be an integer.',
         ];
     }
 
@@ -31,7 +39,7 @@ class DestroyAddressRequest extends FormRequest
     {
         $this->merge(
         [
-            'address' => $this->route('address'),
+            'id' => $this->route('id'),
         ]);
     }
 }

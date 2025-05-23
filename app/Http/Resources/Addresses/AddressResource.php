@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Resources;
+namespace App\Http\Resources\Addresses;
 
 use App\Models\Municipality;
 use App\Models\User;
