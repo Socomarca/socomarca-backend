@@ -65,6 +65,14 @@ class ListFavoriteController extends Controller
 
         $listFavorite = ListFavorite::find($id);
 
+        if (!$listFavorite)
+        {
+            return response()->json(
+            [
+                'message' => 'List not found.',
+            ], 404);
+        }
+
         $listFavorite->name = $data['name'];
         $listFavorite->user_id = $data['user_id'];
 

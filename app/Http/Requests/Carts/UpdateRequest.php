@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Requests\ListsFavorites;
+namespace App\Http\Requests\Carts;
 
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -21,11 +21,10 @@ class UpdateRequest extends FormRequest
      */
     public function rules(): array
     {
-        return
-        [
-            'id' => 'bail|integer|exists:lists_favorites,id',
-            'name' => 'bail|required|string',
-            'user_id' => 'bail|required|integer|exists:users,id',
+        return [
+            'id'            => 'bail|integer|exists:carts,id',
+            'quantity'      => 'bail|required|integer|min:1|max:99',
+            'price'         => 'bail|required|integer',
         ];
     }
 
