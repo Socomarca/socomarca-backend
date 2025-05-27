@@ -13,6 +13,11 @@ class Kernel extends ConsoleKernel
         $schedule->command('random:sync-products')
                 ->dailyAt('03:00')
                 ->withoutOverlapping();
+
+        // Sincronizar usuarios cada día a las 1 AM
+        $schedule->command('random:sync-users')
+                ->dailyAt('01:00')
+                ->withoutOverlapping();
     }
 
     protected function commands()

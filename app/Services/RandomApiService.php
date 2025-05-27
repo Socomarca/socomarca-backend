@@ -4,6 +4,7 @@ namespace App\Services;
 
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
 
 class RandomApiService
 {
@@ -71,6 +72,44 @@ class RandomApiService
             'size' => $size,
             'page' => $page
         ]);
+    }
+
+     public function getEntidadesUsuarios($size = 15, $page = 1)
+    {
+        return $this->makeRequest('get', '/web32/entidades', [
+            'size' => $size,
+            'page' => $page
+        ]);
+    }
+
+    public function fetchAndUpdateUsers()
+    {
+        // 1. Login para obtener el token
+        $loginResponse = Http::post($this->baseUrl . '/login', [
+            'username' => 'demo@random.cl',
+            'password' => 'd3m0r4nd0m3RP'
+        ]);
+
+        if (!$loginResponse->successful()) {
+            Log::error('Error autenticando con Random API');
+            return;
+        }
+
+        $token = $loginResponse->json('token');
+
+        // 2. Usar el token en la petición GET
+        $response = Http::withToken($token)
+            ->get($this->baseUrl.'/web32/entidades', [
+                //'empresa' => '01',
+                //'size' => 100
+            ]);
+
+        if ($response->successful()) {
+            return $response->json();
+
+        } else {
+            Log::error('Error obteniendo entidades de Random API');
+        }
     }
 
     public function getProducts($tipr = '', $kopr_anterior = 0, $kopr = '', $nokopr = '', $search = '', $fmpr = '', $pfpr = '', $hfpr = '')
