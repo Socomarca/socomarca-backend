@@ -16,6 +16,7 @@ use App\Http\Controllers\Api\ListFavoriteController;
 use App\Http\Controllers\Api\FavoriteController;
 use App\Http\Controllers\Api\CartController;
 use App\Http\Controllers\Api\PaymentMethodController;
+use App\Http\Controllers\Api\OrderController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -77,6 +78,9 @@ Route::post('/carts', [CartController::class, 'store']);
 Route::get('/carts/{id}', [CartController::class, 'show']);
 Route::put('/carts/{id}', [CartController::class, 'update']);
 Route::delete('/carts/{id}', [CartController::class, 'destroy']);
+
+Route::get('/orders', [OrderController::class, 'index']);
+Route::post('/orders/create-from-cart', [OrderController::class, 'createFromCart']);
 
 Route::get('/payment-methods', [PaymentMethodController::class, 'index']);
 Route::put('/payment-methods/{id}', [PaymentMethodController::class, 'update']);

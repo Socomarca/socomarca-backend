@@ -18,8 +18,10 @@ class PriceFactory extends Factory
     {
         return [
             'product_id' => \App\Models\Product::factory(),
-            'amount' => $this->faker->randomFloat(2, 10, 1000),
+            'price_list_id' => $this->faker->word(),
+            'price' => $this->faker->randomFloat(2, 10, 1000),
             //'currency' => 'USD',
+            'unit' => $this->faker->randomElement(['kg', 'gr', 'un']),
             'valid_from' => now()->subDays(rand(0, 30)),
             'valid_to' => null,
             'is_active' => true,
