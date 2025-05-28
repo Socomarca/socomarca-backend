@@ -12,7 +12,12 @@
 |
 */
 
-uses(Tests\TestCase::class)->in('Feature');
+use App\Models\Address;
+use App\Models\FavoriteList;
+use App\Models\User;
+
+uses(Tests\TestCase::class,
+    \Illuminate\Foundation\Testing\DatabaseTruncation::class)->in('Feature');
 //uses(Tests\TestCase::class)->in('Unit');
 
 /*
@@ -43,6 +48,21 @@ uses(Tests\TestCase::class)->in('Feature');
 |
 */
 
-// function something() {
-//     // ...
-// }
+function createuser()
+{
+    return User::factory()->create();
+}
+
+function createAddress()
+{
+    return User::factory()
+            ->has(Address::factory(), 'addresses')
+                ->create();
+}
+
+function createFavoriteList()
+{
+    return User::factory()
+            ->has(FavoriteList::factory(), 'favoritesList')
+                ->create();
+}

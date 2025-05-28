@@ -2,13 +2,14 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 
-class ListFavorite extends Model
+class FavoriteList extends Model
 {
     use HasFactory;
-    protected $table = 'lists_favorites';
+
+    protected $table = 'favorites_list';
 
     protected $fillable = [
         'name',
@@ -17,7 +18,7 @@ class ListFavorite extends Model
 
     public function favorites()
     {
-        return $this->hasMany(Favorite::class, 'list_favorite_id');
+        return $this->hasMany(Favorite::class);
     }
 
 
@@ -25,5 +26,4 @@ class ListFavorite extends Model
     {
         return $this->belongsTo(User::class);
     }
-
 }

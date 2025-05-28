@@ -3,26 +3,26 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Category\ShowRequest;
+use App\Http\Requests\Categories\ShowRequest;
 use App\Http\Resources\Categories\CategoryCollection;
-use App\Http\Resources\Categories\CategoryResource;
 use App\Models\Category;
 
 class CategoryController extends Controller
 {
     public function index()
     {
-        $data = Category::all();
+        $categories = Category::all();
 
-        return new CategoryCollection($data);
+        $data = new CategoryCollection($categories);
+
+        return $data;
     }
 
     public function show(ShowRequest $showRequest, $id)
     {
         $showRequest->validated();
-        $category = Category::find($id);
 
-        if (!$category)
+        if (!Category::find($id))
         {
             return response()->json(
             [
@@ -30,6 +30,10 @@ class CategoryController extends Controller
             ], 404);
         }
 
-        return new CategoryResource($category);
+        $categories = Category::where('id', $id)->get();
+
+        $data = new CategoryCollection($categories);
+
+        return response()->json($data[0]);
     }
 }

@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Requests\Favorites;
+namespace App\Http\Requests\Subcategories;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class StoreRequest extends FormRequest
+class ShowRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -23,8 +23,23 @@ class StoreRequest extends FormRequest
     {
         return
         [
-            'favorite_list_id' => 'bail|required|integer|exists:favorites_list,id',
-            'product_id' => 'bail|required|integer|exists:products,id',
+            'id' => 'bail|integer',
         ];
+    }
+
+    public function messages()
+    {
+        return
+        [
+            'id.integer' => 'The id field in params must be an integer.',
+        ];
+    }
+
+    protected function prepareForValidation()
+    {
+        $this->merge(
+        [
+            'id' => $this->route('id'),
+        ]);
     }
 }

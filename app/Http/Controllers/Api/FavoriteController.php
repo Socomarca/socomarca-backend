@@ -4,12 +4,11 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Favorites\DestroyRequest;
-use Illuminate\Http\Request;
 use App\Http\Requests\Favorites\IndexRequest;
 use App\Http\Requests\Favorites\StoreRequest;
 use App\Http\Resources\Favorites\FavoriteCollection;
 use App\Models\Favorite;
-use App\Models\ListFavorite;
+use App\Models\FavoriteList;
 
 class FavoriteController extends Controller
 {
@@ -18,21 +17,23 @@ class FavoriteController extends Controller
         $data = $indexRequest->validated();
 
         $userId = $data['user_id'];
-        $favoriteId = $data['list_favorite_id'];
+        $favoriteListId = $data['favorite_list_id'];
 
-        $listsfavorites = ListFavorite::where('user_id', $userId)->where('id', $favoriteId)->exists();
+        $favoritesList = FavoriteList::where('user_id', $userId)->where('id', $favoriteListId)->exists();
 
-        if(!$listsfavorites){
+        if(!$favoritesList)
+        {
             return response()->json(
             [
-                'message' => 'Favorites not found.',
+                'message' => 'Favorite product not found.',
             ], 404);
         }
 
-        $favorites = Favorite::where('list_favorite_id', $favoriteId)->get();
+        $favorites = Favorite::where('favorite_list_id', $favoriteListId)->get();
+
         $data = new FavoriteCollection($favorites);
+
         return $data;
-        // return FavoriteResource::collection($favorites);
     }
 
     public function store(StoreRequest $storeRequest)
@@ -41,7 +42,7 @@ class FavoriteController extends Controller
 
         $favorite = new favorite;
 
-        $favorite->list_favorite_id = $data['list_favorite_id'];
+        $favorite->favorite_list_id = $data['favorite_list_id'];
         $favorite->product_id = $data['product_id'];
 
         $favorite->save();
@@ -54,16 +55,17 @@ class FavoriteController extends Controller
         $destroyRequest->validated();
 
         $favorite = Favorite::find($id);
+
         if (!$favorite)
         {
             return response()->json(
             [
-                'message' => 'Favorite not found.',
+                'message' => 'Favorite product not found.',
             ], 404);
         }
 
         $favorite->delete();
 
-        return response()->json(['message' => 'Favorite deleted.']);
+        return response()->json(['message' => 'The selected favorite product has been deleted']);
     }
 }

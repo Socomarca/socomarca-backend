@@ -17,9 +17,11 @@ class PriceFactory extends Factory
     public function definition()
     {
         return [
-            'product_id' => \App\Models\Product::factory(),
-            'amount' => $this->faker->randomFloat(2, 10, 1000),
+            'product_id' => 'product_id',
+            'price_list_id' => 'price_list_id',
             //'currency' => 'USD',
+            'unit' => fake()->numberBetween(1, 10),
+            'price' => fake()->randomFloat(2, 1000, 100000),
             'valid_from' => now()->subDays(rand(0, 30)),
             'valid_to' => null,
             'is_active' => true,

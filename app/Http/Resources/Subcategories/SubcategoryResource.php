@@ -1,14 +1,11 @@
 <?php
 
-namespace App\Http\Resources\Products;
+namespace App\Http\Resources\Subcategories;
 
-use App\Models\Brand;
-use App\Models\Category;
-use App\Models\Subcategory;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class ProductResource extends JsonResource
+class SubcategoryResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -23,11 +20,6 @@ class ProductResource extends JsonResource
             'name' => $this->name,
             'description' => $this->description,
             'category' => $this->category,
-            'subcategory' => $this->subcategory,
-            'brand' => $this->brand,
-            'price' => 1000,
-            'sku' => $this->sku,
-            'status' => $this->status,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];

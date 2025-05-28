@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Requests\ListsFavorites;
+namespace App\Http\Requests\FavoritesList;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class UpdateRequest extends FormRequest
+class DestroyRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -23,9 +23,7 @@ class UpdateRequest extends FormRequest
     {
         return
         [
-            'id' => 'bail|integer|exists:lists_favorites,id',
-            'name' => 'bail|required|string',
-            'user_id' => 'bail|required|integer|exists:users,id',
+            'id' => 'bail|integer',
         ];
     }
 

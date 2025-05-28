@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Requests\ListsFavorites;
+namespace App\Http\Requests\FavoritesList;
 
 use Illuminate\Foundation\Http\FormRequest;
 
