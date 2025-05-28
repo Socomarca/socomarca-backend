@@ -26,4 +26,14 @@ class Order extends Model
         return $this->hasMany(OrderItem::class);
     }
 
+    public function getAmountAttribute()
+    {
+        return round($this->attributes['amount'], 0);
+    }
+
+    public function getSubtotalAttribute()
+    {
+        return round($this->attributes['subtotal'], 0);
+    }
+
 }

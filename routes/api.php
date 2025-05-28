@@ -17,6 +17,7 @@ use App\Http\Controllers\Api\FavoriteController;
 use App\Http\Controllers\Api\CartController;
 use App\Http\Controllers\Api\PaymentMethodController;
 use App\Http\Controllers\Api\OrderController;
+use App\Http\Controllers\Api\WebpayController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -79,8 +80,17 @@ Route::get('/carts/{id}', [CartController::class, 'show']);
 Route::put('/carts/{id}', [CartController::class, 'update']);
 Route::delete('/carts/{id}', [CartController::class, 'destroy']);
 
-Route::get('/orders', [OrderController::class, 'index']);
-Route::post('/orders/create-from-cart', [OrderController::class, 'createFromCart']);
+
 
 Route::get('/payment-methods', [PaymentMethodController::class, 'index']);
 Route::put('/payment-methods/{id}', [PaymentMethodController::class, 'update']);
+
+// Rutas de orden
+Route::get('/orders', [OrderController::class, 'index']);
+Route::post('/orders/create-from-cart', [OrderController::class, 'createFromCart']);
+
+// Rutas de Webpay
+Route::post('/orders/pay', [OrderController::class, 'payOrder']);
+Route::get('/webpay/return', [WebpayController::class, 'return'])->name('webpay.return');
+Route::get('/webpay/status', [WebpayController::class, 'status']);
+Route::post('/webpay/refund', [WebpayController::class, 'refund']);
