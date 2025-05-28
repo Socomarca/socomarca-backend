@@ -52,6 +52,15 @@ class WebpayController extends Controller
                         'order_status' => $order->status,
                         'payment_status' => $payment->response_status
                     ]);
+
+                    Payment::where('order_id', $order->id)->update([
+                        'response_status' => $result['status'],
+                        'response_message' => json_encode($result),
+                        'auth_code' => $result['authorization_code'] ?? null,
+                        'paid_at' => $result['status'] === 'AUTHORIZED' ? now() : null
+                    ]);
+
+
                 } else {
                     Log::warning('Webpay return: Orden no encontrada', ['order_id' => $payment->order_id]);
                 }
@@ -72,6 +81,14 @@ class WebpayController extends Controller
 
         if ($request->exists("TBK_TOKEN")) {
             Log::info('Webpay return: Pago abortado por usuario', ['token' => $request->TBK_TOKEN]);
+
+            $payment = Payment::where('token', $request->TBK_TOKEN)->first();
+            if ($payment) {
+                $payment->response_status = 'failed';
+                $payment->response_message = json_encode(['message' => 'Pago abortado por el usuario']);
+                $payment->save();
+            }
+
             return response()->json([
                 'success' => false,
                 'message' => 'Pago abortado por el usuario',
