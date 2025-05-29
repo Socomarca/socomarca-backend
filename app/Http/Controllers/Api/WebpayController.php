@@ -135,6 +135,11 @@ class WebpayController extends Controller
                 $request->token,
                 $request->amount
             );
+
+            $payment = Payment::where('token', $request->token)->first();
+            $payment->response_status = 'refunded';
+            $payment->response_message = json_encode($result);
+            $payment->save();
             
             return response()->json([
                 'success' => true,

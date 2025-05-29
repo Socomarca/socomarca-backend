@@ -2,8 +2,9 @@
 
 namespace Database\Factories;
 
+use App\Models\Subcategory;
+use App\Models\Category;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Support\Str;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Subcategory>
@@ -11,18 +12,26 @@ use Illuminate\Support\Str;
 class SubcategoryFactory extends Factory
 {
     /**
+     * The name of the factory's corresponding model.
+     *
+     * @var string
+     */
+    protected $model = Subcategory::class;
+
+    /**
      * Define the model's default state.
      *
      * @return array<string, mixed>
      */
-    public function definition()
+    public function definition(): array
     {
-        $name = $this->faker->unique()->word();
         return [
-            'category_id' => \App\Models\Category::factory(),
-            'name' => ucfirst($name),
+            'name' => $this->faker->unique()->word(),
             'description' => $this->faker->sentence(),
-            //'slug' => Str::slug($name),
+            'category_id' => Category::factory(),
+            'code' => $this->faker->numberBetween(1, 100),
+            'level' => 2,
+            'key' => $this->faker->unique()->word(),
         ];
     }
 }
