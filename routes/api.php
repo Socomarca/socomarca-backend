@@ -53,7 +53,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/subcategories', [SubcategoryController::class,'index'])->name('subcategories.index');
     Route::get('/subcategories/{id}', [SubcategoryController::class,'show'])->name('subcategories.show');
 
-    Route::resource('products', ProductController::class)->only(['index', 'show']);
+    Route::get('products', [ProductController::class, 'index']);
+    Route::get('products/{id}', [ProductController::class, 'show']);
     Route::post('/products/search', [ProductController::class, 'search'])->name('products.search');
 
     Route::get('/favorites-list', [FavoriteListController::class, 'index']);
@@ -75,13 +76,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/payment-methods', [PaymentMethodController::class, 'index']);
     Route::put('/payment-methods/{id}', [PaymentMethodController::class, 'update']);
 
+    Route::any('{url}', function()
+    {
+        return response()->json(['message' => 'Method Not Allowed.'], 405);
+    })->where('url', '.*');
+
 });
 
 Route::apiResource('brands', BrandController::class)->only(['index']);
 
 Route::apiResource('prices', PriceController::class)->only(['index']);
-
-Route::any('{url}', function()
-{
-    return response()->json(['message' => 'Method Not Allowed.'], 405);
-})->where('url', '.*');

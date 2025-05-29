@@ -29,7 +29,9 @@ test('validate_status_code_200', function ()
         ->withHeaders(['Accept' => 'application/json'])
         ->get('/api/addresses?user_id=' . $userId);
 
-    $response->assertStatus(200);
+    $response
+        ->assertStatus(200)
+        ->assertJson([]);
 });
 
 /**
@@ -37,9 +39,9 @@ test('validate_status_code_200', function ()
  */
 test('test_user_is_invalid', function ()
 {
-    Address::truncate();
-
     $userId = $this->user->id;
+
+    Address::truncate();
 
     $response = $this->actingAs($this->user, 'sanctum')
         ->withHeaders(['Accept' => 'application/json'])
@@ -53,7 +55,7 @@ test('test_user_is_invalid', function ()
  */
 test('test_id_is_integer', function ()
 {
-    $id = 'a';
+    $id = 'id';
 
     $response = $this->actingAs($this->user, 'sanctum')
         ->withHeaders(['Accept' => 'application/json'])
@@ -67,9 +69,9 @@ test('test_id_is_integer', function ()
  */
 test('test_address_not_found', function ()
 {
-    Address::truncate();
+    $id = $this->user->addresses['0']->id;
 
-    $id = '1';
+    Address::truncate();
 
     $response = $this->actingAs($this->user, 'sanctum')
         ->withHeaders(['Accept' => 'application/json'])

@@ -20,10 +20,10 @@ class AddressFactory extends Factory
     {
         return
         [
-            'user_id' => User::factory(),
+            'user_id' => \App\Models\User::factory(),
             'address_line1' => fake()->streetAddress(),
             'address_line2' => fake()->secondaryAddress(),
-            'municipality_id' => Municipality::factory(),
+            'municipality_id' => \App\Models\Municipality::factory(),
             'postal_code' => fake()->numberBetween(2000000, 2999999),
             'is_default' => fake()->boolean(),
             'type' => fake()->randomElement(['billing', 'shipping']),

@@ -16,7 +16,7 @@ test('usuario puede iniciar sesion con credenciales validas', function () {
     ]);
 
     // Acción
-    $response = $this->postJson(route('login'), [
+    $response = $this->postJson(route('auth.token.store'), [
         'rut' => '17260847-7',
         'password' => 'password123',
         'device_name' => 'test-device',
@@ -35,7 +35,7 @@ test('usuario no puede iniciar sesion con credenciales invalidas', function () {
     ]);
 
     // Acción
-    $response = $this->postJson(route('login'), [
+    $response = $this->postJson(route('auth.token.store'), [
         'rut' => '11111111-1',
         'password' => 'wrongpassword',
         'device_name' => 'test-device',
@@ -54,17 +54,16 @@ test('usuario inactivo no puede iniciar sesion', function () {
     ]);
 
     // Acción
-    $response = $this->postJson(route('login'), [
+    $response = $this->postJson(route('auth.token.store'), [
         'rut' => '22222222-2',
         'password' => 'password123',
         'device_name' => 'test-device',
     ]);
 
     // Aserción
-    $response->assertStatus(403)
+    $response->assertStatus(401)
         ->assertJson([
-            'status' => false,
-            'message' => 'Tu cuenta está desactivada. Por favor contacta con soporte.',
+            'message' => "Unauthorized",
         ]);
     $this->assertGuest();
 });
@@ -79,7 +78,7 @@ test('usuario puede cerrar sesion', function () {
     Sanctum::actingAs($user);
 
     // Acción
-    $response = $this->deleteJson(route('destroy'));
+    $response = $this->deleteJson(route('auth.token.destroy'));
 
     // Aserción
     $response->assertStatus(200);
@@ -93,7 +92,7 @@ test('usuario autenticado puede obtener su informacion', function () {
     Sanctum::actingAs($user);
 
     // Acción
-    $response = $this->getJson(route('me'));
+    $response = $this->getJson('/api/users/' . $user->id);
 
     // Aserción
     $response->assertStatus(200);

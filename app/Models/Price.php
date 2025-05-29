@@ -19,8 +19,8 @@ class Price extends Model
         'is_active',
     ];
 
-    public function product()
+    public function products()
     {
-        return $this->belongsTo(Product::class);
+        return $this->hasMany(Product::class);
     }
 }
