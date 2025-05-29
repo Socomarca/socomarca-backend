@@ -2,6 +2,9 @@
 
 namespace App\Http\Resources\Products;
 
+use App\Models\Brand;
+use App\Models\Category;
+use App\Models\Subcategory;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -21,14 +24,14 @@ class ProductResource extends JsonResource
             ->first();
 
         $isFavorite = false;
-        
+
         $userId = 1;
 
         $isFavorite = $this->favorites()
-        ->whereHas('listFavorite', function ($q) use ($userId) {
-            $q->where('user_id', $userId);
-        })
-        ->exists();
+            ->whereHas('listFavorite', function ($q) use ($userId) {
+                $q->where('user_id', $userId);
+            })
+            ->exists();
 
         return
         [

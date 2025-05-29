@@ -12,6 +12,10 @@ use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\PriceController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PasswordResetController;
+use App\Http\Controllers\Api\ListFavoriteController;
+use App\Http\Controllers\Api\FavoriteController;
+use App\Http\Controllers\Api\CartController;
+use App\Http\Controllers\Api\PaymentMethodController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -57,3 +61,22 @@ Route::middleware('auth:sanctum')->group(function () {
 Route::apiResource('brands', BrandController::class)->only(['index']);
 
 Route::apiResource('prices', PriceController::class)->only(['index']);
+
+Route::get('/lists-favorites', [ListFavoriteController::class, 'index']);
+Route::post('/lists-favorites', [ListFavoriteController::class, 'store']);
+Route::get('/lists-favorites/{id}', [ListFavoriteController::class, 'show']);
+Route::put('/lists-favorites/{id}', [ListFavoriteController::class, 'update']);
+Route::delete('/lists-favorites/{id}', [ListFavoriteController::class, 'destroy']);
+
+Route::get('/favorites', [FavoriteController::class, 'index']);
+Route::post('/favorites', [FavoriteController::class, 'store']);
+Route::delete('/favorites/{id}', [FavoriteController::class, 'destroy']);
+
+Route::get('/carts', [CartController::class, 'index']);
+Route::post('/carts', [CartController::class, 'store']);
+Route::get('/carts/{id}', [CartController::class, 'show']);
+Route::put('/carts/{id}', [CartController::class, 'update']);
+Route::delete('/carts/{id}', [CartController::class, 'destroy']);
+
+Route::get('/payment-methods', [PaymentMethodController::class, 'index']);
+Route::put('/payment-methods/{id}', [PaymentMethodController::class, 'update']);

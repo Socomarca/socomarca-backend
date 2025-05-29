@@ -1,0 +1,32 @@
+[
+    {
+        "name": "Juan Perez",
+        "email": "23843925-6@socomarca.cl",
+        "rut": "23843925-6"
+    },
+    {
+        "name": "Pedro Neza",
+        "email": "19285517-9@socomarca.cl",
+        "rut": "19285517-9"
+    },
+    {
+        "name": "Armando Meza",
+        "email": "13462207-5@socomarca.cl",
+        "rut": "13462207-5"
+    },
+    {
+        "name": "Rogelio Rojas",
+        "email": "12532299-9@socomarca.cl",
+        "rut": "12532299-9"
+    },
+    {
+        "name": "Eduardo Fuentes",
+        "email": "20285838-4@socomarca.cl",
+        "rut": "20285838-4"
+    },
+    {
+        "name": "Usuario Demo",
+        "email": "12312312-3@socomarca.cl",
+        "rut": "12312312-3"
+    }
+]
