@@ -17,6 +17,7 @@ class Price extends Model
         'valid_from',
         'valid_to',
         'is_active',
+        'unit',
     ];
 
     public function product()

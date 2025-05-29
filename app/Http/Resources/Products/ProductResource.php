@@ -17,10 +17,21 @@ class ProductResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        $id = $this->id;
-        $categoryId = $this->category_id;
-        $subcategoryId = $this->subcategory_id;
-        $brandId = $this->brand_id;
+        // Obtiene el precio activo más reciente
+        $activePrice = $this->prices()
+            ->where('is_active', true)
+            ->orderByDesc('valid_from')
+            ->first();
+
+        $isFavorite = false;
+
+        $userId = 1;
+
+        $isFavorite = $this->favorites()
+            ->whereHas('listFavorite', function ($q) use ($userId) {
+                $q->where('user_id', $userId);
+            })
+            ->exists();
 
         return
         [
@@ -30,11 +41,12 @@ class ProductResource extends JsonResource
             'category' => $this->category,
             'subcategory' => $this->subcategory,
             'brand' => $this->brand,
-            'price' => 1000,
+            'price' => $activePrice ? $activePrice->amount : null,
             'sku' => $this->sku,
             'status' => $this->status,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
+            'is_favorite' => $isFavorite,
         ];
     }
 }
