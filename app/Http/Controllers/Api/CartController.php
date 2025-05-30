@@ -10,6 +10,7 @@ use App\Http\Requests\Carts\StoreRequest;
 use App\Http\Requests\Carts\UpdateRequest;
 use App\Http\Resources\Carts\CartCollection;
 use App\Models\Cart;
+use App\Helpers\MyHelper;
 
 class CartController extends Controller
 {
@@ -20,10 +21,15 @@ class CartController extends Controller
         $userId = $indexRequest->user_id;
 
         $carts = Cart::where('user_id', $userId)->get();
+        $total = MyHelper::total($carts);
 
         $data = new CartCollection($carts);
 
-        return $data;
+        return response()->json([
+            'data' => $data,
+            'total' => $total,
+        ]);
+        //return $data;
     }
 
     public function store(StoreRequest $storeRequest)
@@ -38,6 +44,7 @@ class CartController extends Controller
         $cart->price = $data['price'];
 
         $cart->save();
+        //$total = $this->total($data['user_id']);
 
         return response()->json(['message' => 'The product in the cart has been added'], 201);
     }
@@ -55,11 +62,12 @@ class CartController extends Controller
                 'message' => 'Product not found.',
             ], 404);
         }
+        $userId = $cart->user_id;
 
         $cart->quantity = $data['quantity'];
         $cart->price = $data['price'];
-
         $cart->save();
+        //$total = $this->total($userId);
 
         return response()->json(['message' => 'The selected product has been updated']);
 
@@ -82,4 +90,24 @@ class CartController extends Controller
 
         return response()->json(['message' => 'The selected product has been deleted']);
     }
+
+    /*public function total($carrito)
+    {
+        // $userId = 1;
+        // $carrito = Cart::where('user_id', $userId)->get();
+        $totalProductos = [];
+        $totalCarrito = 0;
+
+        foreach ($carrito as $key => $producto) {
+            $total = $producto['quantity'] * $producto['price'];
+            array_push($totalProductos, $total);
+        }
+
+        foreach ($totalProductos as $value) {
+            $totalCarrito += $value;
+        }
+
+        //dd($totalCarrito);
+        return $totalCarrito;
+    }*/
 }

@@ -81,6 +81,8 @@ Route::apiResource('brands', BrandController::class)->only(['index']);
 
 Route::apiResource('prices', PriceController::class)->only(['index']);
 
+Route::get('/carts-total', [CartController::class, 'total']);
+
 Route::any('{url}', function()
 {
     return response()->json(['message' => 'Method Not Allowed.'], 405);
