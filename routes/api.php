@@ -14,7 +14,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PasswordResetController;
 use App\Http\Controllers\Api\FavoriteController;
 use App\Http\Controllers\Api\FavoriteListController;
-use App\Http\Controllers\Api\CartController;
+use App\Http\Controllers\Api\CartItemController;
 use App\Http\Controllers\Api\PaymentMethodController;
 
 Route::get('/user', function (Request $request) {
@@ -67,11 +67,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/favorites', [FavoriteController::class, 'store']);
     Route::delete('/favorites/{id}', [FavoriteController::class, 'destroy']);
 
-    Route::get('/carts', [CartController::class, 'index']);
-    Route::post('/carts', [CartController::class, 'store']);
-    Route::get('/carts/{id}', [CartController::class, 'show']);
-    Route::put('/carts/{id}', [CartController::class, 'update']);
-    Route::delete('/carts/{id}', [CartController::class, 'destroy']);
+    Route::get('/carts', [CartItemController::class, 'index']);
+    Route::post('/carts', [CartItemController::class, 'store']);
+    Route::get('/carts/{id}', [CartItemController::class, 'show']);
+    Route::put('/carts/{id}', [CartItemController::class, 'update']);
+    Route::delete('/carts/{id}', [CartItemController::class, 'destroy']);
 
     Route::get('/payment-methods', [PaymentMethodController::class, 'index']);
     Route::put('/payment-methods/{id}', [PaymentMethodController::class, 'update']);
@@ -86,8 +86,6 @@ Route::middleware('auth:sanctum')->group(function () {
 Route::apiResource('brands', BrandController::class)->only(['index']);
 
 Route::apiResource('prices', PriceController::class)->only(['index']);
-
-//Route::get('/carts-total', [CartController::class, 'total']); solo de prueba, hay q eliminar
 
 Route::any('{url}', function()
 {

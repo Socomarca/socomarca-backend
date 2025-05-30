@@ -12,7 +12,7 @@ use App\Http\Resources\Carts\CartCollection;
 use App\Models\CartItem;
 use App\Helpers\MyHelper;
 
-class CartController extends Controller
+class CartItemController extends Controller
 {
     public function index(IndexRequest $indexRequest)
     {
