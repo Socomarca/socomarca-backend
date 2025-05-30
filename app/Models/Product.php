@@ -104,6 +104,7 @@ class Product extends Model
      */
     public function scopeFilter($query, array $filters)
     {
+        $sortByPrice = null;
         foreach ($filters as $filter) {
             // Filtros especiales para precios
             if (isset($filter['field']) && $filter['field'] === 'price') {
