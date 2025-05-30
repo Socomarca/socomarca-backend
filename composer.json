@@ -13,7 +13,8 @@
         "laravel/scout": "^10.15",
         "laravel/tinker": "^2.10.1",
         "meilisearch/meilisearch-php": "^1.14",
-        "spatie/laravel-permission": "^6.17"
+        "spatie/laravel-permission": "^6.17",
+        "transbank/transbank-sdk": "^5.0"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",

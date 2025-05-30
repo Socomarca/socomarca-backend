@@ -9,7 +9,12 @@ class Order extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['user_id', 'amount', 'status'];
+    protected $fillable = [
+        'user_id',
+        'subtotal',
+        'amount',
+        'status'
+    ];
 
     public function user()
     {
@@ -19,6 +24,16 @@ class Order extends Model
     public function orderDetails()
     {
         return $this->hasMany(OrderItem::class);
+    }
+
+    public function getAmountAttribute()
+    {
+        return round($this->attributes['amount'], 0);
+    }
+
+    public function getSubtotalAttribute()
+    {
+        return round($this->attributes['subtotal'], 0);
     }
 
 }

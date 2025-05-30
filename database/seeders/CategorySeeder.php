@@ -16,12 +16,18 @@ class CategorySeeder extends Seeder
             $category = Category::create([
                 'name' => $fc->name,
                 'description' => $fc->description,
+                'code' => rand(1, 100),
+                'level' => 1,
+                'key' => substr($fc->name, 0, 3),
             ]);
 
             foreach ($fc->subcategories as $sc) {
                 $category->subcategories()->create([
                     'name' => $sc->name,
                     'description' => $sc->description,
+                    'code' => rand(1, 100),
+                    'level' => 2,
+                    'key' => substr($fc->name, 0, 3).'/'.substr($sc->name, 0, 3),
                 ]);
             }
         }
