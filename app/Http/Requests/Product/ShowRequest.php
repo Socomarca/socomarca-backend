@@ -39,7 +39,7 @@ class ShowRequest extends FormRequest
     {
         $this->merge(
         [
-            'id' => $this->route('id'),
+            'id' => $this->route('product'),
         ]);
     }
 }
