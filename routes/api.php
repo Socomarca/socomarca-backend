@@ -87,7 +87,7 @@ Route::apiResource('brands', BrandController::class)->only(['index']);
 
 Route::apiResource('prices', PriceController::class)->only(['index']);
 
-Route::get('/carts-total', [CartController::class, 'total']);
+//Route::get('/carts-total', [CartController::class, 'total']); solo de prueba, hay q eliminar
 
 Route::any('{url}', function()
 {
