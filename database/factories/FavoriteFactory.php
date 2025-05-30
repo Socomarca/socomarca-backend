@@ -2,13 +2,12 @@
 
 namespace Database\Factories;
 
-use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\FavoriteList>
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Favorite>
  */
-class FavoriteListFactory extends Factory
+class FavoriteFactory extends Factory
 {
     /**
      * Define the model's default state.
@@ -19,8 +18,8 @@ class FavoriteListFactory extends Factory
     {
         return
         [
-            'name' => fake()->word(),
-            'user_id' => \App\Models\User::factory(),
+            'favorite_list_id' => \App\Models\FavoriteList::factory(),
+            'product_id' => \App\Models\Product::factory(),
         ];
     }
 }

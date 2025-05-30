@@ -25,7 +25,7 @@ test('el usuario puede solicitar restablecimiento de contraseña con RUT válido
         'email' => 'test@example.com',
     ]);
 
-    $response = $this->postJson(route('password.email'), [
+    $response = $this->postJson(route('auth.password.restore'), [
         'rut' => '11111111-1',
     ]);
 
@@ -62,11 +62,11 @@ test('el usuario puede solicitar restablecimiento de contraseña con RUT válido
 test('solicitud de restablecimiento falla si el RUT no existe', function () {
     Mail::fake();
 
-    $response = $this->postJson(route('password.email'), [
+    $response = $this->postJson(route('auth.password.restore'), [
         'rut' => '00000000-0',
     ]);
 
-    $response->assertStatus(422);
+    $response->assertStatus(401);
 });
 
 test('usuario autenticado puede cambiar su contraseña', function () {
@@ -81,7 +81,7 @@ test('usuario autenticado puede cambiar su contraseña', function () {
 
     $newPassword = 'newStrongPassword123';
 
-    $response = $this->postJson(route('password.change'), [
+    $response = $this->putJson(route('password.update'), [
         'current_password' => 'currentpassword',
         'password' => $newPassword,
         'password_confirmation' => $newPassword,
@@ -107,7 +107,7 @@ test('cambio de contraseña falla con contraseña actual incorrecta', function (
 
     $this->actingAs($user);
 
-    $response = $this->postJson(route('password.change'), [
+    $response = $this->putJson(route('password.update'), [
         'current_password' => 'wrongcurrentpassword',
         'password' => 'newpassword123',
         'password_confirmation' => 'newpassword123',
@@ -124,7 +124,7 @@ test('cambio de contraseña falla si la nueva contraseña es igual a la actual',
 
     $this->actingAs($user);
 
-    $response = $this->postJson(route('password.change'), [
+    $response = $this->putJson(route('password.update'), [
         'current_password' => 'currentpassword',
         'password' => 'currentpassword',
         'password_confirmation' => 'currentpassword',
@@ -141,7 +141,7 @@ test('cambio de contraseña falla con validaciones incorrectas', function () {
     $this->actingAs($user);
 
     
-    $response = $this->postJson(route('password.change'), [
+    $response = $this->putJson(route('password.update'), [
         'current_password' => 'currentpassword',
         'password' => 'short',
         'password_confirmation' => 'short',
@@ -150,7 +150,7 @@ test('cambio de contraseña falla con validaciones incorrectas', function () {
         ->assertJsonValidationErrorFor('password');
 
     
-    $response = $this->postJson(route('password.change'), [
+    $response = $this->putJson(route('password.update'), [
         'current_password' => 'currentpassword',
         'password' => 'newpassword123',
         'password_confirmation' => 'anotherpassword123',

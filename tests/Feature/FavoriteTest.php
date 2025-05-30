@@ -1,10 +1,16 @@
 <?php
 
+use App\Models\Favorite;
 use App\Models\FavoriteList;
 
 beforeEach(function ()
 {
-    $this->user = createFavoriteList();
+    createPrice();
+    createCategory();
+    createBrand();
+    createProduct();
+
+    $this->user = createFavorite();
 });
 
 /**
@@ -13,7 +19,7 @@ beforeEach(function ()
 test('validate_token', function ()
 {
     $response = $this->withHeaders(['Accept' => 'application/json'])
-        ->get('/api/favorites-list');
+        ->get('/api/favorites');
 
     $response->assertStatus(401);
 });
@@ -24,10 +30,11 @@ test('validate_token', function ()
 test('validate_status_code_200', function ()
 {
     $userId = $this->user->id;
+    $favoriteListId = $this->user->favoritesList['0']->id;
 
     $response = $this->actingAs($this->user, 'sanctum')
         ->withHeaders(['Accept' => 'application/json'])
-        ->get('/api/favorites-list?user_id=' . $userId);
+        ->get('/api/favorites?user_id=' . $userId . '&favorite_list_id=' . $favoriteListId);
 
     $response
         ->assertStatus(200)
@@ -40,42 +47,30 @@ test('validate_status_code_200', function ()
 test('test_user_is_invalid', function ()
 {
     $userId = $this->user->id;
+    $favoriteListId = $this->user->favoritesList['0']->id;
 
     FavoriteList::truncate();
 
     $response = $this->actingAs($this->user, 'sanctum')
         ->withHeaders(['Accept' => 'application/json'])
-        ->get('/api/favorites-list?user_id=' . $userId);
+        ->get('/api/favorites?user_id=' . $userId . '&favorite_list_id=' . $favoriteListId);
 
     $response->assertStatus(422);
 });
 
 /**
- * Prueba que valida que el campo id en params sea un entero.
+ * Prueba que valida que el campo favorite_list_id en query params sea válido en la tabla favorites.
  */
-test('test_id_is_integer', function ()
+test('test_favorite_list_is_invalid', function ()
 {
-    $id = 'id';
+    $userId = $this->user->id;
+    $favoriteListId = $this->user->favoritesList['0']->id;
+
+    Favorite::truncate();
 
     $response = $this->actingAs($this->user, 'sanctum')
         ->withHeaders(['Accept' => 'application/json'])
-        ->get('/api/favorites-list/' . $id);
+        ->get('/api/favorites?user_id=' . $userId . '&favorite_list_id=' . $favoriteListId);
 
     $response->assertStatus(422);
-});
-
-/**
- * Prueba que valida que el campo id en params sea válido en la tabla favorites_list.
- */
-test('test_favorites_list_not_found', function ()
-{
-    $id = $this->user->favoritesList['0']->id;
-
-    FavoriteList::truncate();
-
-    $response = $this->actingAs($this->user, 'sanctum')
-        ->withHeaders(['Accept' => 'application/json'])
-        ->get('/api/favorites-list/' . $id);
-
-    $response->assertStatus(404);
 });

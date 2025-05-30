@@ -21,7 +21,7 @@ class MunicipalityFactory extends Factory
         [
             'name' => fake()->city(),
             'code' => fake()->regexify('[A-Z]{10}'),
-            'region_id' => Region::factory(),
+            'region_id' => \App\Models\Region::factory(),
         ];
     }
 }
