@@ -76,8 +76,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/payment-methods', [PaymentMethodController::class, 'index']);
     Route::put('/payment-methods/{id}', [PaymentMethodController::class, 'update']);
 
-    Route::any('{url}', function()
-    {
+    Route::any('{url}', function(){
         return response()->json(['message' => 'Method Not Allowed.'], 405);
     })->where('url', '.*');
 
@@ -86,8 +85,3 @@ Route::middleware('auth:sanctum')->group(function () {
 Route::apiResource('brands', BrandController::class)->only(['index']);
 
 Route::apiResource('prices', PriceController::class)->only(['index']);
-
-Route::any('{url}', function()
-{
-    return response()->json(['message' => 'Method Not Allowed.'], 405);
-})->where('url', '.*');
