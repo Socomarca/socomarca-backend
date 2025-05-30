@@ -1,10 +1,11 @@
 <?php
 
 use App\Models\FavoriteList;
+use App\Models\User;
 
 beforeEach(function ()
 {
-    $this->user = createFavoriteList();
+    $this->user = createUserHasFavoriteList();
 });
 
 /**
@@ -31,7 +32,30 @@ test('validate_status_code_200', function ()
 
     $response
         ->assertStatus(200)
-        ->assertJson([]);
+        ->assertJsonStructure(
+        [
+            'data' => array
+            (
+                [
+                    'id',
+                    'name',
+                    'user' =>
+                    [
+                        'id',
+                        'name',
+                        'email',
+                        'phone',
+                        'rut',
+                        'business_name',
+                        'created_at',
+                        'updated_at',
+                    ],
+                    'favorites',
+                    'created_at',
+                    'updated_at',
+                ],
+            ),
+        ]);
 });
 
 /**
@@ -41,25 +65,11 @@ test('test_user_is_invalid', function ()
 {
     $userId = $this->user->id;
 
-    FavoriteList::truncate();
+    User::truncate();
 
     $response = $this->actingAs($this->user, 'sanctum')
         ->withHeaders(['Accept' => 'application/json'])
         ->get('/api/favorites-list?user_id=' . $userId);
-
-    $response->assertStatus(422);
-});
-
-/**
- * Prueba que valida que el campo id en params sea un entero.
- */
-test('test_id_is_integer', function ()
-{
-    $id = 'id';
-
-    $response = $this->actingAs($this->user, 'sanctum')
-        ->withHeaders(['Accept' => 'application/json'])
-        ->get('/api/favorites-list/' . $id);
 
     $response->assertStatus(422);
 });

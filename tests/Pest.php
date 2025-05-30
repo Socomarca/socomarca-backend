@@ -59,7 +59,7 @@ function createUser()
     return User::factory()->create();
 }
 
-function createAddress()
+function createUserHasAddress()
 {
     return User::factory()
             ->has(Address::factory(), 'addresses')
@@ -88,14 +88,14 @@ function createProduct()
     return Product::factory()->create();
 }
 
-function createFavoriteList()
+function createUserHasFavoriteList()
 {
     return User::factory()
             ->has(FavoriteList::factory(), 'favoritesList')
                 ->create();
 }
 
-function createFavorite()
+function createUserHasFavorite()
 {
     return User::factory()
             ->has(FavoriteList::factory()

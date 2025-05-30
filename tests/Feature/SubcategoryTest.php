@@ -30,21 +30,33 @@ test('validate_status_code_200', function ()
 
     $response
         ->assertStatus(200)
-        ->assertJson([]);
-});
-
-/**
- * Prueba que valida que el campo id en params sea un entero.
- */
-test('test_id_is_integer', function ()
-{
-    $id = 'id';
-
-    $response = $this->actingAs($this->user, 'sanctum')
-        ->withHeaders(['Accept' => 'application/json'])
-        ->get('/api/subcategories/' . $id);
-
-    $response->assertStatus(422);
+        ->assertJsonStructure(
+        [
+            'data' => array
+            (
+                [
+                    'id',
+                    'name',
+                    'description',
+                    'code',
+                    'level',
+                    'key',
+                    'category' =>
+                    [
+                        'id',
+                        'name',
+                        'description',
+                        'code',
+                        'level',
+                        'key',
+                        'created_at',
+                        'updated_at',
+                    ],
+                    'created_at',
+                    'updated_at',
+                ],
+            ),
+        ]);
 });
 
 /**

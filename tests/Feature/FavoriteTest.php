@@ -1,7 +1,7 @@
 <?php
 
-use App\Models\Favorite;
 use App\Models\FavoriteList;
+use App\Models\User;
 
 beforeEach(function ()
 {
@@ -10,7 +10,7 @@ beforeEach(function ()
     createBrand();
     createProduct();
 
-    $this->user = createFavorite();
+    $this->user = createUserHasFavorite();
 });
 
 /**
@@ -38,7 +38,34 @@ test('validate_status_code_200', function ()
 
     $response
         ->assertStatus(200)
-        ->assertJson([]);
+        ->assertJsonStructure(
+        [
+            'data' => array
+            (
+                [
+                    'id',
+                    'favorite_list' =>
+                    [
+                        'id',
+                        'name',
+                        'created_at',
+                        'updated_at',
+                    ],
+                    'product' =>
+                    [
+                        'id',
+                        'name',
+                        'description',
+                        'sku',
+                        'status',
+                        'created_at',
+                        'updated_at',
+                    ],
+                    'created_at',
+                    'updated_at',
+                ],
+            ),
+        ]);
 });
 
 /**
@@ -49,13 +76,15 @@ test('test_user_is_invalid', function ()
     $userId = $this->user->id;
     $favoriteListId = $this->user->favoritesList['0']->id;
 
-    FavoriteList::truncate();
+    User::truncate();
 
     $response = $this->actingAs($this->user, 'sanctum')
         ->withHeaders(['Accept' => 'application/json'])
         ->get('/api/favorites?user_id=' . $userId . '&favorite_list_id=' . $favoriteListId);
 
-    $response->assertStatus(422);
+    $response
+        ->assertStatus(422)
+        ->assertJsonFragment(['user_id' => ['The selected user in query params is invalid.']]);
 });
 
 /**
@@ -66,11 +95,13 @@ test('test_favorite_list_is_invalid', function ()
     $userId = $this->user->id;
     $favoriteListId = $this->user->favoritesList['0']->id;
 
-    Favorite::truncate();
+    FavoriteList::truncate();
 
     $response = $this->actingAs($this->user, 'sanctum')
         ->withHeaders(['Accept' => 'application/json'])
         ->get('/api/favorites?user_id=' . $userId . '&favorite_list_id=' . $favoriteListId);
 
-    $response->assertStatus(422);
+    $response
+        ->assertStatus(422)
+        ->assertJsonFragment(['favorite_list_id' => ['The selected favorites list in query params is invalid.']]);
 });
