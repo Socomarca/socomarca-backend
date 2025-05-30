@@ -23,8 +23,8 @@ class CartItemController extends Controller
         $carts = CartItem::where('user_id', $userId)->get();
 
         $data = new CartItemCollection($carts);
-
-        $total = TotalHelper::totalCarrito($data);
+        $arrayData = json_decode(json_encode($data), true);
+        $total = TotalHelper::totalCarrito($arrayData);
 
         return response()->json([
             'total' => $total,
