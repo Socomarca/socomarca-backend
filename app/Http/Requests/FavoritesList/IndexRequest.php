@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Requests\ListsFavorites;
+namespace App\Http\Requests\FavoritesList;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class ShowRequest extends FormRequest
+class IndexRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -21,8 +21,9 @@ class ShowRequest extends FormRequest
      */
     public function rules(): array
     {
-        return [
-            'id' => 'bail|integer',
+        return
+        [
+            'user_id' => 'bail|required|integer|exists:favorites_list,user_id',
         ];
     }
 
@@ -30,15 +31,9 @@ class ShowRequest extends FormRequest
     {
         return
         [
-            'id.integer' => 'The id field in params must be an integer.',
+            'user_id.required' => 'The user_id field in query params is required.',
+            'user_id.integer' => 'The user_id field in query params must be an integer.',
+            'user_id.exists' => 'The selected user in query params is invalid.',
         ];
-    }
-
-    protected function prepareForValidation()
-    {
-        $this->merge(
-        [
-            'id' => $this->route('id'),
-        ]);
     }
 }

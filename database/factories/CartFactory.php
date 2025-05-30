@@ -18,8 +18,8 @@ class CartFactory extends Factory
      */
     public function definition(): array
     {
-        $user_id = User::inRandomOrder()->pluck('id')->first();
-        $product_id = Product::inRandomOrder()->pluck('id')->first();
+        $user_id = \App\Models\User::inRandomOrder()->pluck('id')->first();
+        $product_id = \App\Models\Product::inRandomOrder()->pluck('id')->first();
 
         return [
             'user_id' => $user_id,

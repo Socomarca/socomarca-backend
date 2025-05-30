@@ -11,8 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('prices', function (Blueprint $table) {
-            $table->string('unit')->nullable()->after('amount');
+        Schema::create('favorites_list', function (Blueprint $table) {
+            $table->id();
+            $table->string('name');
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->timestamps();
         });
     }
 
@@ -21,8 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('prices', function (Blueprint $table) {
-            $table->dropColumn('unit');
-        });
+        Schema::dropIfExists('favorites_list');
     }
 };

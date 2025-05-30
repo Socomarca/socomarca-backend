@@ -38,7 +38,7 @@ class UserController extends Controller
 
         $user->save();
 
-        return response()->json(['message' => 'The user has been added']);
+        return response()->json(['message' => 'The user has been added'], 201);
     }
 
     public function show(ShowRequest $showRequest, $id)
@@ -63,6 +63,14 @@ class UserController extends Controller
     public function update(UpdateRequest $updateRequest, $id)
     {
         $data = $updateRequest->validated();
+
+        if (!User::find($id))
+        {
+            return response()->json(
+            [
+                'message' => 'User not found.',
+            ], 404);
+        }
 
         $user = User::find($id);
 

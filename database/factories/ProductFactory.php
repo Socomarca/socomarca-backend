@@ -16,6 +16,7 @@ class ProductFactory extends Factory
      */
     public function definition()
     {
+        $price = \App\Models\Price::inRandomOrder()->first();
         $brand = \App\Models\Brand::inRandomOrder()->first();
         $category = \App\Models\Category::inRandomOrder()->first();
         $subcategory = \App\Models\Subcategory::where('category_id', $category->id)
@@ -28,6 +29,7 @@ class ProductFactory extends Factory
         return [
             'name' => $this->faker->words(3, true),
             'description' => $this->faker->paragraph(),
+            'price_id' => $price->id,
             'category_id' => $category->id,
             'subcategory_id' => $subcategory->id,
             'brand_id' => $brand->id,

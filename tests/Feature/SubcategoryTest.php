@@ -1,6 +1,6 @@
 <?php
 
-use App\Models\Category;
+use App\Models\Subcategory;
 
 beforeEach(function ()
 {
@@ -14,7 +14,7 @@ beforeEach(function ()
 test('validate_token', function ()
 {
     $response = $this->withHeaders(['Accept' => 'application/json'])
-        ->get('/api/categories');
+        ->get('/api/subcategories');
 
     $response->assertStatus(401);
 });
@@ -26,7 +26,7 @@ test('validate_status_code_200', function ()
 {
     $response = $this->actingAs($this->user, 'sanctum')
         ->withHeaders(['Accept' => 'application/json'])
-        ->get('/api/categories');
+        ->get('/api/subcategories');
 
     $response
         ->assertStatus(200)
@@ -41,20 +41,17 @@ test('validate_status_code_200', function ()
                     'code',
                     'level',
                     'key',
-                    'subcategories' => array
-                    (
-                        [
-                            'id',
-                            'category_id',
-                            'name',
-                            'description',
-                            'code',
-                            'level',
-                            'key',
-                            'created_at',
-                            'updated_at',
-                        ],
-                    ),
+                    'category' =>
+                    [
+                        'id',
+                        'name',
+                        'description',
+                        'code',
+                        'level',
+                        'key',
+                        'created_at',
+                        'updated_at',
+                    ],
                     'created_at',
                     'updated_at',
                 ],
@@ -63,17 +60,17 @@ test('validate_status_code_200', function ()
 });
 
 /**
- * Prueba que valida que el campo id en params sea válido en la tabla categories.
+ * Prueba que valida que el campo id en params sea válido en la tabla subcategories.
  */
-test('test_category_not_found', function ()
+test('test_subcategory_not_found', function ()
 {
-    $id = $this->category->id;
+    $id = $this->category->subCategories['0']->id;
 
-    Category::truncate();
+    Subcategory::truncate();
 
     $response = $this->actingAs($this->user, 'sanctum')
         ->withHeaders(['Accept' => 'application/json'])
-        ->get('/api/categories/' . $id);
+        ->get('/api/subcategories/' . $id);
 
     $response->assertStatus(404);
 });

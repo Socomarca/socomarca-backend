@@ -50,7 +50,7 @@ class AddressController extends Controller
 
         $address->save();
 
-        return response()->json(['message' => 'The address has been added']);
+        return response()->json(['message' => 'The address has been added'], 201);
     }
 
     public function show(ShowRequest $showRequest, $id)
@@ -75,6 +75,14 @@ class AddressController extends Controller
     public function update(UpdateRequest $updateRequest, $id)
     {
         $data = $updateRequest->validated();
+
+        if (!Address::find($id))
+        {
+            return response()->json(
+            [
+                'message' => 'Address not found.',
+            ], 404);
+        }
 
         $data['is_default'] === true &&
             DB::table('addresses')

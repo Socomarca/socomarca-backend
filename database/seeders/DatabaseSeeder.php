@@ -13,10 +13,9 @@ class DatabaseSeeder extends Seeder
             RegionSeeder::class,
             UserSeeder::class,
             CategorySeeder::class,
-            SubcategorySeeder::class,
             BrandSeeder::class,
-            ProductSeeder::class,
             PriceSeeder::class,
+            ProductSeeder::class,
 
             CartSeeder::class,
             PaymentMethodSeeder::class,

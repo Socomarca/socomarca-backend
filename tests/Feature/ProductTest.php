@@ -1,38 +1,15 @@
 <?php
 
 use App\Models\Product;
-use App\Models\User;
 
-/**
- * Prueba de respuesta exitosa.
- */
-test('validate_status_code_200', function ()
+beforeEach(function ()
 {
-    $user = User::factory()->create();
+    createPrice();
+    createCategory();
+    createBrand();
 
-    $response = $this->actingAs($user, 'sanctum')
-        ->withHeaders(['Accept' => 'application/json'])
-        ->get('/api/products');
-
-    $response->assertStatus(200);
-});
-
-/**
- * Prueba que valida que el campo product en params es obligatorio.
- */
-test('validate_id_is_required', function ()
-{
-    $user = User::factory()->create();
-
-    Product::factory()->create();
-
-    $id = '1';
-
-    $response = $this->actingAs($user, 'sanctum')
-        ->withHeaders(['Accept' => 'application/json'])
-        ->get('/api/products/' . $id);
-
-    $response->assertStatus(200);
+    $this->user = createUser();
+    $this->product = createProduct();
 });
 
 /**
@@ -40,37 +17,83 @@ test('validate_id_is_required', function ()
  */
 test('validate_token', function ()
 {
-    $id = '1';
-
     $response = $this->withHeaders(['Accept' => 'application/json'])
-        ->get('/api/products/' . $id);
+        ->get('/api/products');
 
     $response->assertStatus(401);
 });
 
 /**
- * Prueba que valida que el campo product en params sea un entero.
+ * Prueba de respuesta exitosa.
  */
-test('validate_id_is_integer', function ()
+test('validate_status_code_200', function ()
 {
-    $id = 'a';
+    $response = $this->actingAs($this->user, 'sanctum')
+        ->withHeaders(['Accept' => 'application/json'])
+        ->get('/api/products');
 
-    $response = $this->withHeaders(['Accept' => 'application/json'])
-        ->get('/api/products/' . $id);
-
-    $response->assertStatus(401);
+    $response
+        ->assertStatus(200)
+        ->assertJsonStructure(
+        [
+            'data' => array
+            (
+                [
+                    'id',
+                    'name',
+                    'description',
+                    'category' =>
+                    [
+                        'id',
+                        'name',
+                        'description',
+                        'code',
+                        'level',
+                        'key',
+                        'created_at',
+                        'updated_at',
+                    ],
+                    'subcategory' =>
+                    [
+                        'id',
+                        'category_id',
+                        'name',
+                        'description',
+                        'code',
+                        'level',
+                        'key',
+                        'created_at',
+                        'updated_at',
+                    ],
+                    'brand' =>
+                    [
+                        'id',
+                        'name',
+                        'description',
+                        'logo_url',
+                        'created_at',
+                        'updated_at',
+                    ],
+                    'price',
+                    'sku',
+                    'status',
+                    'created_at',
+                    'updated_at',
+                ],
+            ),
+        ]);
 });
 
 /**
- * Prueba que valida que el campo product en params sea válido en la base de datos.
+ * Prueba que valida que el campo id en params sea válido en la tabla products.
  */
-test('validate_product_not_found', function ()
+test('test_product_not_found', function ()
 {
-    $user = User::factory()->create();
+    $id = $this->product->id;
 
-    $id = '999';
+    Product::truncate();
 
-    $response = $this->actingAs($user, 'sanctum')
+    $response = $this->actingAs($this->user, 'sanctum')
         ->withHeaders(['Accept' => 'application/json'])
         ->get('/api/products/' . $id);
 
