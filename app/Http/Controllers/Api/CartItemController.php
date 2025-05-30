@@ -8,9 +8,9 @@ use App\Http\Requests\Carts\IndexRequest;
 use App\Http\Requests\Carts\ShowRequest;
 use App\Http\Requests\Carts\StoreRequest;
 use App\Http\Requests\Carts\UpdateRequest;
-use App\Http\Resources\Carts\CartCollection;
+use App\Http\Resources\CartItems\CartItemCollection;
 use App\Models\CartItem;
-use App\Helpers\MyHelper;
+use App\Helpers\TotalHelper;
 
 class CartItemController extends Controller
 {
@@ -21,13 +21,14 @@ class CartItemController extends Controller
         $userId = $indexRequest->user_id;
 
         $carts = CartItem::where('user_id', $userId)->get();
-        $total = MyHelper::total($carts);
 
-        $data = new CartCollection($carts);
+        $data = new CartItemCollection($carts);
+
+        $total = TotalHelper::totalCarrito($data);
 
         return response()->json([
-            'data' => $data,
             'total' => $total,
+            'data' => $data,
         ]);
         //return $data;
     }

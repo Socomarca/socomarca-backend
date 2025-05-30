@@ -71,7 +71,7 @@ class Product extends Model
 
     public function prices()
     {
-        return $this->hasMany(Price::class);
+        return $this->hasOne(Price::class);
     }
 
     public function toSearchableArray()

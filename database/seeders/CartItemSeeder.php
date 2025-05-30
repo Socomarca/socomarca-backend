@@ -2,11 +2,11 @@
 
 namespace Database\Seeders;
 
+use App\Models\CartItem;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
-use App\Models\CartItem;
 
-class CartSeeder extends Seeder
+class CartItemSeeder extends Seeder
 {
     /**
      * Run the database seeds.
