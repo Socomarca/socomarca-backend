@@ -28,7 +28,7 @@ class ProductResource extends JsonResource
         $userId = 1;
 
         $isFavorite = $this->favorites()
-            ->whereHas('listFavorite', function ($q) use ($userId) {
+            ->whereHas('favoriteList', function ($q) use ($userId) {
                 $q->where('user_id', $userId);
             })
             ->exists();

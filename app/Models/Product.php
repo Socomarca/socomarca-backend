@@ -81,7 +81,7 @@ class Product extends Model
     public function userFavorites($userId)
     {
         return $this->hasMany(Favorite::class)
-            ->whereHas('listFavorite', function ($q) use ($userId) {
+            ->whereHas('favoriteList', function ($q) use ($userId) {
                 $q->where('user_id', $userId);
             });
     }
