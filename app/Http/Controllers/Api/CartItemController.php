@@ -3,11 +3,11 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Carts\DestroyRequest;
-use App\Http\Requests\Carts\IndexRequest;
-use App\Http\Requests\Carts\ShowRequest;
-use App\Http\Requests\Carts\StoreRequest;
-use App\Http\Requests\Carts\UpdateRequest;
+use App\Http\Requests\CartItems\DestroyRequest;
+use App\Http\Requests\CartItems\IndexRequest;
+use App\Http\Requests\CartItems\ShowRequest;
+use App\Http\Requests\CartItems\StoreRequest;
+use App\Http\Requests\CartItems\UpdateRequest;
 use App\Http\Resources\CartItems\CartItemCollection;
 use App\Models\CartItem;
 use App\Helpers\TotalHelper;

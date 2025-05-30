@@ -12,6 +12,7 @@ class TotalHelper
 
         $totalCarrito = 0;
         foreach ($carrito as $value) {
+
             $totalCarrito += $value->subtotal;
         }
 
