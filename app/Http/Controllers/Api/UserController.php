@@ -41,10 +41,8 @@ class UserController extends Controller
         return response()->json(['message' => 'The user has been added'], 201);
     }
 
-    public function show(ShowRequest $showRequest, $id)
+    public function show($id)
     {
-        $showRequest->validated();
-
         if (!User::find($id))
         {
             return response()->json(

@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Addresses\DestroyRequest;
 use App\Http\Requests\Addresses\IndexRequest;
-use App\Http\Requests\Addresses\ShowRequest;
 use App\Http\Requests\Addresses\StoreRequest;
 use App\Http\Requests\Addresses\UpdateRequest;
 use App\Http\Resources\Addresses\AddressCollection;
@@ -53,10 +52,8 @@ class AddressController extends Controller
         return response()->json(['message' => 'The address has been added'], 201);
     }
 
-    public function show(ShowRequest $showRequest, $id)
+    public function show($id)
     {
-        $showRequest->validated();
-
         if (!Address::find($id))
         {
             return response()->json(

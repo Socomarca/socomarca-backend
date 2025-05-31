@@ -18,10 +18,8 @@ class SubcategoryController extends Controller
         return $data;
     }
 
-    public function show(ShowRequest $showRequest, $id)
+    public function show($id)
     {
-        $showRequest->validated();
-
         if (!Subcategory::find($id))
         {
             return response()->json(
