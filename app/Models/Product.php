@@ -18,6 +18,7 @@ class Product extends Model
         'brand_id',
         'sku',
         'status',
+        'price_id'
     ];
 
     /**
@@ -70,7 +71,7 @@ class Product extends Model
 
     public function prices()
     {
-        return $this->hasMany(Price::class);
+        return $this->hasOne(Price::class);
     }
 
     public function favorites()

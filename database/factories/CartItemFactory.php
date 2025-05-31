@@ -2,14 +2,12 @@
 
 namespace Database\Factories;
 
-use App\Models\Product;
-use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Cart>
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\CartItem>
  */
-class CartFactory extends Factory
+class CartItemFactory extends Factory
 {
     /**
      * Define the model's default state.
@@ -25,7 +23,7 @@ class CartFactory extends Factory
             'user_id' => $user_id,
             'product_id' => $product_id,
             'quantity' => fake()->numberBetween(1, 10),
-            'price' => $this->faker->randomFloat(2, 1000, 100000),
         ];
     }
 }
+

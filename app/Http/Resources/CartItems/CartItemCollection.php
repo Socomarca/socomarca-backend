@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Http\Resources\Carts;
+namespace App\Http\Resources\CartItems;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\ResourceCollection;
 
-class CartCollection extends ResourceCollection
+class CartItemCollection extends ResourceCollection
 {
     /**
      * Transform the resource collection into an array.

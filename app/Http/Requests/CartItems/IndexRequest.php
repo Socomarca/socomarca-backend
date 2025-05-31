@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Requests\Carts;
+namespace App\Http\Requests\CartItems;
 
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -23,7 +23,7 @@ class IndexRequest extends FormRequest
     {
         return
         [
-            'user_id' => 'bail|required|integer|exists:carts,user_id',
+            'user_id' => 'bail|required|integer|exists:cart_items,user_id',
         ];
     }
 }

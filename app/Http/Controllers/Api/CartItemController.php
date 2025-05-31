@@ -3,15 +3,16 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Carts\DestroyRequest;
-use App\Http\Requests\Carts\IndexRequest;
-use App\Http\Requests\Carts\ShowRequest;
-use App\Http\Requests\Carts\StoreRequest;
-use App\Http\Requests\Carts\UpdateRequest;
-use App\Http\Resources\Carts\CartCollection;
-use App\Models\Cart;
+use App\Http\Requests\CartItems\DestroyRequest;
+use App\Http\Requests\CartItems\IndexRequest;
+use App\Http\Requests\CartItems\ShowRequest;
+use App\Http\Requests\CartItems\StoreRequest;
+use App\Http\Requests\CartItems\UpdateRequest;
+use App\Http\Resources\CartItems\CartItemCollection;
+use App\Models\CartItem;
+use App\Helpers\TotalHelper;
 
-class CartController extends Controller
+class CartItemController extends Controller
 {
     public function index(IndexRequest $indexRequest)
     {
@@ -19,18 +20,24 @@ class CartController extends Controller
 
         $userId = $indexRequest->user_id;
 
-        $carts = Cart::where('user_id', $userId)->get();
+        $carts = CartItem::where('user_id', $userId)->get();
 
-        $data = new CartCollection($carts);
+        $data = new CartItemCollection($carts);
+        $arrayData = json_decode(json_encode($data), true);
+        $total = TotalHelper::totalCarrito($arrayData);
 
-        return $data;
+        return response()->json([
+            'total' => $total,
+            'data' => $data,
+        ]);
+        //return $data;
     }
 
     public function store(StoreRequest $storeRequest)
     {
         $data = $storeRequest->validated();
 
-        $cart = new Cart;
+        $cart = new CartItem;
 
         $cart->user_id = $data['user_id'];
         $cart->product_id = $data['product_id'];
@@ -38,6 +45,7 @@ class CartController extends Controller
         $cart->price = $data['price'];
 
         $cart->save();
+        //$total = $this->total($data['user_id']);
 
         return response()->json(['message' => 'The product in the cart has been added'], 201);
     }
@@ -47,7 +55,7 @@ class CartController extends Controller
     {
         $data = $updateRequest->validated();
 
-        $cart = Cart::find($id);
+        $cart = CartItem::find($id);
         if (!$cart)
         {
             return response()->json(
@@ -55,11 +63,12 @@ class CartController extends Controller
                 'message' => 'Product not found.',
             ], 404);
         }
+        $userId = $cart->user_id;
 
         $cart->quantity = $data['quantity'];
         $cart->price = $data['price'];
-
         $cart->save();
+        //$total = $this->total($userId);
 
         return response()->json(['message' => 'The selected product has been updated']);
 
@@ -69,7 +78,7 @@ class CartController extends Controller
     {
         $destroyRequest->validated();
 
-        $cart = Cart::find($id);
+        $cart = CartItem::find($id);
         if (!$cart)
         {
             return response()->json(
@@ -82,4 +91,24 @@ class CartController extends Controller
 
         return response()->json(['message' => 'The selected product has been deleted']);
     }
+
+    /*public function total($carrito)
+    {
+        // $userId = 1;
+        // $carrito = Cart::where('user_id', $userId)->get();
+        $totalProductos = [];
+        $totalCarrito = 0;
+
+        foreach ($carrito as $key => $producto) {
+            $total = $producto['quantity'] * $producto['price'];
+            array_push($totalProductos, $total);
+        }
+
+        foreach ($totalProductos as $value) {
+            $totalCarrito += $value;
+        }
+
+        //dd($totalCarrito);
+        return $totalCarrito;
+    }*/
 }
