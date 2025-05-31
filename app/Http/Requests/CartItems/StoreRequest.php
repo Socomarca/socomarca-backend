@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Requests\Carts;
+namespace App\Http\Requests\CartItems;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class DestroyRequest extends FormRequest
+class StoreRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -22,23 +22,10 @@ class DestroyRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'id' => 'bail|integer',
+            'user_id'       => 'bail|required|integer|exists:users,id',
+            'product_id'    => 'bail|required|integer|exists:products,id',
+            'quantity'      => 'bail|required|integer|min:1|max:99',
+            'price'         => 'bail|required|integer',
         ];
-    }
-
-    public function messages()
-    {
-        return
-        [
-            'id.integer' => 'The id field in params must be an integer.',
-        ];
-    }
-
-    protected function prepareForValidation()
-    {
-        $this->merge(
-        [
-            'id' => $this->route('id'),
-        ]);
     }
 }
