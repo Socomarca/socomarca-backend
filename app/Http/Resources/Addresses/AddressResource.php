@@ -16,13 +16,9 @@ class AddressResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        $id = $this->id;
-        $userId = $this->user_id;
-        $municipalityId = $this->municipality_id;
-
         return
         [
-            'id' => $id,
+            'id' => $this->id,
             'address_line1' => $this->address_line1,
             'address_line2' => $this->address_line2,
             'postal_code' => $this->postal_code,
@@ -30,8 +26,8 @@ class AddressResource extends JsonResource
             'type' => $this->type,
             'phone' => $this->phone,
             'contact_name' => $this->contact_name,
-            'user' => User::where('id', $userId)->first(),
-            'municipality' => Municipality::where('id', $municipalityId)->first(),
+            'user' => $this->user,
+            'municipality' => $this->municipality,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];

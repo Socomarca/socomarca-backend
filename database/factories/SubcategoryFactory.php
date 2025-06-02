@@ -29,9 +29,9 @@ class SubcategoryFactory extends Factory
             'name' => $this->faker->unique()->word(),
             'description' => $this->faker->sentence(),
             'category_id' => Category::factory(),
-            'code' => $this->faker->numberBetween(1, 100),
-            'level' => 2,
-            'key' => $this->faker->unique()->word(),
+            'code' => fake()->regexify('[A-Z]{10}'),
+            'level' => fake()->numberBetween(1, 10),
+            'key' => fake()->regexify('[A-Z]{4}'),
         ];
     }
 }

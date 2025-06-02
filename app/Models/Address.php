@@ -33,7 +33,7 @@ class Address extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function commune()
+    public function municipality()
     {
         return $this->belongsTo(Municipality::class);
     }

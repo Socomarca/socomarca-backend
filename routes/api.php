@@ -12,9 +12,9 @@ use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\PriceController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PasswordResetController;
-use App\Http\Controllers\Api\ListFavoriteController;
 use App\Http\Controllers\Api\FavoriteController;
-use App\Http\Controllers\Api\CartController;
+use App\Http\Controllers\Api\FavoriteListController;
+use App\Http\Controllers\Api\CartItemController;
 use App\Http\Controllers\Api\PaymentMethodController;
 use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\WebpayController;
@@ -55,42 +55,46 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/subcategories', [SubcategoryController::class,'index'])->name('subcategories.index');
     Route::get('/subcategories/{id}', [SubcategoryController::class,'show'])->name('subcategories.show');
 
-    Route::resource('products', ProductController::class)->only(['index', 'show']);
+    Route::get('products', [ProductController::class, 'index']);
+    Route::get('products/{id}', [ProductController::class, 'show']);
     Route::post('/products/search', [ProductController::class, 'search'])->name('products.search');
 
+    Route::get('/favorites-list', [FavoriteListController::class, 'index']);
+    Route::post('/favorites-list', [FavoriteListController::class, 'store']);
+    Route::get('/favorites-list/{id}', [FavoriteListController::class, 'show']);
+    Route::put('/favorites-list/{id}', [FavoriteListController::class, 'update']);
+    Route::delete('/favorites-list/{id}', [FavoriteListController::class, 'destroy']);
+
+    Route::get('/favorites', [FavoriteController::class, 'index']);
+    Route::post('/favorites', [FavoriteController::class, 'store']);
+    Route::delete('/favorites/{id}', [FavoriteController::class, 'destroy']);
+
+    Route::get('/carts', [CartItemController::class, 'index']);
+    Route::post('/carts', [CartItemController::class, 'store']);
+    Route::get('/carts/{id}', [CartItemController::class, 'show']);
+    Route::put('/carts/{id}', [CartItemController::class, 'update']);
+    Route::delete('/carts/{id}', [CartItemController::class, 'destroy']);
+
+    Route::get('/payment-methods', [PaymentMethodController::class, 'index']);
+    Route::put('/payment-methods/{id}', [PaymentMethodController::class, 'update']);
+
+    Route::apiResource('brands', BrandController::class)->only(['index']);
+
+    Route::apiResource('prices', PriceController::class)->only(['index']);
+
+    // Rutas de orden
+    Route::get('/orders', [OrderController::class, 'index']);
+    Route::post('/orders/create-from-cart', [OrderController::class, 'createFromCart']);
+
+    // Rutas de Webpay
+    Route::post('/orders/pay', [OrderController::class, 'payOrder']);
+    Route::get('/webpay/return', [WebpayController::class, 'return'])->name('webpay.return');
+    Route::get('/webpay/status', [WebpayController::class, 'status']);
+    Route::post('/webpay/refund', [WebpayController::class, 'refund']);
+
+    Route::any('{url}', function()
+    {
+        return response()->json(['message' => 'Method Not Allowed.'], 405);
+    })->where('url', '.*');
+
 });
-
-Route::apiResource('brands', BrandController::class)->only(['index']);
-
-Route::apiResource('prices', PriceController::class)->only(['index']);
-
-Route::get('/lists-favorites', [ListFavoriteController::class, 'index']);
-Route::post('/lists-favorites', [ListFavoriteController::class, 'store']);
-Route::get('/lists-favorites/{id}', [ListFavoriteController::class, 'show']);
-Route::put('/lists-favorites/{id}', [ListFavoriteController::class, 'update']);
-Route::delete('/lists-favorites/{id}', [ListFavoriteController::class, 'destroy']);
-
-Route::get('/favorites', [FavoriteController::class, 'index']);
-Route::post('/favorites', [FavoriteController::class, 'store']);
-Route::delete('/favorites/{id}', [FavoriteController::class, 'destroy']);
-
-Route::get('/carts', [CartController::class, 'index']);
-Route::post('/carts', [CartController::class, 'store']);
-Route::get('/carts/{id}', [CartController::class, 'show']);
-Route::put('/carts/{id}', [CartController::class, 'update']);
-Route::delete('/carts/{id}', [CartController::class, 'destroy']);
-
-
-
-Route::get('/payment-methods', [PaymentMethodController::class, 'index']);
-Route::put('/payment-methods/{id}', [PaymentMethodController::class, 'update']);
-
-// Rutas de orden
-Route::get('/orders', [OrderController::class, 'index']);
-Route::post('/orders/create-from-cart', [OrderController::class, 'createFromCart']);
-
-// Rutas de Webpay
-Route::post('/orders/pay', [OrderController::class, 'payOrder']);
-Route::get('/webpay/return', [WebpayController::class, 'return'])->name('webpay.return');
-Route::get('/webpay/status', [WebpayController::class, 'status']);
-Route::post('/webpay/refund', [WebpayController::class, 'refund']);

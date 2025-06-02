@@ -18,6 +18,7 @@ class Product extends Model
         'brand_id',
         'sku',
         'status',
+        'price_id'
     ];
 
     /**
@@ -70,7 +71,20 @@ class Product extends Model
 
     public function prices()
     {
-        return $this->hasMany(Price::class);
+        return $this->hasOne(Price::class);
+    }
+
+    public function favorites()
+    {
+        return $this->hasMany(Favorite::class);
+    }
+
+    public function userFavorites($userId)
+    {
+        return $this->hasMany(Favorite::class)
+            ->whereHas('favoriteList', function ($q) use ($userId) {
+                $q->where('user_id', $userId);
+            });
     }
 
     public function toSearchableArray()
@@ -91,7 +105,30 @@ class Product extends Model
      */
     public function scopeFilter($query, array $filters)
     {
+        $sortByPrice = null;
         foreach ($filters as $filter) {
+            // Filtros especiales para precios
+            if (isset($filter['field']) && $filter['field'] === 'price') {
+                $query->whereHas('prices', function ($q) use ($filter) {
+                    if (isset($filter['min'])) {
+                        $q->where('amount', '>=', $filter['min']);
+                    }
+                    if (isset($filter['max'])) {
+                        $q->where('amount', '<=', $filter['max']);
+                    }
+                    if (isset($filter['unit'])) {
+                        $q->where('unit', $filter['unit']);
+                    }
+                    $q->where('is_active', true);
+                });
+
+                // Ordenar por precio si se solicita en el filtro
+                if (isset($filter['sort']) && in_array(strtolower($filter['sort']), ['asc', 'desc'])) {
+                    $sortByPrice = strtolower($filter['sort']);
+                }
+                continue;
+            }
+
             $field = array_find($this->allowedFilters, function ($item) use ($filter) {
                 return $item['field'] === $filter['field'];
             });
@@ -119,6 +156,16 @@ class Product extends Model
                     $query->orderBy($filter['field'], $filter['sort']);
                 }
             }
+        }
+
+        if ($sortByPrice) {
+            $query->selectRaw('products.*, MIN(prices.amount) as min_price')
+                ->leftJoin('prices', function($join) {
+                    $join->on('products.id', '=', 'prices.product_id')
+                        ->where('prices.is_active', true);
+                })
+                ->groupBy('products.id')
+                ->orderBy('min_price', $sortByPrice);
         }
         return $query;
     }

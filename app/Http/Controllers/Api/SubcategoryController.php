@@ -3,20 +3,35 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\SubcategoryIdRequest;
-use Illuminate\Http\Request;
+use App\Http\Requests\Subcategories\ShowRequest;
+use App\Http\Resources\Subcategories\SubcategoryCollection;
 use App\Models\Subcategory;
 
 class SubcategoryController extends Controller
 {
     public function index()
     {
-        return Subcategory::all();
+        $subcategories = Subcategory::all();
+
+        $data = new SubcategoryCollection($subcategories);
+
+        return $data;
     }
 
-    public function show(SubcategoryIdRequest $request)
+    public function show($id)
     {
-        $subcategory = Subcategory::find($request->id);
-        return response()->json($subcategory);
+        if (!Subcategory::find($id))
+        {
+            return response()->json(
+            [
+                'message' => 'Subcategory not found.',
+            ], 404);
+        }
+
+        $subcategories = Subcategory::where('id', $id)->get();
+
+        $data = new SubcategoryCollection($subcategories);
+
+        return response()->json($data[0]);
     }
 }

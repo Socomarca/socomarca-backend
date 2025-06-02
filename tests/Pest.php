@@ -12,7 +12,18 @@
 |
 */
 
-uses(Tests\TestCase::class)->in('Feature');
+use App\Models\Address;
+use App\Models\Brand;
+use App\Models\Category;
+use App\Models\Favorite;
+use App\Models\FavoriteList;
+use App\Models\Price;
+use App\Models\Product;
+use App\Models\Subcategory;
+use App\Models\User;
+
+uses(Tests\TestCase::class,
+    \Illuminate\Foundation\Testing\DatabaseTruncation::class)->in('Feature');
 //uses(Tests\TestCase::class)->in('Unit');
 
 /*
@@ -43,6 +54,51 @@ uses(Tests\TestCase::class)->in('Feature');
 |
 */
 
-// function something() {
-//     // ...
-// }
+function createUser()
+{
+    return User::factory()->create();
+}
+
+function createUserHasAddress()
+{
+    return User::factory()
+            ->has(Address::factory(), 'addresses')
+                ->create();
+}
+
+function createPrice()
+{
+    return Price::factory()->create();
+}
+
+function createCategory()
+{
+    return Category::factory()
+            ->has(Subcategory::factory(), 'subCategories')
+                ->create();
+}
+
+function createBrand()
+{
+    return Brand::factory()->create();
+}
+
+function createProduct()
+{
+    return Product::factory()->create();
+}
+
+function createUserHasFavoriteList()
+{
+    return User::factory()
+            ->has(FavoriteList::factory(), 'favoritesList')
+                ->create();
+}
+
+function createUserHasFavorite()
+{
+    return User::factory()
+            ->has(FavoriteList::factory()
+                ->has(Favorite::factory(), 'favorites'), 'favoritesList')
+                    ->create();
+}
