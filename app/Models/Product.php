@@ -111,10 +111,10 @@ class Product extends Model
             if (isset($filter['field']) && $filter['field'] === 'price') {
                 $query->whereHas('prices', function ($q) use ($filter) {
                     if (isset($filter['min'])) {
-                        $q->where('amount', '>=', $filter['min']);
+                        $q->where('price', '>=', $filter['min']);
                     }
                     if (isset($filter['max'])) {
-                        $q->where('amount', '<=', $filter['max']);
+                        $q->where('price', '<=', $filter['max']);
                     }
                     if (isset($filter['unit'])) {
                         $q->where('unit', $filter['unit']);
@@ -159,7 +159,7 @@ class Product extends Model
         }
 
         if ($sortByPrice) {
-            $query->selectRaw('products.*, MIN(prices.amount) as min_price')
+            $query->selectRaw('products.*, MIN(prices.price) as min_price')
                 ->leftJoin('prices', function($join) {
                     $join->on('products.id', '=', 'prices.product_id')
                         ->where('prices.is_active', true);

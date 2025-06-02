@@ -9,6 +9,6 @@ class PriceSeeder extends Seeder
 {
     public function run(): void
     {
-        Price::factory(20)->create();
+        Price::factory(100)->create();
     }
 }

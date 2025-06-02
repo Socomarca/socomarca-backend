@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\Product;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -17,8 +18,8 @@ class PriceFactory extends Factory
     public function definition()
     {
         return [
-            'product_id' => 'product_id',
-            'price_list_id' => 'price_list_id',
+            'product_id' => rand(1,1000), //Product::inRandomOrder()->first()?->id ?? Product::factory(),
+            'price_list_id' => 1,
             //'currency' => 'USD',
             'unit' => fake()->numberBetween(1, 10),
             'price' => fake()->randomFloat(2, 1000, 100000),
