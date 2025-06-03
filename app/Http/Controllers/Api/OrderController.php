@@ -43,6 +43,7 @@ class OrderController extends Controller
     public function createFromCart(CreateFromCartRequest $request)
     {
         $data = $request->validated();
+        //$this->createCart();
         $carts = CartItem::where('user_id', $data['user_id'])->get();
 
         if ($carts->isEmpty()) {
