@@ -14,6 +14,20 @@ class CartItemCollection extends ResourceCollection
      */
     public function toArray(Request $request): array
     {
-        return parent::toArray($request);
+        
+        $items = $this->collection->map(function ($item) use ($request) {
+            return (new CartItemResource($item))->toArray($request);
+        })->values();
+        
+        $total = collect($items)
+        ->filter(fn($item) => array_key_exists('subtotal', $item))
+        ->sum('subtotal');
+
+        return [
+            'items' => $items,
+            'total' => $total,
+        ];
+
+        
     }
 }

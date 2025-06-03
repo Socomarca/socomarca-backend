@@ -23,7 +23,7 @@ class IndexRequest extends FormRequest
     {
         return
         [
-            'user_id' => 'bail|required|integer|exists:cart_items,user_id',
+           //'user_id' => 'bail|required|integer|exists:cart_items,user_id',
         ];
     }
 }

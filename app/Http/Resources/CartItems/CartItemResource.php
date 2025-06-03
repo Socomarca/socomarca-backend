@@ -20,18 +20,23 @@ class CartItemResource extends JsonResource
 
         $product = Product::where('id', $this->product_id)->first();
         $priceObj = Price::where('id', $product->price_id)->where('is_active', 1)->first();
-        $price = $priceObj->price;
+        $price = $priceObj->price ?? 0;
+        $unit = $priceObj->unit;
         $totalPrice = $price * $this->quantity;
 
+        
+        
+    
         return [
             "id" => $this->id,
-            "user" => $this->user,
-            "product" => $this->product,
+            "user_id" => $this->user_id,
+            "product_id" => $this->product_id,
             "quantity" => $this->quantity,
             "price" => $price,
+            "unit" => $unit,
             "subtotal" => $totalPrice,
-            "created_at" => $this->created_at,
-            "updated_at" => $this->updated_at,
+            // "created_at" => $this->created_at,
+            // "updated_at" => $this->updated_at,
         ];
     }
 }
