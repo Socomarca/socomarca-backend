@@ -7,6 +7,7 @@ use App\Http\Requests\Favorites\DestroyRequest;
 use App\Http\Requests\Favorites\IndexRequest;
 use App\Http\Requests\Favorites\StoreRequest;
 use App\Http\Resources\Favorites\FavoriteCollection;
+use App\Http\Resources\FavoritesList\FavoriteListResource;
 use App\Models\Favorite;
 use App\Models\FavoriteList;
 use Illuminate\Support\Facades\Auth;
@@ -15,7 +16,12 @@ class FavoriteController extends Controller
 {
     public function index(){
        
-    
+        $userId = Auth::user()->id;
+        $lists = FavoriteList::with('favorites.product')
+            ->where('user_id', $userId)
+            ->get();
+
+        return FavoriteListResource::collection($lists);
     }
 
     public function store(StoreRequest $storeRequest)

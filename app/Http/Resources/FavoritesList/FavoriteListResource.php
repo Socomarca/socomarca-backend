@@ -18,6 +18,7 @@ class FavoriteListResource extends JsonResource
         return
         [
             'id' => $this->id,
+            'name' => $this->name,
             'favorites' => new WithoutFavoriteListCollection($this->favorites),
 
         ];

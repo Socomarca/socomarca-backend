@@ -22,10 +22,9 @@ class FavoriteResource extends JsonResource
         return
         [
             'id' => $this->id,
-            'favorite_list' => FavoriteList::select('id', 'name', 'created_at', 'updated_at')->where('id', $favoriteListId)->first(),
-            'product' => Product::select('id', 'name', 'description', 'sku', 'status', 'created_at', 'updated_at')->where('id', $productId)->first(),
-            'created_at' => $this->created_at,
-            'updated_at' => $this->updated_at,
+            'favorite_list' => FavoriteList::select('id', 'name')->where('id', $favoriteListId)->first(),
+            'product' => Product::select('id', 'name', 'description', 'sku', 'status')->where('id', $productId)->first(),
+            
         ];
     }
 }
