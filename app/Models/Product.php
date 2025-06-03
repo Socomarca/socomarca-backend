@@ -71,7 +71,7 @@ class Product extends Model
 
     public function prices()
     {
-        return $this->hasOne(Price::class);
+        return $this->hasMany(Price::class);
     }
 
     public function favorites()
