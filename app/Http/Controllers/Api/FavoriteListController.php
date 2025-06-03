@@ -10,14 +10,14 @@ use App\Http\Requests\FavoritesList\StoreRequest;
 use App\Http\Requests\FavoritesList\UpdateRequest;
 use App\Http\Resources\FavoritesList\FavoriteListCollection;
 use App\Models\FavoriteList;
+use Illuminate\Support\Facades\Auth;
 
 class FavoriteListController extends Controller
 {
-    public function index(IndexRequest $indexRequest)
+    public function index()
     {
-        $data = $indexRequest->validated();
 
-        $userId = $data['user_id'];
+        $userId = Auth::id();
 
         $favoritesList = FavoriteList::where('user_id', $userId)->get();
 
@@ -33,7 +33,7 @@ class FavoriteListController extends Controller
         $favoriteList = new FavoriteList;
 
         $favoriteList->name = $data['name'];
-        $favoriteList->user_id = $data['user_id'];
+        $favoriteList->user_id = Auth::user()->id;
 
         $favoriteList->save();
 
@@ -50,7 +50,9 @@ class FavoriteListController extends Controller
             ], 404);
         }
 
-        $favoritesList = FavoriteList::where('id', $id)->get();
+        $favoritesList = FavoriteList::where('id', $id)
+        ->where('user_id', Auth::user()->id)
+        ->first();
 
         $data = new FavoriteListCollection($favoritesList);
 
@@ -61,7 +63,9 @@ class FavoriteListController extends Controller
     {
         $data = $updateRequest->validated();
 
-        $favoriteList = FavoriteList::find($id);
+        $favoriteList = FavoriteList::where('id', $id)
+        ->where('user_id', Auth::user()->id)
+        ->first();
 
         if (!$favoriteList)
         {
@@ -72,7 +76,7 @@ class FavoriteListController extends Controller
         }
 
         $favoriteList->name = $data['name'];
-        $favoriteList->user_id = $data['user_id'];
+        
 
         $favoriteList->save();
 
@@ -83,7 +87,9 @@ class FavoriteListController extends Controller
     {
         $destroyRequest->validated();
 
-        $favoriteList = FavoriteList::find($id);
+        $favoriteList = FavoriteList::where('id', $id)
+        ->where('user_id', Auth::user()->id)
+        ->first();
 
         if (!$favoriteList)
         {

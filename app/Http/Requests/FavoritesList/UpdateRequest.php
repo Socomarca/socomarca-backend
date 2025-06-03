@@ -25,7 +25,7 @@ class UpdateRequest extends FormRequest
         [
             'id' => 'bail|integer|exists:favorites_list,id',
             'name' => 'bail|required|string',
-            'user_id' => 'bail|required|integer|exists:users,id',
+            
         ];
     }
 

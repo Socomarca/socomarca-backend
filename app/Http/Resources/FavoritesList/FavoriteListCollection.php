@@ -14,6 +14,13 @@ class FavoriteListCollection extends ResourceCollection
      */
     public function toArray(Request $request): array
     {
-        return parent::toArray($request);
+        return $this->collection->map(function ($favoriteList) {
+            return [
+                'id' => $favoriteList->id,
+                'name' => $favoriteList->name,
+                'user_id' => $favoriteList->user_id,
+                
+            ];
+        })->all();
     }
 }
