@@ -2,13 +2,12 @@
 
 use App\Models\User;
 use App\Models\Order;
-use App\Models\Cart;
 use App\Models\Product;
 use App\Models\Category;
 use App\Models\Subcategory;
 use App\Models\Brand;
+use App\Models\CartItem;
 use App\Models\Price;
-use Faker\Factory as Faker;
 use App\Services\WebpayService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
@@ -73,13 +72,15 @@ test('puede crear una orden desde el carrito', function () {
     ]);
     $brand = Brand::factory()->create();
 
+    $product = Product::factory()->create([
+        'category_id' => $category->id,
+        'subcategory_id' => $subcategory->id,
+        'brand_id' => $brand->id
+    ]);
+
     // Crear productos con sus precios
     $price1 = Price::factory()->create([
-        'product_id' => Product::factory()->create([
-            'category_id' => $category->id,
-            'subcategory_id' => $subcategory->id,
-            'brand_id' => $brand->id
-        ])->id,
+        'product_id' => $product->id,
         'price_list_id' => fake()->word(),
         'unit' => 'kg',
         'price' => 100,
@@ -88,7 +89,7 @@ test('puede crear una orden desde el carrito', function () {
         'is_active' => true
     ]);
 
-    Cart::create([
+    CartItem::create([
         'user_id' => $this->user->id,
         'product_id' => $price1->product_id,
         'quantity' => 2,
@@ -100,14 +101,14 @@ test('puede crear una orden desde el carrito', function () {
         'user_id' => $this->user->id
     ]);
 
-    
+
 
     // Assert
     $response->assertStatus(201);
 
     // Assert - Verificar estado de la base de datos
     $this->assertDatabaseCount('carts', 0);
-    
+
     $this->assertDatabaseHas('orders', [
         'user_id' => $this->user->id,
         'subtotal' => 200, // (2 * 100)

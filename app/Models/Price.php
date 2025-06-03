@@ -17,10 +17,11 @@ class Price extends Model
         'valid_from',
         'valid_to',
         'is_active',
+        'unit',
     ];
 
-    public function product()
+    public function products()
     {
-        return $this->belongsTo(Product::class);
+        return $this->hasMany(Product::class);
     }
 }

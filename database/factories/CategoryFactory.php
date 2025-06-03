@@ -18,13 +18,13 @@ class CategoryFactory extends Factory
     public function definition()
     {
         $name = $this->faker->unique()->word();
+
         return [
             'name' => ucfirst($name),
             'description' => $this->faker->sentence(),
-            'code' => $this->faker->unique()->numberBetween(10000, 99999),
-            'level' => $this->faker->numberBetween(1, 3),
-            'key' => $this->faker->unique()->word(),
-            //'slug' => Str::slug($name),
+            'code' => fake()->regexify('[A-Z]{10}'),
+            'level' => fake()->numberBetween(1, 10),
+            'key' => fake()->regexify('[A-Z]{4}'),
         ];
     }
 }

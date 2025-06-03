@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Addresses\DestroyRequest;
 use App\Http\Requests\Addresses\IndexRequest;
-use App\Http\Requests\Addresses\ShowRequest;
 use App\Http\Requests\Addresses\StoreRequest;
 use App\Http\Requests\Addresses\UpdateRequest;
 use App\Http\Resources\Addresses\AddressCollection;
@@ -50,13 +49,11 @@ class AddressController extends Controller
 
         $address->save();
 
-        return response()->json(['message' => 'The address has been added']);
+        return response()->json(['message' => 'The address has been added'], 201);
     }
 
-    public function show(ShowRequest $showRequest, $id)
+    public function show($id)
     {
-        $showRequest->validated();
-
         if (!Address::find($id))
         {
             return response()->json(
@@ -75,6 +72,14 @@ class AddressController extends Controller
     public function update(UpdateRequest $updateRequest, $id)
     {
         $data = $updateRequest->validated();
+
+        if (!Address::find($id))
+        {
+            return response()->json(
+            [
+                'message' => 'Address not found.',
+            ], 404);
+        }
 
         $data['is_default'] === true &&
             DB::table('addresses')

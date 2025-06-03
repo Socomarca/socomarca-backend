@@ -9,11 +9,12 @@ use App\Http\Requests\Orders\PayOrderRequest;
 use App\Http\Resources\Orders\OrderCollection;
 use App\Http\Resources\Orders\OrderResource;
 use App\Http\Resources\Orders\PaymentResource;
-use App\Models\Cart;
+use App\Models\CartItem;
 use App\Models\Order;
 use App\Models\OrderItem;
 use Illuminate\Support\Facades\DB;
 use App\Services\WebpayService;
+use Illuminate\Support\Facades\Log;
 
 class OrderController extends Controller
 {
@@ -34,7 +35,7 @@ class OrderController extends Controller
     public function createFromCart(CreateFromCartRequest $request)
     {
         $data = $request->validated();
-        $carts = Cart::where('user_id', $data['user_id'])->get();
+        $carts = CartItem::where('user_id', $data['user_id'])->get();
 
         if ($carts->isEmpty()) {
             return response()->json(['message' => 'El carrito está vacío'], 400);
@@ -68,14 +69,14 @@ class OrderController extends Controller
             }
 
             // Limpiar el carrito
-            Cart::where('user_id', $data['user_id'])->delete();
+            CartItem::where('user_id', $data['user_id'])->delete();
 
             DB::commit();
 
             return new OrderResource($order);
         } catch (\Exception $e) {
             DB::rollBack();
-            return response()->json(['message' => 'Error al crear la orden: ' . $e->getMessage()], 500);
+            throw $e;
         }
     }
 
@@ -98,7 +99,7 @@ class OrderController extends Controller
 
         try {
             $paymentResponse = $this->webpayService->createTransaction($order);
-            
+
             return new PaymentResource((object)[
                 'order' => $order,
                 'payment_url' => $paymentResponse['url'],

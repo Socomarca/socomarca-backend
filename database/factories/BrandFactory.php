@@ -26,11 +26,11 @@ class BrandFactory extends Factory
     public function definition(): array
     {
         $name = $this->faker->unique()->company();
+
         return [
             'name' => $name,
             'description' => $this->faker->sentence(),
             'logo_url' => $this->faker->imageUrl(),
-            //'slug' => Str::slug($name),
         ];
     }
 }

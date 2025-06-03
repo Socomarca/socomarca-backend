@@ -1,38 +1,11 @@
 <?php
 
 use App\Models\Category;
-use App\Models\User;
 
-/**
- * Prueba de respuesta exitosa.
- */
-test('validate_status_code_200', function ()
+beforeEach(function ()
 {
-    $user = User::factory()->create();
-
-    $response = $this->actingAs($user, 'sanctum')
-        ->withHeaders(['Accept' => 'application/json'])
-        ->get('/api/categories');
-
-    $response->assertStatus(200);
-});
-
-/**
- * Prueba que valida que el campo category en params es obligatorio.
- */
-test('validate_id_is_required', function ()
-{
-    $user = User::factory()->create();
-
-    Category::factory()->create();
-
-    $id = '1';
-
-    $response = $this->actingAs($user, 'sanctum')
-        ->withHeaders(['Accept' => 'application/json'])
-        ->get('/api/categories/' . $id);
-
-    $response->assertStatus(200);
+    $this->user = createUser();
+    $this->category = createCategory();
 });
 
 /**
@@ -40,37 +13,65 @@ test('validate_id_is_required', function ()
  */
 test('validate_token', function ()
 {
-    $id = '1';
-
     $response = $this->withHeaders(['Accept' => 'application/json'])
-        ->get('/api/categories/' . $id);
+        ->get('/api/categories');
 
     $response->assertStatus(401);
 });
 
 /**
- * Prueba que valida que el campo category en params sea un entero.
+ * Prueba de respuesta exitosa.
  */
-test('validate_id_is_integer', function ()
+test('validate_status_code_200', function ()
 {
-    $id = 'a';
+    $response = $this->actingAs($this->user, 'sanctum')
+        ->withHeaders(['Accept' => 'application/json'])
+        ->get('/api/categories');
 
-    $response = $this->withHeaders(['Accept' => 'application/json'])
-        ->get('/api/categories/' . $id);
-
-    $response->assertStatus(401);
+    $response
+        ->assertStatus(200)
+        ->assertJsonStructure(
+        [
+            'data' => array
+            (
+                [
+                    'id',
+                    'name',
+                    'description',
+                    'code',
+                    'level',
+                    'key',
+                    'subcategories' => array
+                    (
+                        [
+                            'id',
+                            'category_id',
+                            'name',
+                            'description',
+                            'code',
+                            'level',
+                            'key',
+                            'created_at',
+                            'updated_at',
+                        ],
+                    ),
+                    'created_at',
+                    'updated_at',
+                ],
+            ),
+        ]);
 });
 
 /**
- * Prueba que valida que el campo category en params sea válido en la base de datos.
+ * Prueba que valida que el campo id en params sea válido en la tabla categories.
  */
-test('validate_category_not_found', function ()
+test('test_category_not_found', function ()
 {
-    $user = User::factory()->create();
+    $id = $this->category->id;
 
-    $id = '999';
+    Category::truncate();
 
-    $response = $this->actingAs($user, 'sanctum')
+    $response = $this->actingAs($this->user, 'sanctum')
         ->withHeaders(['Accept' => 'application/json'])
         ->get('/api/categories/' . $id);
 

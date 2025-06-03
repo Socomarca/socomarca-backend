@@ -19,18 +19,17 @@ class ProductController extends Controller
         return $data;
     }
 
-    public function show(ShowRequest $showRequest, $id)
+    public function show($id)
     {
-        $showRequest->validated();
-
         $product = Product::find($id);
 
-        if (!$product)
-        {
+        if (!$product) {
             return response()->json(
-            [
-                'message' => 'Product not found.',
-            ], 404);
+                [
+                    'message' => 'Product not found.',
+                ],
+                404
+            );
         }
 
         $data = new ProductResource($product);
@@ -48,14 +47,24 @@ class ProductController extends Controller
     public function search(Request $request)
     {
         $perPage = $request->input('per_page', 20);
-        $filters = $request->input('filters');
+        $filters = $request->input('filters', []);
         $result = Product::select("products.*")
             ->filter($filters)
             ->paginate($perPage);
 
-        $data = new ProductCollection($result);
+        $priceFilter = collect($filters)->firstWhere('field', 'price');
+        $minPrice = $priceFilter['min'] ?? null;
+        $maxPrice = $priceFilter['max'] ?? null;
+        $unit     = $priceFilter['unit'] ?? null;
+
+        $data = new ProductCollection($result)->additional([
+            'filters' => [
+                'min_price' => $minPrice,
+                'max_price' => $maxPrice,
+                'unit' => $unit,
+            ]
+        ]);
 
         return $data;
     }
-
 }

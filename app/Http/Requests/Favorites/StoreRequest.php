@@ -23,7 +23,7 @@ class StoreRequest extends FormRequest
     {
         return
         [
-            'list_favorite_id' => 'bail|required|integer|exists:lists_favorites,id',
+            'favorite_list_id' => 'bail|required|integer|exists:favorites_list,id',
             'product_id' => 'bail|required|integer|exists:products,id',
         ];
     }
