@@ -16,6 +16,8 @@ use App\Http\Controllers\Api\FavoriteController;
 use App\Http\Controllers\Api\FavoriteListController;
 use App\Http\Controllers\Api\CartItemController;
 use App\Http\Controllers\Api\PaymentMethodController;
+use App\Http\Controllers\Api\OrderController;
+use App\Http\Controllers\Api\WebpayController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -79,6 +81,16 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('brands', BrandController::class)->only(['index']);
 
     Route::apiResource('prices', PriceController::class)->only(['index']);
+
+    // Rutas de orden
+    Route::get('/orders', [OrderController::class, 'index']);
+    Route::post('/orders/create-from-cart', [OrderController::class, 'createFromCart']);
+
+    // Rutas de Webpay
+    Route::post('/orders/pay', [OrderController::class, 'payOrder']);
+    Route::get('/webpay/return', [WebpayController::class, 'return'])->name('webpay.return');
+    Route::get('/webpay/status', [WebpayController::class, 'status']);
+    Route::post('/webpay/refund', [WebpayController::class, 'refund']);
 
     Route::any('{url}', function()
     {

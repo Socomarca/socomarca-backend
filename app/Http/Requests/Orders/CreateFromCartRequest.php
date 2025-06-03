@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Requests\FavoritesList;
+namespace App\Http\Requests\Orders;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class UpdateRequest extends FormRequest
+class CreateFromCartRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -21,27 +21,17 @@ class UpdateRequest extends FormRequest
      */
     public function rules(): array
     {
-        return
-        [
-            'id' => 'bail|integer|exists:favorites_list,id',
-            'name' => 'bail|required|string',
-            
+        return [
+            'user_id' => 'bail|required|integer|exists:users,id',
         ];
     }
 
     public function messages()
     {
-        return
-        [
-            'id.integer' => 'The id field in params must be an integer.',
+        return [
+            'user_id.required' => 'El ID del usuario es requerido.',
+            'user_id.integer' => 'El ID del usuario debe ser un número entero.',
+            'user_id.exists' => 'El usuario especificado no existe.',
         ];
     }
-
-    protected function prepareForValidation()
-    {
-        $this->merge(
-        [
-            'id' => $this->route('id'),
-        ]);
-    }
-}
+} 

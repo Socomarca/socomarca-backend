@@ -15,12 +15,12 @@ return new class extends Migration
             $table->id();
             $table->foreignId('order_id')->constrained()->onDelete('cascade');
             $table->foreignId('payment_method_id')->constrained()->onDelete('cascade');
-            $table->string('auth_code', 50);
+            $table->string('auth_code', 50)->nullable();
             $table->decimal('amount', 10, 2);
             $table->string('response_status', 50);
             $table->json('response_message')->nullable();
             $table->string('token');
-            $table->dateTime('paid_at');
+            $table->dateTime('paid_at')->nullable();
             $table->timestamps();
         });
     }

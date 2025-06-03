@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('prices', function (Blueprint $table) {
             $table->id();
-            $table->string('product_id')->onDelete('cascade');
+            $table->integer('product_id')->nullable();
             $table->string('price_list_id')->onDelete('cascade');
             $table->string('unit', 10);
             $table->decimal('price', 10, 2);
@@ -22,6 +22,8 @@ return new class extends Migration
             $table->timestamp('valid_to')->nullable();
             $table->boolean('is_active')->default(true);
             $table->timestamps();
+
+            $table->foreign('product_id')->references('id')->on('products')->onDelete('cascade');
         });
 
     }

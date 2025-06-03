@@ -19,10 +19,8 @@ class FavoriteListResource extends JsonResource
         [
             'id' => $this->id,
             'name' => $this->name,
-            'user' => $this->user,
             'favorites' => new WithoutFavoriteListCollection($this->favorites),
-            'created_at' => $this->created_at,
-            'updated_at' => $this->updated_at,
+
         ];
     }
 }

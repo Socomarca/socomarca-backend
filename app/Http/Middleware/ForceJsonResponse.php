@@ -1,11 +1,11 @@
 <?php
 
-
 namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Illuminate\Support\Facades\Log;
 
 class ForceJsonResponse
 {
@@ -16,9 +16,19 @@ class ForceJsonResponse
      */
     public function handle(Request $request, Closure $next): mixed
     {
+        // Excluir la ruta de retorno de Webpay
+        if ($request->is('api/webpay/return')) {
+            Log::info('ForceJsonResponse: Excluyendo ruta de Webpay return');
+            return $next($request);
+        }
+
         if (!$request->wantsJson()) {
+            Log::warning('ForceJsonResponse: Intento de acceso sin JSON', [
+                'url' => $request->fullUrl(),
+                'method' => $request->method()
+            ]);
             return response()->json([
-                'message' => 'error'
+                'message' => 'Response must be JSON'
             ], Response::HTTP_NOT_ACCEPTABLE);
         }
         return $next($request);

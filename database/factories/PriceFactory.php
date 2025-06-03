@@ -2,6 +2,8 @@
 
 namespace Database\Factories;
 
+use App\Models\Price;
+use App\Models\Product;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -10,18 +12,30 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 class PriceFactory extends Factory
 {
     /**
+     * The name of the factory's corresponding model.
+     *
+     * @var string
+     */
+    protected $model = Price::class;
+
+    /**
      * Define the model's default state.
      *
      * @return array<string, mixed>
      */
-    public function definition()
+    public function definition(): array
     {
+        $product = Product::inRandomOrder()->first();
+
+        if (!$product) {
+            $product = Product::factory()->create();
+        }
+
         return [
-            'product_id' => 'product_id',
-            'price_list_id' => 'price_list_id',
-            //'currency' => 'USD',
-            'unit' => fake()->numberBetween(1, 10),
-            'price' => fake()->randomFloat(2, 1000, 100000),
+            'price' => $this->faker->randomFloat(2, 1000, 100000),
+            'product_id' => $product->id,
+            'price_list_id' => fake()->regexify('[A-Z]{10}'),
+            'unit' => $this->faker->randomElement(['kg', 'gr', 'un']),
             'valid_from' => now()->subDays(rand(0, 30)),
             'valid_to' => null,
             'is_active' => true,
