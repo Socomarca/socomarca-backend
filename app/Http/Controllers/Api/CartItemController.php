@@ -33,6 +33,7 @@ class CartItemController extends Controller
         
         // Busca el precio activo del producto
         $price = Price::where('product_id', $data['product_id'])
+            ->where('unit', $data['unit'])
             ->where('is_active', true)
             ->first();
         
@@ -40,19 +41,30 @@ class CartItemController extends Controller
             return response()->json(['message' => 'No active price found for this product.'], 404);
         }
         
-        $cart = new CartItem;
+        // Busca si ya existe el item en el carrito para ese usuario, producto y unidad
+        $cart = CartItem::where('user_id', Auth::user()->id)
+            ->where('product_id', $data['product_id'])
+            ->where('unit', $data['unit'])
+            ->first();
 
-        $cart->user_id = Auth::user()->id;
-        $cart->product_id = $data['product_id'];
-        $cart->quantity = $data['quantity'];
-        $cart->unit = $price->unit;
-
-        $cart->save();
-        
-
-        return response()->json(['message' => 'The product in the cart has been added'], 201);
+        if ($cart) {
+            // Si existe, suma la cantidad
+            $cart->quantity += $data['quantity'];
+            //$cart->price = $price->price; // actualiza el precio por si cambió
+            $cart->save();
+            return response()->json(['message' => 'The product quantity in the cart has been updated'], 200);
+        } else {
+            // Si no existe, crea uno nuevo
+            $cart = new CartItem;
+            $cart->user_id = Auth::user()->id;
+            $cart->product_id = $data['product_id'];
+            $cart->quantity = $data['quantity'];
+            $cart->unit = $data['unit'];
+            //$cart->price = $price->price;
+            $cart->save();
+            return response()->json(['message' => 'The product in the cart has been added'], 201);
+        }
     }
-
 
     public function update(UpdateRequest $updateRequest, $id)
     {

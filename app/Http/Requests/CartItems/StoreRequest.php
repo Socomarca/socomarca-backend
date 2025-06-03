@@ -25,6 +25,7 @@ class StoreRequest extends FormRequest
            
             'product_id'    => 'bail|required|integer|exists:products,id',
             'quantity'      => 'bail|required|integer|min:1|max:99',
+            'unit'          => 'required|string|max:10',
             
         ];
     }
