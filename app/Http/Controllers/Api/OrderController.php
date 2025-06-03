@@ -12,9 +12,17 @@ use App\Http\Resources\Orders\PaymentResource;
 use App\Models\CartItem;
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Models\Product;
 use Illuminate\Support\Facades\DB;
 use App\Services\WebpayService;
 use Illuminate\Support\Facades\Log;
+
+
+use App\Models\Category;
+use App\Models\Subcategory;
+use App\Models\Brand;
+use App\Models\Price;
+
 
 class OrderController extends Controller
 {
@@ -58,15 +66,26 @@ class OrderController extends Controller
             ]);
 
             // Crear los items de la orden
+            $total = 0;
             foreach ($carts as $cart) {
+
+                //TODO: Se debe obtener el precio de la unidad desde el carrito
+                $price = $cart->product->prices->where('unit', '=', 'kg')->first();
+                $total += $price->price * $cart->quantity;
+
                 OrderItem::create([
                     'order_id' => $order->id,
                     'product_id' => $cart->product_id,
                     'unit' => 'unidad',
                     'quantity' => $cart->quantity,
-                    'price' => $cart->price
+                    'price' => $price->price
                 ]);
             }
+
+            //Actualizar el subtotal de la orden
+            $order->subtotal = $total;
+            $order->amount = $total;
+            $order->save();
 
             // Limpiar el carrito
             CartItem::where('user_id', $data['user_id'])->delete();
@@ -108,5 +127,39 @@ class OrderController extends Controller
         } catch (\Exception $e) {
             return response()->json(['message' => 'Error al procesar el pago: ' . $e->getMessage(), 'order' => $order], 500);
         }
+    }
+
+
+    //NOTA: No eliminar este método, es para crear un carrito de prueba
+    public function createCart(){
+        $category = Category::factory()->create();
+        $subcategory = Subcategory::factory()->create([
+            'category_id' => $category->id
+        ]);
+        $brand = Brand::factory()->create();
+    
+        $product = Product::factory()->create([
+            'category_id' => $category->id,
+            'subcategory_id' => $subcategory->id,
+            'brand_id' => $brand->id
+        ]);
+    
+        // Crear productos con sus precios
+        $price1 = Price::factory()->create([
+            'product_id' => $product->id,
+            'price_list_id' => fake()->word(),
+            'unit' => 'kg',
+            'price' => 100,
+            'valid_from' => now()->subDays(1),
+            'valid_to' => null,
+            'is_active' => true
+        ]);
+    
+        CartItem::create([
+            'user_id' => 12,
+            'product_id' => $price1->product_id,
+            'quantity' => 2,
+            'price' => $price1->price
+        ]);
     }
 }
