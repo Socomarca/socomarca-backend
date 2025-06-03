@@ -50,7 +50,7 @@ class CartItemController extends Controller
         if ($cart) {
             // Si existe, suma la cantidad
             $cart->quantity += $data['quantity'];
-            //$cart->price = $price->price; // actualiza el precio por si cambió
+            
             $cart->save();
             return response()->json(['message' => 'The product quantity in the cart has been updated'], 200);
         } else {
@@ -60,7 +60,7 @@ class CartItemController extends Controller
             $cart->product_id = $data['product_id'];
             $cart->quantity = $data['quantity'];
             $cart->unit = $data['unit'];
-            //$cart->price = $price->price;
+            
             $cart->save();
             return response()->json(['message' => 'The product in the cart has been added'], 201);
         }
