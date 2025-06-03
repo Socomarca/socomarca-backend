@@ -24,7 +24,7 @@ class StoreRequest extends FormRequest
         return
         [
             'name' => 'bail|required|string',
-            'user_id' => 'bail|required|integer|exists:users,id',
+            
         ];
     }
 }

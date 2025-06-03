@@ -22,9 +22,9 @@ class UpdateRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'id'            => 'bail|integer|exists:carts,id',
+           
             'quantity'      => 'bail|required|integer|min:1|max:99',
-            'price'         => 'bail|required|integer',
+           
         ];
     }
 
@@ -32,7 +32,8 @@ class UpdateRequest extends FormRequest
     {
         return
         [
-            'id.integer' => 'The id field in params must be an integer.',
+           
+            'quantity.required' => 'The quantity field is required.',
         ];
     }
 

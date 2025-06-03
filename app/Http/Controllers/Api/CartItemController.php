@@ -11,41 +11,44 @@ use App\Http\Requests\CartItems\UpdateRequest;
 use App\Http\Resources\CartItems\CartItemCollection;
 use App\Models\CartItem;
 use App\Helpers\TotalHelper;
+use App\Models\Price;
+use Illuminate\Support\Facades\Auth;
 
 class CartItemController extends Controller
 {
-    public function index(IndexRequest $indexRequest)
+    public function index()
     {
-        $data = $indexRequest->validated();
-
-        $userId = $indexRequest->user_id;
+        $userId = Auth::user()->id;
 
         $carts = CartItem::where('user_id', $userId)->get();
 
-        $data = new CartItemCollection($carts);
-        $arrayData = json_decode(json_encode($data), true);
-        $total = TotalHelper::totalCarrito($arrayData);
+        return new CartItemCollection($carts);
 
-        return response()->json([
-            'total' => $total,
-            'data' => $data,
-        ]);
-        //return $data;
+       
     }
 
     public function store(StoreRequest $storeRequest)
     {
         $data = $storeRequest->validated();
-
+        
+        // Busca el precio activo del producto
+        $price = Price::where('product_id', $data['product_id'])
+            ->where('is_active', true)
+            ->first();
+        
+        if (!$price) {
+            return response()->json(['message' => 'No active price found for this product.'], 404);
+        }
+        
         $cart = new CartItem;
 
-        $cart->user_id = $data['user_id'];
+        $cart->user_id = Auth::user()->id;
         $cart->product_id = $data['product_id'];
         $cart->quantity = $data['quantity'];
-        $cart->price = $data['price'];
+        $cart->unit = $price->unit;
 
         $cart->save();
-        //$total = $this->total($data['user_id']);
+        
 
         return response()->json(['message' => 'The product in the cart has been added'], 201);
     }
@@ -55,7 +58,10 @@ class CartItemController extends Controller
     {
         $data = $updateRequest->validated();
 
-        $cart = CartItem::find($id);
+        $cart = CartItem::where('id', $id)
+        ->where('user_id', Auth::user()->id)
+        ->first();
+
         if (!$cart)
         {
             return response()->json(
@@ -63,12 +69,25 @@ class CartItemController extends Controller
                 'message' => 'Product not found.',
             ], 404);
         }
-        $userId = $cart->user_id;
+
+        
+
+         // Busca el precio activo del producto
+        $price = Price::where('product_id', $cart->product_id)
+            ->where('is_active', true)
+            ->first();
+        
+        if (!$price) {
+            return response()->json(['message' => 'No active price found for this product.'], 404);
+        }
+        
+        
 
         $cart->quantity = $data['quantity'];
-        $cart->price = $data['price'];
+        $cart->unit = $price->unit;
+        
         $cart->save();
-        //$total = $this->total($userId);
+        
 
         return response()->json(['message' => 'The selected product has been updated']);
 
@@ -78,7 +97,10 @@ class CartItemController extends Controller
     {
         $destroyRequest->validated();
 
-        $cart = CartItem::find($id);
+        $cart = CartItem::where('id', $id)
+        ->where('user_id', Auth::user()->id)
+        ->first();
+
         if (!$cart)
         {
             return response()->json(
