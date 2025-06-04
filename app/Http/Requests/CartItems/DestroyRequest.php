@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\CartItems;
 
+use App\Rules\DestroyProductItemQuantityValidator;
 use Illuminate\Foundation\Http\FormRequest;
 
 class DestroyRequest extends FormRequest
@@ -22,23 +23,16 @@ class DestroyRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'id' => 'bail|integer',
+            'product_id' => 'required',
+            'unit' => 'required',
+            'quantity' => [
+                'bail',
+                'required',
+                new DestroyProductItemQuantityValidator(
+                    $this->input('product_id'),
+                    $this->input('unit')
+                )
+            ]
         ];
-    }
-
-    public function messages()
-    {
-        return
-        [
-            'id.integer' => 'The id field in params must be an integer.',
-        ];
-    }
-
-    protected function prepareForValidation()
-    {
-        $this->merge(
-        [
-            'id' => $this->route('id'),
-        ]);
     }
 }

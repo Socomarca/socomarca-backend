@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\SubcategoryController;
 use App\Http\Controllers\Api\BrandController;
+use App\Http\Controllers\Api\CartController;
 use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\PriceController;
 use App\Http\Controllers\AuthController;
@@ -69,11 +70,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/favorites', [FavoriteController::class, 'store']);
     Route::delete('/favorites/{id}', [FavoriteController::class, 'destroy']);
 
-    Route::get('/carts', [CartItemController::class, 'index']);
-    Route::post('/carts', [CartItemController::class, 'store']);
-    Route::get('/carts/{id}', [CartItemController::class, 'show']);
-    Route::put('/carts/{id}', [CartItemController::class, 'update']);
-    Route::delete('/carts/{id}', [CartItemController::class, 'destroy']);
+    Route::get('/cart', [CartController::class, 'index']);
+    Route::post('/cart/items', [CartItemController::class, 'store']);
+    Route::delete('/cart/items', [CartItemController::class, 'destroy']);
 
     Route::get('/payment-methods', [PaymentMethodController::class, 'index']);
     Route::put('/payment-methods/{id}', [PaymentMethodController::class, 'update']);
