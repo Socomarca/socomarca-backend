@@ -88,11 +88,6 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Rutas de Webpay
     Route::post('/orders/pay', [OrderController::class, 'payOrder']);
-    Route::any('{url}', function()
-    {
-        return response()->json(['message' => 'Method Not Allowed.'], 405);
-    })->where('url', '.*');
-
 });
 
 //Se sacan de la autenticacion porque es confirmacion de pago.
@@ -101,3 +96,8 @@ Route::middleware('auth:sanctum')->group(function () {
 Route::get('/webpay/return', [WebpayController::class, 'return'])->name('webpay.return');
 Route::get('/webpay/status', [WebpayController::class, 'status']);
 Route::post('/webpay/refund', [WebpayController::class, 'refund']);
+
+// Ruta catch-all al final
+Route::any('{url}', function() {
+    return response()->json(['message' => 'Method Not Allowed.'], 405);
+})->where('url', '.*');
