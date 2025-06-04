@@ -32,13 +32,14 @@ class PriceFactory extends Factory
         }
 
         return [
-            'price' => $this->faker->randomFloat(2, 1000, 100000),
+            'price' => $this->faker->numberBetween(1000, 55000),
             'product_id' => $product->id,
             'price_list_id' => fake()->regexify('[A-Z]{10}'),
             'unit' => $this->faker->randomElement(['kg', 'gr', 'un']),
             'valid_from' => now()->subDays(rand(0, 30)),
             'valid_to' => null,
             'is_active' => true,
+            'stock' => rand(100,200)
         ];
     }
 }
