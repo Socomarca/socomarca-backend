@@ -56,7 +56,7 @@ class WebpayService
                 $order->id,
                 $order->user_id,
                 $order->amount,
-                route('webpay.return')
+                env('WEBPAY_RETURN_URL')
             );
 
             Log::info('WebpayService: Transacción creada exitosamente', [

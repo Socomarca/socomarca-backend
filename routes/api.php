@@ -88,10 +88,6 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Rutas de Webpay
     Route::post('/orders/pay', [OrderController::class, 'payOrder']);
-    Route::get('/webpay/return', [WebpayController::class, 'return'])->name('webpay.return');
-    Route::get('/webpay/status', [WebpayController::class, 'status']);
-    Route::post('/webpay/refund', [WebpayController::class, 'refund']);
-
     Route::any('{url}', function()
     {
         return response()->json(['message' => 'Method Not Allowed.'], 405);
