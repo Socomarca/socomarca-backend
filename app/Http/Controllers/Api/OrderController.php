@@ -88,9 +88,6 @@ class OrderController extends Controller
             $order->amount = $total;
             $order->save();
 
-            // Limpiar el carrito
-            CartItem::where('user_id', $data['user_id'])->delete();
-
             DB::commit();
 
             return new OrderResource($order);

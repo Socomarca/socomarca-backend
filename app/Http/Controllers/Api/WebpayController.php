@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\Payment;
+use App\Models\CartItem;
 use App\Services\WebpayService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -52,6 +53,11 @@ class WebpayController extends Controller
                         'order_status' => $order->status,
                         'payment_status' => $payment->response_status
                     ]);
+
+                    if ($result['status'] === 'AUTHORIZED') {
+                        CartItem::where('user_id', $order->user_id)->delete();
+                        Log::info('Webpay return: Carrito borrado exitosamente', ['user_id' => $order->user_id]);
+                    }
 
                     Payment::where('order_id', $order->id)->update([
                         'response_status' => $result['status'],
