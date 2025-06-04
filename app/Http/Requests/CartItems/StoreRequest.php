@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\CartItems;
 
+use App\Rules\ProductMustHavePrice;
 use Illuminate\Foundation\Http\FormRequest;
 
 class StoreRequest extends FormRequest
@@ -22,11 +23,14 @@ class StoreRequest extends FormRequest
     public function rules(): array
     {
         return [
-           
-            'product_id'    => 'bail|required|integer|exists:products,id',
+            'product_id'    => [
+                'bail',
+                'required',
+                'exists:products,id',
+                new ProductMustHavePrice($this->input('unit', ''))
+            ],
             'quantity'      => 'bail|required|integer|min:1|max:99',
             'unit'          => 'required|string|max:10',
-            
         ];
     }
 }

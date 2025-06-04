@@ -43,7 +43,7 @@ class ProductResource extends JsonResource
             'subcategory' => $this->subcategory,
             'brand' => $this->brand,
             'price_id' => $this->price_id,
-            'price' => Price::where('id', $this->price_id)->where('is_active', 1)->pluck('price')->first(),
+            'price' => $activePrice,
             'sku' => $this->sku,
             'status' => $this->status,
             'created_at' => $this->created_at,
