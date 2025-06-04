@@ -14,7 +14,9 @@ class ProductController extends Controller
     public function index(Request $request)
     {
         $perPage = $request->input('per_page', 20);
-        $products = Product::paginate($perPage);
+        $products = Product::with(['prices' => function($q) {
+            $q->where('is_active', true);
+        }])->paginate($perPage);
         $data = new ProductCollection($products);
         return $data;
     }

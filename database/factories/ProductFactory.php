@@ -33,6 +33,7 @@ class ProductFactory extends Factory
             'brand_id' => $brand->id,
             'sku' => $sku,
             'status' => $this->faker->boolean(90),
+            'image' => "/assets/global/logo_plant.png"
         ];
     }
 }

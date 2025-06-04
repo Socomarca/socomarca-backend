@@ -42,12 +42,14 @@ class ProductResource extends JsonResource
             'category' => $this->category,
             'subcategory' => $this->subcategory,
             'brand' => $this->brand,
-            'price_id' => $this->price_id,
-            'price' => $activePrice,
+            'prices' => $this->prices->map(function($price) {
+                return [
+                    'unit' => $price->unit,
+                    'price' => $price->price,
+                ];
+            }),
             'sku' => $this->sku,
             'status' => $this->status,
-            'created_at' => $this->created_at,
-            'updated_at' => $this->updated_at,
             'is_favorite' => $isFavorite,
         ];
     }
