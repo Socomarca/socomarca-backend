@@ -87,13 +87,16 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Rutas de Webpay
     Route::post('/orders/pay', [OrderController::class, 'payOrder']);
-    Route::get('/webpay/return', [WebpayController::class, 'return'])->name('webpay.return');
-    Route::get('/webpay/status', [WebpayController::class, 'status']);
-    Route::post('/webpay/refund', [WebpayController::class, 'refund']);
-
     Route::any('{url}', function()
     {
         return response()->json(['message' => 'Method Not Allowed.'], 405);
     })->where('url', '.*');
 
 });
+
+//Se sacan de la autenticacion porque es confirmacion de pago.
+//Front recibe el token y lo envia a /webpay/return  (La ruta se establece en el webpayService: linea 59)
+///webpay/return valida la token y entrega al front el estado del pago
+Route::get('/webpay/return', [WebpayController::class, 'return'])->name('webpay.return');
+Route::get('/webpay/status', [WebpayController::class, 'status']);
+Route::post('/webpay/refund', [WebpayController::class, 'refund']);
