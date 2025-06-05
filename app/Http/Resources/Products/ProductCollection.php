@@ -36,7 +36,7 @@ class ProductCollection extends ResourceCollection
                     return [
                         'id' => $product->id,
                         'name' => $product->name,
-                        'description' => $product->description,
+                        
                         'category' => [
                             'id' => $product->category->id,
                             'name' => $product->category->name,
