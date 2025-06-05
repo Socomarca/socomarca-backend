@@ -12,10 +12,8 @@ class DatabaseSeeder extends Seeder
         $this->call([
             RegionSeeder::class,
             UserSeeder::class,
-            CategorySeeder::class,
             BrandSeeder::class,
             ProductSeeder::class,
-            PriceSeeder::class,
             PaymentMethodSeeder::class,
         ]);
     }

@@ -25,15 +25,9 @@ class PriceFactory extends Factory
      */
     public function definition(): array
     {
-        $product = Product::inRandomOrder()->first();
-
-        if (!$product) {
-            $product = Product::factory()->create();
-        }
-
         return [
             'price' => $this->faker->numberBetween(1000, 55000),
-            'product_id' => $product->id,
+            'product_id' => Product::factory(),
             'price_list_id' => fake()->regexify('[A-Z]{10}'),
             'unit' => $this->faker->randomElement(['kg', 'gr', 'un']),
             'valid_from' => now()->subDays(rand(0, 30)),
