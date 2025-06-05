@@ -22,12 +22,7 @@ use App\Http\Controllers\Api\WebpayController;
 
 
 
-Route::middleware('auth:sanctum')->get('/auth/check-token', function (Request $request) {
-    return response()->json([
-        'valid' => true,
-        'user' => $request->user(),
-    ]);
-});
+
 
 Route::prefix('auth')->group(function () {
     Route::post('/token', [AuthController::class, 'login'])->name('auth.token.store');
@@ -37,7 +32,7 @@ Route::prefix('auth')->group(function () {
     Route::middleware('auth:sanctum')->group(function () {
         Route::get('/check-token', function () {
             return response()->json(['valid' => true]);
-        })->name('auth.token.check');
+        })->name('auth.check.token');
         Route::delete('/token', [AuthController::class, 'destroy'])->name('auth.token.destroy');
         Route::prefix('/password')->group(function () {
             Route::put('', [PasswordResetController::class, 'changePassword'])->name('password.update');
