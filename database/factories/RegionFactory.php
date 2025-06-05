@@ -16,10 +16,11 @@ class RegionFactory extends Factory
      */
     public function definition(): array
     {
-        return
-        [
-            'name' => fake()->state(),
-            'code' => fake()->regexify('[A-Z]{10}'),
+         $code = str_pad($this->faker->numberBetween(1, 16), 2, '0', STR_PAD_LEFT);
+
+        return [
+            'name' => $this->faker->state(),
+            'code' => $code,
         ];
     }
 }
