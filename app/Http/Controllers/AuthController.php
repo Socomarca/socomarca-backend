@@ -32,8 +32,8 @@ class AuthController extends Controller
         $token = $user->createToken($tokenName)->plainTextToken;
 
         // Obtener roles y permisos
-        //$roles = $user->getRoleNames();
-        //$permissions = $user->getAllPermissions()->pluck('name');
+        $roles = $user->getRoleNames();
+        $permissions = $user->getAllPermissions()->pluck('name');
 
         return response()->json([
             'token' => $token,
@@ -42,9 +42,9 @@ class AuthController extends Controller
                 'name' => $user->name,
                 'rut' => $user->rut,
                 'email' => $user->email,
+                'roles' => $roles,
+                'permissions' => $permissions,
             ]
-                // 'roles' => $roles,
-                // 'permissions' => $permissions,
                 
             
         ]);
