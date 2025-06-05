@@ -26,7 +26,7 @@ class CartItemController extends Controller
             ->first();
 
         if ($item) {
-            $item->quantity += $data['quantity'];
+            $item->quantity = $data['quantity'];
             $item->save();
         } else {
             $item = new CartItem;
