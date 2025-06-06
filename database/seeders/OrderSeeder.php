@@ -20,7 +20,7 @@ class OrderSeeder extends Seeder
          $users = User::pluck('id')->toArray();
         $products = Product::pluck('id')->toArray();
 
-        for ($i = 0; $i < 20; $i++) {
+        for ($i = 0; $i < 200; $i++) {
             $userId = fake()->randomElement($users);
 
             $subtotal = 0;
