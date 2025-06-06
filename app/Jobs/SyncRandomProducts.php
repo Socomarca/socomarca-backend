@@ -48,6 +48,7 @@ class SyncRandomProducts implements ShouldQueue
                 }
     
                 $data = [
+                    'random_product_id' => $product['KOPR'],
                     'sku' => $product['KOPR'],
                     'name' => $product['NOKOPR'],
                     'description' => null,
@@ -59,7 +60,7 @@ class SyncRandomProducts implements ShouldQueue
                 
                 //Update or create product
                 Product::updateOrCreate(
-                    ['sku' => $product['KOPR']], $data
+                    ['random_product_id' => $product['KOPR']], $data
                 );
             }
             

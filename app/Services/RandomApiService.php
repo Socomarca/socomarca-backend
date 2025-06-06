@@ -146,4 +146,17 @@ class RandomApiService
         $request = $this->makeRequest('get', '/web32/precios/pidelistaprecio?' . http_build_query($data));
         return $request;
     }
+
+    public function getStock($kopr = null, $fields = null, $warehouse = null, $business_code = null, $mode = null){
+        $data = [];
+        
+        if ($kopr !== null) $data['kopr'] = $kopr;
+        if ($fields !== null) $data['fields'] = $fields;
+        if ($warehouse !== null) $data['warehouse'] = $warehouse;
+        if ($business_code !== null) $data['business_code'] = $business_code;
+        if ($mode !== null) $data['mode'] = $mode;
+
+        $request = $this->makeRequest('get', '/stock/detalle?' . http_build_query($data));
+        return $request;
+    }
 } 
