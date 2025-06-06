@@ -90,6 +90,10 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Rutas de Webpay
     Route::post('/orders/pay', [OrderController::class, 'payOrder']);
+    
+    Route::post('/orders/serach', [OrderController::class, 'searchOrders'])->name('orders.search');
+    Route::get('/orders/{id}', [OrderController::class, 'show']);
+
 });
 
 //Se sacan de la autenticacion porque es confirmacion de pago.
