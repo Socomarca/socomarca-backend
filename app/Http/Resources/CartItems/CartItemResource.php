@@ -23,20 +23,36 @@ class CartItemResource extends JsonResource
         $price = $priceObj->price ?? 0;
         $unit = $priceObj->unit;
         $totalPrice = $price * $this->quantity;
-
+        $stock = $priceObj->stock ?? null;
+        $totalPrice = $price * $this->quantity;
+   
         
         
     
         return [
-            "id" => $this->id,
-            "user_id" => $this->user_id,
-            "product_id" => $this->product_id,
-            "quantity" => $this->quantity,
-            "price" => $price,
-            "unit" => $unit,
+            "id" => $product->id,
+            "name" => $product->name,
+            "category" => $product->category ? [
+                "id" => $product->category->id,
+                "name" => $product->category->name,
+            ] : null,
+            "subcategory" => $product->subcategory ? [
+                "id" => $product->subcategory->id,
+                "name" => $product->subcategory->name,
+            ] : null,
+            "brand" => $product->brand ? [
+                "id" => $product->brand->id,
+                "name" => $product->brand->name,
+            ] : null,
+            "quantity" => (int)$this->quantity,
+            "unit" => $unit ?? null,
+            "price" => (int)$price,
+            "stock" => (int)$stock,
+            "image" => $product->image ?? null,
+            "sku" => $product->sku ?? null,
             "subtotal" => $totalPrice,
-            // "created_at" => $this->created_at,
-            // "updated_at" => $this->updated_at,
+            "is_favorite" => false,
+
         ];
     }
 }
