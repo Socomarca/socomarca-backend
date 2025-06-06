@@ -1,0 +1,18 @@
+[
+    { "id": 1, "code": "15", "name": "Arica y Parinacota" },
+    { "id": 2, "code": "01", "name": "Tarapacá" },
+    { "id": 3, "code": "02", "name": "Antofagasta" },
+    { "id": 4, "code": "03", "name": "Atacama" },
+    { "id": 5, "code": "04", "name": "Coquimbo" },
+    { "id": 6, "code": "05", "name": "Valparaíso" },
+    { "id": 7, "code": "13", "name": "Metropolitana de Santiago" },
+    { "id": 8, "code": "06", "name": "Libertador General Bernardo O'Higgins" },
+    { "id": 9, "code": "07", "name": "Maule" },
+    { "id": 10, "code": "16", "name": "Ñuble" },
+    { "id": 11, "code": "08", "name": "Biobío" },
+    { "id": 12, "code": "09", "name": "La Araucanía" },
+    { "id": 13, "code": "14", "name": "Los Ríos" },
+    { "id": 14, "code": "10", "name": "Los Lagos" },
+    { "id": 15, "code": "11", "name": "Aysén" },
+    { "id": 16, "code": "12", "name": "Magallanes y Antártica Chilena" }
+]
