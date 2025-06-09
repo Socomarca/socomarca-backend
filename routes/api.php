@@ -100,6 +100,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/orders/reports/top-product-list', [ReportController::class, 'productsSalesList']);
         Route::post('/orders/reports/transactions-list', [ReportController::class, 'transactionsList']);
         Route::post('/orders/reports/clients-list', [ReportController::class, 'clientsList']);
+        Route::post('/orders/reports/failed-transactions-list', [ReportController::class, 'failedTransactionsList']);
     //});
 
 });

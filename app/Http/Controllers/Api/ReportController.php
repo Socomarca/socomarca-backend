@@ -77,6 +77,21 @@ class ReportController extends Controller
             ]);
         }
 
+        if ($type === 'transacciones-fallidas') {
+            $grafico = [];
+            foreach ($orders as $order) {
+                $grafico[] = [
+                    'mes' => $order->mes,
+                    'transacciones_fallidas' => (int)$order->transacciones_fallidas,
+                    'total_fallido' => (float)$order->total_fallido,
+                ];
+            }
+
+            return response()->json([
+                'grafico' => $grafico,
+            ]);
+        }
+
         if ($type === 'top-productos') {
             // Obtén todos los productos involucrados
             $productIds = $orders->pluck('product_id')->unique()->all();
@@ -100,6 +115,32 @@ class ReportController extends Controller
 
             return response()->json([
                 'top-productos' => $topProductos
+            ]);
+        }
+
+        if ($type === 'top-categorias') {
+            $meses = $orders->pluck('mes')->unique()->sort()->values()->all();
+
+            $topCategorias = [];
+            foreach ($meses as $mes) {
+                $categoriasMes = $orders->where('mes', $mes);
+                $top = $categoriasMes->sortByDesc('total_ventas')->first();
+                if ($top) {
+                    $topCategorias[] = [
+                        'mes' => $mes,
+                        'categoria' => $top->categoria,
+                        'total' => (int)$top->subtotal, // O usa total_ventas si prefieres cantidad
+                    ];
+                }
+            }
+
+            $totalVentas = collect($topCategorias)->sum('total');
+            $promedioVentas = count($topCategorias) > 0 ? round($totalVentas / count($topCategorias), 0) : 0;
+
+            return response()->json([
+                'top-categorias' => $topCategorias,
+                'total_ventas' => $totalVentas,
+                'promedio_ventas' => $promedioVentas
             ]);
         }
 
@@ -268,5 +309,46 @@ class ReportController extends Controller
             'total' => $ordersPaginated->total(),
         ]
     ]);
+    }
+
+    public function failedTransactionsList(Request $request)
+    {
+        $start = $request->input('start') 
+            ? date('Y-m-d', strtotime($request->input('start')))
+            : now()->subMonths(12)->startOfMonth()->toDateString();
+
+        $end = $request->input('end') 
+            ? date('Y-m-d', strtotime($request->input('end')))
+            : now()->endOfMonth()->toDateString();
+
+        $perPage = $request->input('per_page', 15);
+
+        $query = \App\Models\Order::with('user')
+            ->where('status', 'failed')
+            ->whereBetween('created_at', [$start, $end])
+            ->orderByDesc('created_at');
+
+        $ordersPaginated = $query->paginate($perPage);
+
+        $detalleTabla = [];
+        foreach ($ordersPaginated as $order) {
+            $detalleTabla[] = [
+                'id' => $order->id,
+                'cliente' => $order->user ? $order->user->name : null,
+                'monto' => $order->amount,
+                'fecha' => $order->created_at ? $order->created_at->toDateString() : null,
+                'estado' => $order->status,
+            ];
+        }
+
+        return response()->json([
+            'detalle_tabla' => $detalleTabla,
+            'pagination' => [
+                'current_page' => $ordersPaginated->currentPage(),
+                'last_page' => $ordersPaginated->lastPage(),
+                'per_page' => $ordersPaginated->perPage(),
+                'total' => $ordersPaginated->total(),
+            ]
+        ]);
     }
 }
