@@ -17,63 +17,67 @@ class OrderSeeder extends Seeder
      */
     public function run(): void
     {
-         $users = User::pluck('id')->toArray();
-        $products = Product::pluck('id')->toArray();
+        $users = \App\Models\User::pluck('id')->toArray();
+        $products = \App\Models\Product::pluck('id')->toArray();
 
-        for ($i = 0; $i < 200; $i++) {
-            $userId = fake()->randomElement($users);
+        // Meses de 2025 a poblar
+        $months = [
+            '2025-01', '2025-02', '2025-03', '2025-04', '2025-05', '2025-06'
+        ];
 
-            $subtotal = 0;
-            $amount = 0;
+        foreach ($months as $month) {
+            // Crea 10 órdenes por mes (ajusta la cantidad si lo deseas)
+            for ($i = 0; $i < 100; $i++) {
+                $userId = fake()->randomElement($users);
 
-            // Crea la orden sin subtotal ni amount (se actualiza después)
-            $order = Order::create([
-                'user_id' => $userId,
-                'subtotal' => 0,
-                'amount' => 0,
-                'status' => fake()->randomElement([
-                    'pending',    // Orden creada, pendiente de pago
-                    'processing', // Orden en proceso de pago
-                    'on_hold',    // Orden en espera
-                    'completed',  // Pago exitoso
-                    'canceled',   // Orden cancelada
-                    'refunded',   // Reembolso realizado
-                    'failed',     // Pago fallido
-                ]),
-            ]);
+                // Fecha aleatoria dentro del mes
+                $date = fake()->dateTimeBetween("$month-01", "$month-28");
 
-            // Cada orden tendrá entre 1 y 5 productos
-            $itemsCount = rand(1, 5);
-            $productIds = fake()->randomElements($products, $itemsCount);
+                $subtotal = 0;
+                $amount = 0;
 
-            foreach ($productIds as $productId) {
-                $priceObj = Price::where('product_id', $productId)
-                    ->where('is_active', true)
-                    ->inRandomOrder()
-                    ->first();
+                $order = \App\Models\Order::create([
+                    'user_id' => $userId,
+                    'subtotal' => 0,
+                    'amount' => 0,
+                    'status' => fake()->randomElement([
+                        'pending', 'processing', 'on_hold', 'completed', 'canceled', 'refunded', 'failed'
+                    ]),
+                    'created_at' => $date,
+                    'updated_at' => $date,
+                ]);
 
-                if (!$priceObj) continue;
+                $itemsCount = rand(1, 5);
+                $productIds = fake()->randomElements($products, $itemsCount);
 
-                $quantity = rand(1, 10);
-                $itemTotal = $priceObj->price * $quantity;
-                $subtotal += $itemTotal;
+                foreach ($productIds as $productId) {
+                    $priceObj = \App\Models\Price::where('product_id', $productId)
+                        ->where('is_active', true)
+                        ->inRandomOrder()
+                        ->first();
 
-                OrderItem::create([
-                    'order_id' => $order->id,
-                    'product_id' => $productId,
-                    'unit' => $priceObj->unit,
-                    'quantity' => $quantity,
-                    'price' => $priceObj->price,
+                    if (!$priceObj) continue;
+
+                    $quantity = rand(1, 10);
+                    $itemTotal = $priceObj->price * $quantity;
+                    $subtotal += $itemTotal;
+
+                    \App\Models\OrderItem::create([
+                        'order_id' => $order->id,
+                        'product_id' => $productId,
+                        'unit' => $priceObj->unit,
+                        'quantity' => $quantity,
+                        'price' => $priceObj->price,
+                    ]);
+                }
+
+                $amount = $subtotal; // Puedes ajustar si tienes lógica de descuentos/impuestos
+
+                $order->update([
+                    'subtotal' => $subtotal,
+                    'amount' => $amount,
                 ]);
             }
-
-            // Puedes agregar lógica de descuentos, impuestos, etc. para calcular amount
-            $amount = $subtotal; // Aquí amount = subtotal, ajusta si necesitas lógica extra
-
-            $order->update([
-                'subtotal' => $subtotal,
-                'amount' => $amount,
-            ]);
         }
     }
 }

@@ -91,7 +91,7 @@ class Order extends Model
                     DB::raw('SUM(order_items.quantity) as total_ventas'),
                     DB::raw('SUM(order_items.price * order_items.quantity) as subtotal')
                 )
-                ->whereBetween('orders.created_at', [$start, $end]) // <--- aquí el cambio
+                ->whereBetween('orders.created_at', [$start, $end]) 
                 ->groupBy('mes', 'order_items.product_id')
                 ->orderBy('mes')
                 ->orderByDesc('total_ventas');

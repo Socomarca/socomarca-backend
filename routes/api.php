@@ -96,6 +96,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/orders/search/income-per-month', [ReportController::class, 'income-per-month'])->name('orders.search.income');
     //Route::middleware(['auth:sanctum', 'permission:can-see-all-reports'])->group(function () {
         Route::post('/orders/reports/search', [ReportController::class, 'report']);
+
+        Route::post('/orders/reports/top-product-list', [ReportController::class, 'productsSalesList']);
+        Route::post('/orders/reports/transactions-list', [ReportController::class, 'transactionsList']);
+        Route::post('/orders/reports/clients-list', [ReportController::class, 'clientsList']);
     //});
 
 });
