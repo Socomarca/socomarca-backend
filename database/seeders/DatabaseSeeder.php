@@ -9,14 +9,24 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        $this->call([
-            RegionSeeder::class,
-            UserSeeder::class,
-            BrandSeeder::class,
-            ProductSeeder::class,
-            PaymentMethodSeeder::class,
-            OrderSeeder::class,
-        ]);
+
+        if (app()->environment(['local', 'qa'])) {
+            $this->call([
+                RegionSeeder::class,
+                UserSeeder::class,
+                BrandSeeder::class,
+                ProductSeeder::class,
+                PaymentMethodSeeder::class,
+                RolesAndPermissionsSeeder::class,
+            ]);
+
+        }else{
+            $this->call([
+                RegionSeeder::class,
+                PaymentMethodSeeder::class,
+                RolesAndPermissionsSeeder::class,
+            ]);
+        }
     }
 
 }

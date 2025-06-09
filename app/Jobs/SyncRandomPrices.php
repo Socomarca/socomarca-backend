@@ -3,6 +3,7 @@
 namespace App\Jobs;
 
 use App\Models\Price;
+use App\Models\Product;
 use App\Services\RandomApiService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -23,8 +24,11 @@ class SyncRandomPrices implements ShouldQueue
             
             foreach($prices['datos'] as $price) {
                 foreach($price['unidades'] as $unit) {
+                    $product = Product::where('random_product_id', $price['kopr'])->first();
+    
                     $data = [
-                        'product_id' => $price['kopr'],
+                        'product_id' => $product->id,
+                        'random_product_id' => $price['kopr'],
                         'price_list_id' => $prices['nombre'],
                         'unit' => $unit['nombre'],
                         'price' => $unit['prunneto'][0]['f'],
@@ -34,8 +38,7 @@ class SyncRandomPrices implements ShouldQueue
                     ];
                     
                     Price::updateOrCreate([
-                        'product_id' => $price['kopr'],
-                        'price_list_id' => $prices['nombre'],
+                        'random_product_id' => $price['kopr'],
                         'unit' => $unit['nombre']
                     ], $data);
                 }

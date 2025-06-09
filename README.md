@@ -42,6 +42,12 @@ Start queue worker
 docker compose exec workcontainer php artisan queue:work
 ```
 
+Run all syncs
+```bash
+docker compose exec workcontainer php artisan random:sync-all
+```
+## Indivual syncs
+
 Sync categories
 ```bash
 docker compose exec workcontainer php artisan random:sync-categories
@@ -52,11 +58,18 @@ Sync products
 docker compose exec workcontainer php artisan random:sync-products
 ```
 
-
 Sync prices
 ```bash
 docker compose exec workcontainer php artisan random:sync-prices
 ```
+
+Sync stock
+```bash
+docker compose exec workcontainer php artisan random:sync-stock
+```
+
+
+
 # Testing
 
 First you must create a testing DB

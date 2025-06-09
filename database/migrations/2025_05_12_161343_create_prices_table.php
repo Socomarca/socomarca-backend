@@ -14,10 +14,11 @@ return new class extends Migration
         Schema::create('prices', function (Blueprint $table) {
             $table->id();
             $table->integer('product_id')->nullable();
+            $table->string('random_product_id')->nullable();
             $table->string('price_list_id')->onDelete('cascade');
             $table->string('unit', 10);
             $table->decimal('price', 10, 2);
-            //$table->string('currency', 3)->default('USD');
+            //$table->string('currency', 3)->default('USD'); 
             $table->timestamp('valid_from')->nullable();
             $table->timestamp('valid_to')->nullable();
             $table->boolean('is_active')->default(true);
