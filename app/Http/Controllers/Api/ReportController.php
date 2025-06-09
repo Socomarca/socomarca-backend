@@ -242,20 +242,22 @@ class ReportController extends Controller
 
         $perPage = $request->input('per_page', 15);
 
-        // Usa el scope con el tipo 'transacciones'
-        $query = Order::searchReport($start, $end, 'transacciones');
-        $ordersPaginated = $query->with('user')->paginate($perPage);
+        // Consulta directa, no agrupada
+        $query = \App\Models\Order::with('user')
+            ->where('status', 'completed')
+            ->whereBetween('created_at', [$start, $end])
+            ->orderByDesc('created_at');
 
-        // Detalle para tabla paginada
+        $ordersPaginated = $query->paginate($perPage);
+
         $detalleTabla = [];
         foreach ($ordersPaginated as $order) {
             $detalleTabla[] = [
                 'id' => $order->id,
                 'cliente' => $order->user ? $order->user->name : null,
-                'monto' => $order->total_procesado ?? $order->amount ?? 0,
+                'monto' => $order->amount,
                 'fecha' => $order->created_at ? $order->created_at->toDateString() : null,
-                'estado' => $order->status ?? 'completed',
-                'mes' => $order->mes ?? null,
+                'estado' => $order->status,
             ];
         }
 
