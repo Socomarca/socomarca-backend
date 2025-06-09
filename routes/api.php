@@ -18,6 +18,7 @@ use App\Http\Controllers\Api\FavoriteListController;
 use App\Http\Controllers\Api\CartItemController;
 use App\Http\Controllers\Api\PaymentMethodController;
 use App\Http\Controllers\Api\OrderController;
+use App\Http\Controllers\Api\ReportController;
 use App\Http\Controllers\Api\WebpayController;
 
 
@@ -91,8 +92,9 @@ Route::middleware('auth:sanctum')->group(function () {
     // Rutas de Webpay
     Route::post('/orders/pay', [OrderController::class, 'payOrder']);
     
-    Route::post('/orders/serach', [OrderController::class, 'searchOrders'])->name('orders.search');
-    Route::get('/orders/{id}', [OrderController::class, 'show']);
+    Route::post('/orders/search/buyers-per-month', [ReportController::class, 'buyersPerMonth'])->name('orders.search');
+    Route::post('/orders/search/income-per-month', [ReportController::class, 'income-per-month'])->name('orders.search.income');
+
 
 });
 
