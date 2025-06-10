@@ -59,7 +59,7 @@ class ProductController extends Controller
 
         if ($includeSales) {
             $query->withCount(['orderDetails as sales_quantity' => function($query) {
-                $query->select(DB::raw('COALESCE(SUM(quantity), 0)'));
+                $query->select(DB::raw('COALESCE(SUM(quantity * price), 0)'));
             }]);
         }
 
