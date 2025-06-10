@@ -9,7 +9,6 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-
         if (app()->environment(['local', 'qa'])) {
             $this->call([
                 RegionSeeder::class,
@@ -18,6 +17,7 @@ class DatabaseSeeder extends Seeder
                 ProductSeeder::class,
                 PaymentMethodSeeder::class,
                 RolesAndPermissionsSeeder::class,
+                OrderSeeder::class,
             ]);
 
         }else{
