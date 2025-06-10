@@ -10,8 +10,6 @@ use Illuminate\Support\Facades\DB;
 
 class ReportController extends Controller
 {
-
-
     public function report(Request $request)
     {
         $start = $request->input('start') 
@@ -22,166 +20,176 @@ class ReportController extends Controller
             ? date('Y-m-d', strtotime($request->input('end')))
             : now()->endOfMonth()->toDateString();
 
-        $type = $request->input('type', 'ventas'); // ventas, compradores, ingresos, transacciones, top-clientes
+        $type = $request->input('type', 'sales'); 
 
         $orders = \App\Models\Order::searchReport($start, $end, $type)->with('user')->get();
 
-        if ($type === 'top-clientes') {
-            // Obtén los usuarios involucrados
+        if ($type === 'top-clients') {
             $userIds = $orders->pluck('user_id')->unique()->all();
             $users = \App\Models\User::whereIn('id', $userIds)->get()->keyBy('id');
 
-            $meses = $orders->pluck('mes')->unique()->sort()->values()->all();
+            $months = $orders->pluck('month')->unique()->sort()->values()->all();
 
-            $topClientes = [];
-            $totalVentas = 0;
+            $topClients = [];
+            $totalSales = 0;
 
-            foreach ($meses as $mes) {
-                $clientesMes = $orders->where('mes', $mes);
-                $top = $clientesMes->sortByDesc('total_compras')->first();
+            foreach ($months as $month) {
+                $clientsMonth = $orders->where('month', $month);
+                $top = $clientsMonth->sortByDesc('total_purchases')->first();
                 if ($top) {
-                    $usuario = $users->get($top->user_id);
-                    $topClientes[] = [
-                        'mes' => $mes,
-                        'cliente' => $usuario ? $usuario->name : null,
-                        'total' => (int)$top->total_compras,
-                        'cantidad_compras' => (int)$top->cantidad_compras, 
+                    $user = $users->get($top->user_id);
+                    $topClients[] = [
+                        'month' => $month,
+                        'client' => $user ? $user->name : null,
+                        'total_purchases' => (int)$top->total_purchases,
+                        'quantity_purchases' => (int)$top->quantity_purchases, 
                     ];
-                    $totalVentas += $top->total_compras;
+                    $totalSales += $top->total_purchases;
                 }
             }
 
             return response()->json([
-                'top-clientes' => $topClientes,
-                'total_ventas' => $totalVentas
+                'top_clients' => $topClients,
+                'total_sales' => $totalSales
             ]);
         }
 
-        if ($type === 'transacciones') {
-            // $orders contiene el resultado del scope agrupado por mes
-            $grafico = [];
+        if ($type === 'transactions') {
+            $chart = [];
             foreach ($orders as $order) {
-                $grafico[] = [
-                    'mes' => $order->mes,
-                    'transacciones_exitosas' => (int)$order->transacciones_exitosas,
-                    'total_procesado' => (float)$order->total_procesado,
+                $chart[] = [
+                    'month' => $order->month,
+                    'transactions' => (int)$order->transactions,
+                    'total' => (int)$order->total,
                 ];
             }
-
-           
-
             return response()->json([
-                'grafico' => $grafico,
-                // 'detalle_tabla' => $detalleTabla, 
-                
+                'chart' => $chart,
             ]);
         }
 
-        if ($type === 'transacciones-fallidas') {
-            $grafico = [];
+        if ($type === 'transactions-failed') {
+            $chart = [];
             foreach ($orders as $order) {
-                $grafico[] = [
-                    'mes' => $order->mes,
-                    'transacciones_fallidas' => (int)$order->transacciones_fallidas,
-                    'total_fallido' => (float)$order->total_fallido,
+                $chart[] = [
+                    'month' => $order->month,
+                    'failed_transactions' => (int)$order->transactions_failed,
+                    'total_failed' => (float)$order->total,
                 ];
             }
-
             return response()->json([
-                'grafico' => $grafico,
+                'chart' => $chart,
             ]);
         }
 
-        if ($type === 'top-productos') {
-            // Obtén todos los productos involucrados
+        if ($type === 'top-products') {
             $productIds = $orders->pluck('product_id')->unique()->all();
             $products = \App\Models\Product::whereIn('id', $productIds)->get()->keyBy('id');
 
-            $meses = $orders->pluck('mes')->unique()->sort()->values()->all();
+            $months = $orders->pluck('month')->unique()->sort()->values()->all();
 
-            $topProductos = [];
-            foreach ($meses as $mes) {
-                $productosMes = $orders->where('mes', $mes);
-                $top = $productosMes->sortByDesc('total_ventas')->first();
+            $topProducts = [];
+            $total_sales = 0;
+            foreach ($months as $month) {
+                $productsMonth = $orders->where('month', $month);
+                $top = $productsMonth->sortByDesc('total_sales')->first();
                 if ($top) {
-                    $producto = $products->get($top->product_id);
-                    $topProductos[] = [
-                        'mes' => $mes,
-                        'producto' => $producto ? $producto->name : null,
+                    $product = $products->get($top->product_id);
+                    $topProducts[] = [
+                        'month' => $month,
+                        'product' => $product ? $product->name : null,
                         'total' => (int)$top->subtotal, 
                     ];
+                    $total_sales += (int)$top->subtotal;
                 }
             }
 
             return response()->json([
-                'top-productos' => $topProductos
+                'top_products' => $topProducts,
+                'total_sales' => $total_sales,
             ]);
         }
 
-        if ($type === 'top-categorias') {
-            $meses = $orders->pluck('mes')->unique()->sort()->values()->all();
+        if ($type === 'revenue') {
+            $revenues = [];
+            $total_revenue = 0;
+            foreach ($orders as $order) {
+                $revenues[] = [
+                    'month' => $order->month,
+                    'revenue' => (int)$order->total_month
+                ];
+                $total_revenue += (int)$order->total_month;
+            }
+            return response()->json([
+                'revenues' => $revenues,
+                'total_revenue' => $total_revenue,
+            ]);
+        }
 
-            $topCategorias = [];
-            foreach ($meses as $mes) {
-                $categoriasMes = $orders->where('mes', $mes);
-                $top = $categoriasMes->sortByDesc('total_ventas')->first();
+        if ($type === 'top-categories') {
+            $months = $orders->pluck('month')->unique()->sort()->values()->all();
+
+            $topCategories = [];
+            foreach ($months as $month) {
+                $categoriesMonth = $orders->where('month', $month);
+                $top = $categoriesMonth->sortByDesc('total_sales')->first();
                 if ($top) {
-                    $topCategorias[] = [
-                        'mes' => $mes,
-                        'categoria' => $top->categoria,
-                        'total' => (int)$top->subtotal, // O usa total_ventas si prefieres cantidad
+                    $topCategories[] = [
+                        'month' => $month,
+                        'category' => $top->category,
+                        'total' => (int)$top->subtotal,
                     ];
                 }
             }
 
-            $totalVentas = collect($topCategorias)->sum('total');
-            $promedioVentas = count($topCategorias) > 0 ? round($totalVentas / count($topCategorias), 0) : 0;
+            $totalSales = collect($topCategories)->sum('total');
+            $averageSales = count($topCategories) > 0 ? round($totalSales / count($topCategories), 0) : 0;
 
             return response()->json([
-                'top-categorias' => $topCategorias,
-                'total_ventas' => $totalVentas,
-                'promedio_ventas' => $promedioVentas
+                'top_categories' => $topCategories,
+                'total_sales' => $totalSales,
+                'average_sales' => $averageSales
             ]);
         }
 
-        // Para ventas y compradores
-        $meses = $orders->pluck('mes')->unique()->sort()->values()->all();
-        $clientes = $orders->pluck('user.name')->unique()->values()->all();
+        // For sales and buyers
+        $months = $orders->pluck('month')->unique()->sort()->values()->all();
+        $clients = $orders->pluck('user.name')->unique()->values()->all();
 
-        $totales = [];
-        $totalCompradoresPorMes = [];
+        $totals = [];
+        $totalBuyersPerMonth = [];
 
-        foreach ($meses as $mes) {
-            $ventasPorCliente = [];
-            $totalMes = 0;
-            $compradoresMes = $orders->where('mes', $mes)->pluck('user_id')->unique()->count();
+        foreach ($months as $month) {
+            $salesByClient = [];
+            $totalMonth = 0;
+            $buyersMonth = $orders->where('month', $month)->pluck('user_id')->unique()->count();
 
-            foreach ($clientes as $cliente) {
-                $total = $orders->where('mes', $mes)
-                    ->where('user.name', $cliente)
+            foreach ($clients as $client) {
+                $total = $orders->where('month', $month)
+                    ->where('user.name', $client)
                     ->sum('total');
-                $ventasPorCliente[] = [
-                    'cliente' => $cliente,
+                $salesByClient[] = [
+                    'client' => $client,
                     'total' => $total
                 ];
-                $totalMes += $total;
+                $totalMonth += $total;
             }
-            $totales[] = [
-                'mes' => $mes,
-                'ventasPorCliente' => $ventasPorCliente,
-                'totalMes' => $totalMes
+            $totals[] = [
+                'month' => $month,
+                'sales_by_client' => $salesByClient,
+                'total_month' => $totalMonth
             ];
-            $totalCompradoresPorMes[] = [
-                'mes' => $mes,
-                'totalCompradores' => $compradoresMes
+            $totalBuyersPerMonth[] = [
+                'month' => $month,
+                'total_buyers' => $buyersMonth
             ];
         }
 
         return response()->json([
-            'meses' => $meses,
-            'clientes' => $clientes,
-            'totales' => $totales,
-            'totalCompradoresPorMes' => $totalCompradoresPorMes
+            'months' => $months,
+            'clients' => $clients,
+            'totals' => $totals,
+            'total_buyers_per_month' => $totalBuyersPerMonth
         ]);
     }
 
@@ -198,7 +206,7 @@ class ReportController extends Controller
         $perPage = $request->input('per_page', 15);
 
         // Usa el scope con el tipo 'top-productos'
-        $query = Order::searchReport($start, $end, 'top-productos');
+        $query = Order::searchReport($start, $end, 'top-products');
         $ordersPaginated = $query->paginate($perPage);
 
         // productos relacionados para el detalle
@@ -210,17 +218,17 @@ class ReportController extends Controller
         foreach ($ordersPaginated as $order) {
             $producto = $products->get($order->product_id);
             $detalleTabla[] = [
-                'id_producto' => $order->product_id,
-                'producto' => $producto ? $producto->name : null,
+                'product_id' => $order->product_id,
+                'product' => $producto ? $producto->name : null,
                 'subtotal' => (float)$order->subtotal,
                 'margen' => 0,
-                'total_ventas' => (int)$order->total_ventas,
-                'mes' => $order->mes,
+                'total_sales' => (int)$order->total_sales,
+                'month' => $order->month,
             ];
         }
 
         return response()->json([
-            'detalle_tabla' => $detalleTabla,
+            'table_detail' => $detalleTabla,
             'pagination' => [
                 'current_page' => $ordersPaginated->currentPage(),
                 'last_page' => $ordersPaginated->lastPage(),
@@ -254,15 +262,15 @@ class ReportController extends Controller
         foreach ($ordersPaginated as $order) {
             $detalleTabla[] = [
                 'id' => $order->id,
-                'cliente' => $order->user ? $order->user->name : null,
-                'monto' => $order->amount,
-                'fecha' => $order->created_at ? $order->created_at->toDateString() : null,
-                'estado' => $order->status,
+                'client' => $order->user ? $order->user->name : null,
+                'amount' => $order->amount,
+                'date' => $order->created_at ? $order->created_at->toDateString() : null,
+                'status' => $order->status,
             ];
         }
 
         return response()->json([
-            'detalle_tabla' => $detalleTabla,
+            'table_detail' => $detalleTabla,
             'pagination' => [
                 'current_page' => $ordersPaginated->currentPage(),
                 'last_page' => $ordersPaginated->lastPage(),
@@ -295,15 +303,15 @@ class ReportController extends Controller
     foreach ($ordersPaginated as $order) {
         $detalleTabla[] = [
             'id' => $order->id,
-            'cliente' => $order->user ? $order->user->name : null,
-            'monto' => $order->amount,
-            'fecha' => $order->created_at->toDateString(),
-            'estado' => $order->status,
+            'client' => $order->user ? $order->user->name : null,
+            'amount' => $order->amount,
+            'date' => $order->created_at->toDateString(),
+            'status' => $order->status,
         ];
     }
 
     return response()->json([
-        'detalle_tabla' => $detalleTabla,
+        'table_detail' => $detalleTabla,
         'pagination' => [
             'current_page' => $ordersPaginated->currentPage(),
             'last_page' => $ordersPaginated->lastPage(),
@@ -336,15 +344,15 @@ class ReportController extends Controller
         foreach ($ordersPaginated as $order) {
             $detalleTabla[] = [
                 'id' => $order->id,
-                'cliente' => $order->user ? $order->user->name : null,
-                'monto' => $order->amount,
-                'fecha' => $order->created_at ? $order->created_at->toDateString() : null,
-                'estado' => $order->status,
+                'client' => $order->user ? $order->user->name : null,
+                'amount' => $order->amount,
+                'date' => $order->created_at ? $order->created_at->toDateString() : null,
+                'status' => $order->status,
             ];
         }
 
         return response()->json([
-            'detalle_tabla' => $detalleTabla,
+            'table_detail' => $detalleTabla,
             'pagination' => [
                 'current_page' => $ordersPaginated->currentPage(),
                 'last_page' => $ordersPaginated->lastPage(),

@@ -37,101 +37,101 @@ class Order extends Model
         return round($this->attributes['subtotal'], 0);
     }
 
-    public function scopeSearchReport($query, $start, $end, $type = 'ventas')
+    public function scopeSearchReport($query, $start, $end, $type = 'sales')
     {
         $query->whereBetween('orders.created_at', [$start, $end]);
 
-        if ($type === 'transacciones') {
+        if ($type === 'transactions') {
             // Solo órdenes exitosas (ajusta el estado según tu lógica)
             return $query->select(
-                    DB::raw("TO_CHAR(created_at, 'YYYY-MM') as mes"),
-                    DB::raw('COUNT(*) as transacciones_exitosas'),
-                    DB::raw('SUM(amount) as total_procesado')
+                    DB::raw("TO_CHAR(created_at, 'YYYY-MM') as month"),
+                    DB::raw('COUNT(*) as transactions'),
+                    DB::raw('SUM(amount) as total')
                 )
                 ->where('status', 'completed')
-                ->groupBy('mes')
-                ->orderBy('mes');
+                ->groupBy('month')
+                ->orderBy('month');
         }
 
-        if ($type === 'transacciones-fallidas') {
+        if ($type === 'transactions-failed') {
             return $query->select(
-                    DB::raw("TO_CHAR(created_at, 'YYYY-MM') as mes"),
-                    DB::raw('COUNT(*) as transacciones_fallidas'),
-                    DB::raw('SUM(amount) as total_fallido')
+                    DB::raw("TO_CHAR(created_at, 'YYYY-MM') as month"),
+                    DB::raw('COUNT(*) as transactions_failed'),
+                    DB::raw('SUM(amount) as total')
                 )
                 ->where('status', 'failed')
-                ->groupBy('mes')
-                ->orderBy('mes');
+                ->groupBy('month')
+                ->orderBy('month');
         }
 
-        if ($type === 'ventas') {
+        if ($type === 'sales') {
             return $query->select(
-                    DB::raw("TO_CHAR(created_at, 'YYYY-MM') as mes"),
+                    DB::raw("TO_CHAR(created_at, 'YYYY-MM') as month"),
                     'user_id',
                     DB::raw('SUM(amount) as total')
                 )
-                ->groupBy('mes', 'user_id');
+                ->groupBy('month', 'user_id');
         }
 
-        if ($type === 'ingresos') {
+        if ($type === 'revenue') {
             return $query->select(
-                    DB::raw("TO_CHAR(created_at, 'YYYY-MM') as mes"),
-                    DB::raw('SUM(subtotal) as totalMes')
+                    DB::raw("TO_CHAR(created_at, 'YYYY-MM') as month"),
+                    DB::raw('SUM(subtotal) as total_month')
                 )
-                ->groupBy('mes')
-                ->orderBy('mes');
+                ->groupBy('month')
+                ->orderBy('month');
         }
 
-        if ($type === 'top-clientes') {
+        if ($type === 'top-clients') {
             return $query->select(
-                    DB::raw("TO_CHAR(created_at, 'YYYY-MM') as mes"),
+                    DB::raw("TO_CHAR(created_at, 'YYYY-MM') as month"),
                     'user_id',
-                    DB::raw('SUM(amount) as total_compras'),
-                    DB::raw('COUNT(*) as cantidad_compras')
+                    DB::raw('SUM(amount) as total_purchases'),
+                    DB::raw('COUNT(*) as quantity_purchases')
                 )
-                ->groupBy('mes', 'user_id')
-                ->orderBy('mes')
-                ->orderByDesc('total_compras');
+                ->groupBy('month', 'user_id')
+                ->orderBy('month')
+                ->orderByDesc('total_purchases');
         }
 
-        if ($type === 'top-productos') {
+        if ($type === 'top-products') {
             return $query->join('order_items', 'orders.id', '=', 'order_items.order_id')
                 ->select(
-                    DB::raw("TO_CHAR(orders.created_at, 'YYYY-MM') as mes"),
+                    DB::raw("TO_CHAR(orders.created_at, 'YYYY-MM') as month"),
                     'order_items.product_id',
-                    DB::raw('SUM(order_items.quantity) as total_ventas'),
+                    DB::raw('SUM(order_items.quantity) as total_sales'),
                     DB::raw('SUM(order_items.price * order_items.quantity) as subtotal')
                 )
                 ->whereBetween('orders.created_at', [$start, $end]) 
-                ->groupBy('mes', 'order_items.product_id')
-                ->orderBy('mes')
-                ->orderByDesc('total_ventas');
+                ->groupBy('month', 'order_items.product_id')
+                ->orderBy('month')
+                ->orderByDesc('total_sales');
         }
 
-        if ($type === 'top-categorias') {
+        if ($type === 'top-categories') {
             return $query
                 ->join('order_items', 'orders.id', '=', 'order_items.order_id')
                 ->join('products', 'order_items.product_id', '=', 'products.id')
                 ->join('categories', 'products.category_id', '=', 'categories.id')
                 ->select(
-                    DB::raw("TO_CHAR(orders.created_at, 'YYYY-MM') as mes"),
-                    'categories.id as categoria_id',
-                    'categories.name as categoria',
-                    DB::raw('SUM(order_items.quantity) as total_ventas'),
+                    DB::raw("TO_CHAR(orders.created_at, 'YYYY-MM') as month"),
+                    'categories.id as category_id',
+                    'categories.name as category',
+                    DB::raw('SUM(order_items.quantity) as total_sales'),
                     DB::raw('SUM(order_items.price * order_items.quantity) as subtotal')
                 )
                 ->whereBetween('orders.created_at', [$start, $end])
-                ->groupBy('mes', 'categories.id', 'categories.name')
-                ->orderBy('mes')
-                ->orderByDesc('total_ventas');
+                ->groupBy('month', 'categories.id', 'categories.name')
+                ->orderBy('month')
+                ->orderByDesc('total_sales');
         }
 
         // Por defecto, ventas por cliente y mes
         return $query->select(
-                DB::raw("TO_CHAR(created_at, 'YYYY-MM') as mes"),
+                DB::raw("TO_CHAR(created_at, 'YYYY-MM') as month"),
                 'user_id',
                 DB::raw('SUM(amount) as total')
             )
-            ->groupBy('mes', 'user_id');
+            ->groupBy('month', 'user_id');
     }
 }
