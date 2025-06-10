@@ -62,6 +62,9 @@ class RolesAndPermissionsSeeder extends Seeder
                 "can-see-own-purchases",
                 "can-edit-content"
             ],
+            'cliente' => [
+                "can-see-own-purchases"
+            ],
         ];
 
         // Crear roles y asignar permisos
@@ -72,7 +75,7 @@ class RolesAndPermissionsSeeder extends Seeder
 
         $admin = User::find(1);
         if ($admin) {
-            $admin->assignRole('administrador');
+            $admin->assignRole('colaborador');
         }
 
         $superAdmin = User::find(2);
@@ -82,12 +85,17 @@ class RolesAndPermissionsSeeder extends Seeder
 
         $colaborador = User::find(3);
         if ($colaborador) {
-            $colaborador->assignRole('colaborador');
+            $colaborador->assignRole('administrador');
         }
 
         $editor = User::find(4);
         if ($editor) {
             $editor->assignRole('editor');
+        }
+        
+        $cliente = User::find(5);
+        if ($cliente) {
+            $cliente->assignRole('cliente');
         }
     }
 }
