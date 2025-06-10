@@ -17,6 +17,15 @@ return new class extends Migration
             $table->decimal('subtotal', 10, 2)->default(0);
             $table->decimal('amount', 10, 2)->default(0);
             $table->enum('status', ['pending', 'processing', 'on_hold', 'completed', 'canceled', 'refunded', 'failed'])->default('pending');
+            $table->string('name');
+            $table->string('rut');
+            $table->string('email');
+            $table->string('phone');
+            $table->string('address');
+            $table->foreignId('region_id')->constrained()->onDelete('cascade');
+            $table->foreignId('municipality_id')->constrained()->onDelete('cascade');
+            $table->string('billing_address');
+            $table->string('billing_address_details')->nullable();
             $table->timestamps();
         });
     }

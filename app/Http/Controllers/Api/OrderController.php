@@ -43,7 +43,6 @@ class OrderController extends Controller
     public function createFromCart(CreateFromCartRequest $request)
     {
         $data = $request->validated();
-        //$this->createCart();
         $carts = CartItem::where('user_id', $data['user_id'])->get();
 
         if ($carts->isEmpty()) {
@@ -63,30 +62,33 @@ class OrderController extends Controller
                 'user_id' => $data['user_id'],
                 'subtotal' => $subtotal,
                 'amount' => $subtotal,
-                'status' => 'pending'
+                'status' => 'pending',
+                'name' => $data['name'],
+                'rut' => $data['rut'],
+                'email' => $data['email'],
+                'phone' => $data['phone'],
+                'address' => $data['address'],
+                'region_id' => $data['region_id'],
+                'municipality_id' => $data['municipality_id'],
+                'billing_address' => $data['billing_address'],
+                'billing_address_details' => $data['billing_address_details'] ?? null,
             ]);
 
             // Crear los items de la orden
-            $total = 0;
             foreach ($carts as $cart) {
-
-                //TODO: Se debe obtener el precio de la unidad desde el carrito
-                $price = $cart->product->prices->where('unit', '=', 'kg')->first();
-                $total += $price->price * $cart->quantity;
-
+                $price = $cart->product->prices->where('is_active', true)->first();
+                
                 OrderItem::create([
                     'order_id' => $order->id,
                     'product_id' => $cart->product_id,
-                    'unit' => 'unidad',
+                    'unit' => $price->unit ?? 'unidad',
                     'quantity' => $cart->quantity,
-                    'price' => $price->price
+                    'price' => $price->price ?? 0
                 ]);
             }
 
-            //Actualizar el subtotal de la orden
-            $order->subtotal = $total;
-            $order->amount = $total;
-            $order->save();
+            // Limpiar el carrito
+            CartItem::where('user_id', $data['user_id'])->delete();
 
             DB::commit();
 

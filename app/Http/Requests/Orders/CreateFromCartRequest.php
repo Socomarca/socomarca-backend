@@ -22,16 +22,40 @@ class CreateFromCartRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'user_id' => 'bail|required|integer|exists:users,id',
+            'user_id' => 'required|exists:users,id',
+            'name' => 'required|string|max:255',
+            'rut' => 'required|string|max:12',
+            'email' => 'required|email|max:255',
+            'phone' => 'required|string|max:20',
+            'address' => 'required|string|max:255',
+            'region_id' => 'required|exists:regions,id',
+            'municipality_id' => 'required|exists:municipalities,id',
+            'billing_address' => 'required|string|max:255',
+            'billing_address_details' => 'nullable|string|max:255',
         ];
     }
 
-    public function messages()
+    /**
+     * Get custom messages for validator errors.
+     *
+     * @return array
+     */
+    public function messages(): array
     {
         return [
-            'user_id.required' => 'El ID del usuario es requerido.',
-            'user_id.integer' => 'El ID del usuario debe ser un número entero.',
-            'user_id.exists' => 'El usuario especificado no existe.',
+            'user_id.required' => 'El ID del usuario es requerido',
+            'user_id.exists' => 'El usuario no existe',
+            'name.required' => 'El nombre es requerido',
+            'rut.required' => 'El RUT es requerido',
+            'email.required' => 'El email es requerido',
+            'email.email' => 'El email debe ser válido',
+            'phone.required' => 'El teléfono es requerido',
+            'address.required' => 'La dirección es requerida',
+            'region_id.required' => 'La región es requerida',
+            'region_id.exists' => 'La región seleccionada no existe',
+            'municipality_id.required' => 'La comuna es requerida',
+            'municipality_id.exists' => 'La comuna seleccionada no existe',
+            'billing_address.required' => 'La dirección de facturación es requerida',
         ];
     }
 } 
