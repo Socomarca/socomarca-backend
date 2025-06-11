@@ -35,32 +35,43 @@ class RolesAndPermissionsSeeder extends Seeder
 
         // Roles y sus permisos
         $roles = [
-            'administrador' => [
+            'superadmin' => [
                 "can-see-own-purchases",
                 "can-see-all-reports",
                 "can-see-all-products",
                 "can-see-all-clients",
                 "can-see-all-purchases",
-                "can-edit-content"
-            ],
-            'superAdministrador' => [
-                "can-see-own-purchases",
-                "can-see-all-products",
+                "can-edit-content",
                 "can-edit-products",
                 "can-manage-users",
                 "can-manage-categories",
-                "can-see-all-purchases",
-                "can-edit-content",
                 "can-manage-admins"
             ],
-            'colaborador' => [
+            'admin' => [
+                "can-see-own-purchases",
+                "can-see-all-reports",
+                "can-see-all-products",
+                "can-see-all-clients",
+                "can-see-all-purchases",
+                "can-edit-content",
+                "can-edit-products",
+                "can-manage-users",
+                "can-manage-categories"
+            ],
+            'supervisor' => [
+                "can-see-own-purchases",
+                "can-see-all-reports",
+                "can-see-all-products",
+                "can-see-all-clients",
+                "can-see-all-purchases"
+            ],
+            'editor' => [
                 "can-see-own-purchases",
                 "can-see-all-products",
                 "can-edit-content"
             ],
-            'editor' => [
-                "can-see-own-purchases",
-                "can-edit-content"
+            'cliente' => [
+                "can-see-own-purchases"
             ],
         ];
 
@@ -70,24 +81,30 @@ class RolesAndPermissionsSeeder extends Seeder
             $role->syncPermissions($perms);
         }
 
-        $admin = User::find(1);
+        // Asignar roles a usuarios de ejemplo (ajusta los IDs según tus usuarios)
+        $superadmin = User::find(1);
+        if ($superadmin) {
+            $superadmin->assignRole('superadmin');
+        }
+
+        $admin = User::find(2);
         if ($admin) {
-            $admin->assignRole('administrador');
+            $admin->assignRole('admin');
         }
 
-        $superAdmin = User::find(2);
-        if ($superAdmin) {
-            $superAdmin->assignRole('superAdministrador');
-        }
-
-        $colaborador = User::find(3);
-        if ($colaborador) {
-            $colaborador->assignRole('colaborador');
+        $supervisor = User::find(3);
+        if ($supervisor) {
+            $supervisor->assignRole('supervisor');
         }
 
         $editor = User::find(4);
         if ($editor) {
             $editor->assignRole('editor');
+        }
+
+        $cliente = User::find(5);
+        if ($cliente) {
+            $cliente->assignRole('cliente');
         }
     }
 }
