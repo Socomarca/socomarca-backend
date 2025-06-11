@@ -36,42 +36,42 @@ class RolesAndPermissionsSeeder extends Seeder
         // Roles y sus permisos
         $roles = [
             'superadmin' => [
-                "can-see-own-purchases",
-                "can-see-all-reports",
-                "can-see-all-products",
-                "can-see-all-clients",
-                "can-see-all-purchases",
-                "can-edit-content",
-                "can-edit-products",
-                "can-manage-users",
-                "can-manage-categories",
-                "can-manage-admins"
+                "see-own-purchases",
+                "see-all-reports",
+                "see-all-products",
+                "see-all-clients",
+                "see-all-purchases",
+                "edit-content",
+                "edit-products",
+                "manage-users",
+                "manage-categories",
+                "manage-admins"
             ],
             'admin' => [
-                "can-see-own-purchases",
-                "can-see-all-reports",
-                "can-see-all-products",
-                "can-see-all-clients",
-                "can-see-all-purchases",
-                "can-edit-content",
-                "can-edit-products",
-                "can-manage-users",
-                "can-manage-categories"
+                "see-own-purchases",
+                "see-all-reports",
+                "see-all-products",
+                "see-all-clients",
+                "see-all-purchases",
+                "edit-content",
+                "edit-products",
+                "manage-users",
+                "manage-categories"
             ],
             'supervisor' => [
-                "can-see-own-purchases",
-                "can-see-all-reports",
-                "can-see-all-products",
-                "can-see-all-clients",
-                "can-see-all-purchases"
+                "see-own-purchases",
+                "see-all-reports",
+                "see-all-products",
+                "see-all-clients",
+                "see-all-purchases"
             ],
             'editor' => [
-                "can-see-own-purchases",
-                "can-see-all-products",
-                "can-edit-content"
+                "see-own-purchases",
+                "see-all-products",
+                "edit-content"
             ],
             'cliente' => [
-                "can-see-own-purchases"
+                "see-own-purchases"
             ],
         ];
 

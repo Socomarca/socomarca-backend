@@ -16,10 +16,20 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->api([
             ForceJsonResponse::class,
         ]);
+        $middleware->alias([
+        'role' => \Spatie\Permission\Middleware\RoleMiddleware::class,
+        'permission' => \Spatie\Permission\Middleware\PermissionMiddleware::class,
+        'role_or_permission' => \Spatie\Permission\Middleware\RoleOrPermissionMiddleware::class,
+    ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         // Manejar métodos HTTP incorrectos
         $exceptions->render(function (MethodNotAllowedHttpException $e) {
             return response()->json(['message' => 'error'], 405);
+        });
+         $exceptions->render(function (\Spatie\Permission\Exceptions\UnauthorizedException $e) {
+            return response()->json([
+                'message' => 'You do not have permission.'
+            ], 403);
         });
     })->create();
