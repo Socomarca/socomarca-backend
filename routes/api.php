@@ -18,6 +18,7 @@ use App\Http\Controllers\Api\FavoriteListController;
 use App\Http\Controllers\Api\CartItemController;
 use App\Http\Controllers\Api\PaymentMethodController;
 use App\Http\Controllers\Api\OrderController;
+use App\Http\Controllers\Api\ReportController;
 use App\Http\Controllers\Api\WebpayController;
 
 
@@ -90,6 +91,18 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Rutas de Webpay
     Route::post('/orders/pay', [OrderController::class, 'payOrder']);
+    
+    Route::post('/orders/search/buyers-per-month', [ReportController::class, 'buyersPerMonth'])->name('orders.search');
+    Route::post('/orders/search/income-per-month', [ReportController::class, 'income-per-month'])->name('orders.search.income');
+    //Route::middleware(['auth:sanctum', 'permission:can-see-all-reports'])->group(function () {
+        Route::post('/orders/reports', [ReportController::class, 'report']);
+
+        Route::post('/orders/reports/top-product-list', [ReportController::class, 'productsSalesList']);
+        Route::post('/orders/reports/transactions-list', [ReportController::class, 'transactionsList']);
+        Route::post('/orders/reports/clients-list', [ReportController::class, 'clientsList']);
+        Route::post('/orders/reports/failed-transactions-list', [ReportController::class, 'failedTransactionsList']);
+    //});
+
 });
 
 //Se sacan de la autenticacion porque es confirmacion de pago.
