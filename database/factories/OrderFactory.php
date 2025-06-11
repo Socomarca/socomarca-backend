@@ -27,6 +27,15 @@ class OrderFactory extends Factory
     public function definition(): array
     {
         $subtotal = fake()->randomFloat(2, 1000, 100000);
+
+        //Factory 10 Region and Municipality
+        $regions = Region::factory()->count(10)->create();
+        foreach ($regions as $region) {
+            Municipality::factory()->count(10)->create([
+                'region_id' => $region->id
+            ]);
+        }
+
         
         return [
             'user_id' => User::factory(),
