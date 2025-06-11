@@ -102,3 +102,17 @@ function createUserHasFavorite()
                 ->has(Favorite::factory(), 'favorites'), 'favoritesList')
                     ->create();
 }
+
+function createUserWithRole(string $roleName)
+{
+    $user = User::factory()->create();
+    $user->assignRole($roleName);
+    return $user;
+}
+
+function createUserWithPermission(string $permissionName)
+{
+    $user = User::factory()->create();
+    $user->givePermissionTo($permissionName);
+    return $user;
+}
