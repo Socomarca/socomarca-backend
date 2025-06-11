@@ -54,8 +54,7 @@ class ProductCollection extends ResourceCollection
                         'stock' => isset($price->stock) ? (int) $price->stock : null,
                         'image' => $product->image ?? null,
                         'sku' => $product->sku ?? null,
-                        'is_favorite' => false,
-                        'sales_quantity' => $product->sales_quantity ?? 0,
+                        'is_favorite' => false, 
                     ];
                 });
         })->values();

@@ -3,11 +3,11 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Product\ShowRequest;
 use App\Http\Resources\Products\ProductCollection;
 use App\Http\Resources\Products\ProductResource;
 use App\Models\Product;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 
 class ProductController extends Controller
 {
@@ -50,20 +50,9 @@ class ProductController extends Controller
     {
         $perPage = $request->input('per_page', 20);
         $filters = $request->input('filters', []);
-        $includeSales = $request->input('include_sales', false);
-
-        $query = Product::select("products.*")
-            ->with(['prices' => function($q) {
-                $q->where('is_active', true);
-            }, 'category', 'subcategory', 'brand']);
-
-        if ($includeSales) {
-            $query->withCount(['orderDetails as sales_quantity' => function($query) {
-                $query->selectRaw('COALESCE(SUM(quantity * price), 0)');
-            }]);
-        }
-
-        $result = $query->filter($filters)->paginate($perPage);
+        $result = Product::select("products.*")
+            ->filter($filters)
+            ->paginate($perPage);
 
         $priceFilter = collect($filters)->firstWhere('field', 'price');
         $minPrice = $priceFilter['min'] ?? null;

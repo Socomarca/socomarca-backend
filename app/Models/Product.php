@@ -4,7 +4,6 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\DB;
 
 class Product extends Model
 {
@@ -81,11 +80,6 @@ class Product extends Model
         return $this->hasMany(Favorite::class);
     }
 
-    public function orderDetails()
-    {
-        return $this->hasMany(OrderItem::class, 'product_id');
-    }
-
     public function userFavorites($userId)
     {
         return $this->hasMany(Favorite::class)
@@ -112,11 +106,10 @@ class Product extends Model
      */
     public function scopeFilter($query, array $filters)
     {
+        $sortByPrice = null;
         foreach ($filters as $filter) {
-            if (!isset($filter['field'])) continue;
-
             // Filtros especiales para precios
-            if ($filter['field'] === 'price') {
+            if (isset($filter['field']) && $filter['field'] === 'price') {
                 $query->whereHas('prices', function ($q) use ($filter) {
                     if (isset($filter['min'])) {
                         $q->where('price', '>=', $filter['min']);
@@ -130,22 +123,9 @@ class Product extends Model
                     $q->where('is_active', true);
                 });
 
-                // Ordenar por precio si se solicita
+                // Ordenar por precio si se solicita en el filtro
                 if (isset($filter['sort']) && in_array(strtolower($filter['sort']), ['asc', 'desc'])) {
-                    $query->selectRaw('products.*, prices.price as current_price')
-                        ->join('prices', function($join) {
-                            $join->on('products.id', '=', 'prices.product_id')
-                                ->where('prices.is_active', true);
-                        })
-                        ->orderBy('current_price', strtolower($filter['sort']));
-                }
-                continue;
-            }
-
-            // Ordenar por cantidad de ventas
-            if ($filter['field'] === 'sales_quantity') {
-                if (isset($filter['sort']) && in_array(strtolower($filter['sort']), ['asc', 'desc'])) {
-                    $query->orderBy('sales_quantity', strtolower($filter['sort']));
+                    $sortByPrice = strtolower($filter['sort']);
                 }
                 continue;
             }
@@ -168,9 +148,26 @@ class Product extends Model
                         ->whereRaw("products.{$field['field']} % ?", [$value])
                         ->orderBy("similarity_index", "DESC");
                 }
+
+                if (
+                    isset($filter['sort'])
+                    && in_array($filter['field'], $this->allowedSorts)
+                    && in_array($filter['sort'], ['ASC', 'DESC'])
+                ) {
+                    $query->orderBy($filter['field'], $filter['sort']);
+                }
             }
         }
 
+        if ($sortByPrice) {
+            $query->selectRaw('products.*, MIN(prices.price) as min_price')
+                ->leftJoin('prices', function($join) {
+                    $join->on('products.id', '=', 'prices.product_id')
+                        ->where('prices.is_active', true);
+                })
+                ->groupBy('products.id')
+                ->orderBy('min_price', $sortByPrice);
+        }
         return $query;
     }
 }
