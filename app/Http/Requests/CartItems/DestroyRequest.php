@@ -30,7 +30,7 @@ class DestroyRequest extends FormRequest
                 'required',
                 new DestroyProductItemQuantityValidator(
                     $this->input('product_id'),
-                    $this->input('unit')
+                    $this->input('unit', '')
                 )
             ]
         ];
