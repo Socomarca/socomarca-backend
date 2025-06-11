@@ -24,7 +24,7 @@ class ReportController extends Controller
 
         $orders = \App\Models\Order::searchReport($start, $end, $type)->with('user')->get();
 
-        if ($type === 'top-clients') {
+        if ($type === 'top-customers') {
             $userIds = $orders->pluck('user_id')->unique()->all();
             $users = \App\Models\User::whereIn('id', $userIds)->get()->keyBy('id');
 
@@ -40,7 +40,7 @@ class ReportController extends Controller
                     $user = $users->get($top->user_id);
                     $topClients[] = [
                         'month' => $month,
-                        'client' => $user ? $user->name : null,
+                        'customer' => $user ? $user->name : null,
                         'total_purchases' => (int)$top->total_purchases,
                         'quantity_purchases' => (int)$top->quantity_purchases, 
                     ];
@@ -49,7 +49,7 @@ class ReportController extends Controller
             }
 
             return response()->json([
-                'top_clients' => $topClients,
+                'top_customers' => $topClients,
                 'total_sales' => $totalSales
             ]);
         }
@@ -169,14 +169,14 @@ class ReportController extends Controller
                     ->where('user.name', $client)
                     ->sum('total');
                 $salesByClient[] = [
-                    'client' => $client,
+                    'customer' => $client,
                     'total' => $total
                 ];
                 $totalMonth += $total;
             }
             $totals[] = [
                 'month' => $month,
-                'sales_by_client' => $salesByClient,
+                'sales_by_customer' => $salesByClient,
                 'total_month' => $totalMonth
             ];
             $totalBuyersPerMonth[] = [
@@ -187,7 +187,7 @@ class ReportController extends Controller
 
         return response()->json([
             'months' => $months,
-            'clients' => $clients,
+            'customers' => $clients,
             'totals' => $totals,
             'total_buyers_per_month' => $totalBuyersPerMonth
         ]);
@@ -262,7 +262,7 @@ class ReportController extends Controller
         foreach ($ordersPaginated as $order) {
             $detalleTabla[] = [
                 'id' => $order->id,
-                'client' => $order->user ? $order->user->name : null,
+                'customer' => $order->user ? $order->user->name : null,
                 'amount' => $order->amount,
                 'date' => $order->created_at ? $order->created_at->toDateString() : null,
                 'status' => $order->status,
@@ -286,39 +286,39 @@ class ReportController extends Controller
         ? date('Y-m-d', strtotime($request->input('start')))
         : now()->subMonths(12)->startOfMonth()->toDateString();
 
-    $end = $request->input('end') 
-        ? date('Y-m-d', strtotime($request->input('end')))
-        : now()->endOfMonth()->toDateString();
+        $end = $request->input('end') 
+            ? date('Y-m-d', strtotime($request->input('end')))
+            : now()->endOfMonth()->toDateString();
 
-    $perPage = $request->input('per_page', 15);
+        $perPage = $request->input('per_page', 15);
 
-    $query = \App\Models\Order::with('user')
-        ->where('status', 'completed')
-        ->whereBetween('created_at', [$start, $end])
-        ->orderByDesc('created_at');
+        $query = \App\Models\Order::with('user')
+            ->where('status', 'completed')
+            ->whereBetween('created_at', [$start, $end])
+            ->orderByDesc('created_at');
 
-    $ordersPaginated = $query->paginate($perPage);
+        $ordersPaginated = $query->paginate($perPage);
 
-    $detalleTabla = [];
-    foreach ($ordersPaginated as $order) {
-        $detalleTabla[] = [
-            'id' => $order->id,
-            'client' => $order->user ? $order->user->name : null,
-            'amount' => $order->amount,
-            'date' => $order->created_at->toDateString(),
-            'status' => $order->status,
-        ];
-    }
+        $detalleTabla = [];
+        foreach ($ordersPaginated as $order) {
+            $detalleTabla[] = [
+                'id' => $order->id,
+                'customer' => $order->user ? $order->user->name : null,
+                'amount' => $order->amount,
+                'date' => $order->created_at->toDateString(),
+                'status' => $order->status,
+            ];
+        }
 
-    return response()->json([
-        'table_detail' => $detalleTabla,
-        'pagination' => [
-            'current_page' => $ordersPaginated->currentPage(),
-            'last_page' => $ordersPaginated->lastPage(),
-            'per_page' => $ordersPaginated->perPage(),
-            'total' => $ordersPaginated->total(),
-        ]
-    ]);
+        return response()->json([
+            'table_detail' => $detalleTabla,
+            'pagination' => [
+                'current_page' => $ordersPaginated->currentPage(),
+                'last_page' => $ordersPaginated->lastPage(),
+                'per_page' => $ordersPaginated->perPage(),
+                'total' => $ordersPaginated->total(),
+            ]
+        ]);
     }
 
     public function failedTransactionsList(Request $request)

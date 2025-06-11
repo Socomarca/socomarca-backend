@@ -82,7 +82,7 @@ class Order extends Model
                 ->orderBy('month');
         }
 
-        if ($type === 'top-clients') {
+        if ($type === 'top-customers') {
             return $query->select(
                     DB::raw("TO_CHAR(created_at, 'YYYY-MM') as month"),
                     'user_id',
