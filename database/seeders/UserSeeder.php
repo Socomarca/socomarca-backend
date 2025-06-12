@@ -27,16 +27,10 @@ class UserSeeder extends Seeder
                 'rut' => $fu->rut,
                 'business_name' => fake()->company(),
                 'is_active' => true,
-                
-            ]);
-           
-        }
 
-        // Usuarios aleatorios
-        
-        User::factory()->count(5)
-            ->has(Address::factory()->count(2), 'addresses')
-                ->create();
+            ]);
+
+        }
 
         //Usuario personalizado
         User::create([

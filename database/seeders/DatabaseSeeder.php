@@ -20,8 +20,8 @@ class DatabaseSeeder extends Seeder
                 ProductSeeder::class,
                 PaymentMethodSeeder::class,
                 RolesAndPermissionsSeeder::class,
-                OrderSeeder::class,
-                CartItemSeeder::class,
+                // OrderSeeder::class,
+                // CartItemSeeder::class,
             ]);
 
         }else{
