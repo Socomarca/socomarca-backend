@@ -99,6 +99,18 @@ test('verifies products price range filter', function () {
     $minSearch = 60000;
     $maxSearch = 90000;
     Product::truncate();
+
+    // Crea un producto con un precio dentro del rango de búsqueda
+    $productInRange = Product::factory()
+        ->has(
+            Price::factory([
+                'is_active' => true,
+                'price' => ($minSearch + $maxSearch) / 2 
+            ])->count(1)
+        )
+        ->create();
+
+    // Crea otros productos con precios aleatorios
     Product::factory()
         ->has(
             Price::factory([
@@ -106,7 +118,7 @@ test('verifies products price range filter', function () {
                 'price' => random_int($minPrice, $maxPrice)
             ])->count(4)
         )
-        ->count(10)
+        ->count(9)
         ->create();
 
     $response = $this->actingAs($this->user, 'sanctum')
@@ -120,6 +132,8 @@ test('verifies products price range filter', function () {
                 ]
             ]
         ]);
+
+    expect($response->json('data'))->not->toBeEmpty();
 
     foreach ($response->json('data') as $product) {
         expect($product['price'])->toBeGreaterThanOrEqual($minSearch);
@@ -139,4 +153,119 @@ test('verifies that inexistent product is not found', function () {
         ->get('/api/products/1');
 
     $response->assertStatus(404);
+});
+
+test('verifies products subcategory filter', function () {
+    Product::truncate();
+    $subcategory = \App\Models\Subcategory::factory()->create();
+
+    Product::factory()
+        ->has(
+            Price::factory([
+                'is_active' => true,
+            ])->count(4)
+        )
+        ->count(10)
+        ->create(['subcategory_id' => $subcategory->id]);
+
+    $response = $this->actingAs($this->user, 'sanctum')
+        ->postJson('/api/products/search', [
+            'filters' => [
+                [
+                    'field' => 'subcategory_id',
+                    'operator' => '=',
+                    'value' => $subcategory->id,
+                ]
+            ]
+        ]);
+
+    expect($response->json('data'))->not->toBeEmpty();
+
+    foreach ($response->json('data') as $product) {
+        expect($subcategory->id == $product['subcategory']['id'])->toBeTrue();
+    }
+
+    $response
+        ->assertStatus(200)
+        ->assertJsonStructure($this->productListJsonStructure);
+});
+
+test('verifies products name filter (exact and partial match)', function () {
+    Product::truncate();
+
+    // Crea productos con nombres específicos
+    $product1 = Product::factory()
+        ->has(Price::factory(['is_active' => true])->count(1))
+        ->create(['name' => 'Leche condensada']);
+
+    $product2 = Product::factory()
+        ->has(Price::factory(['is_active' => true])->count(1))
+        ->create(['name' => 'Leche consedada']);
+
+    // Búsqueda por nombre exacto
+    $responseExact = $this->actingAs($this->user, 'sanctum')
+        ->postJson('/api/products/search', [
+            'filters' => [
+                [
+                    'field' => 'name',
+                    'operator' => '=',
+                    'value' => 'Leche condensada',
+                ]
+            ]
+        ]);
+
+    expect($responseExact->json('data'))->not->toBeEmpty();
+    foreach ($responseExact->json('data') as $product) {
+        expect($product['name'])->toBe('Leche condensada');
+    }
+    $responseExact->assertStatus(200);
+
+    // Búsqueda por nombre parecido (LIKE)
+    $responseLike = $this->actingAs($this->user, 'sanctum')
+        ->postJson('/api/products/search', [
+            'filters' => [
+                [
+                    'field' => 'name',
+                    'operator' => 'ILIKE',
+                    'value' => '%leche%',
+                ]
+            ]
+        ]);
+
+    expect($responseLike->json('data'))->not->toBeEmpty();
+    foreach ($responseLike->json('data') as $product) {
+        expect(stripos($product['name'], 'Leche'))->not->toBeFalse();
+    }
+    $responseLike->assertStatus(200);
+});
+
+test('verifies products name filter with fulltext similarity', function () {
+    Product::truncate();
+
+    // Crea productos con nombres similares
+    $product1 = Product::factory()
+        ->has(Price::factory(['is_active' => true])->count(1))
+        ->create(['name' => 'Leche condensada']);
+
+    $product2 = Product::factory()
+        ->has(Price::factory(['is_active' => true])->count(1))
+        ->create(['name' => 'Leche consedada']);
+
+    // Búsqueda por fulltext similarity
+    $responseFulltext = $this->actingAs($this->user, 'sanctum')
+        ->postJson('/api/products/search', [
+            'filters' => [
+                [
+                    'field' => 'name',
+                    'operator' => 'fulltext',
+                    'value' => 'leche condensada',
+                ]
+            ]
+        ]);
+
+    expect($responseFulltext->json('data'))->not->toBeEmpty();
+    foreach ($responseFulltext->json('data') as $product) {
+        expect(stripos($product['name'], 'leche'))->not->toBeFalse();
+    }
+    $responseFulltext->assertStatus(200);
 });

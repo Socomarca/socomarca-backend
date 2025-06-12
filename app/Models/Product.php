@@ -41,7 +41,7 @@ class Product extends Model
         ],
         [
             'field' => 'name',
-            'operators' => ['=', '!=', 'LIKE', 'NOT LIKE', 'fulltext'],
+            'operators' => ['=', '!=', 'LIKE', 'ILIKE', 'NOT LIKE', 'fulltext'],
         ],
     ];
 

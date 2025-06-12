@@ -23,9 +23,9 @@ class MunicipalityFactory extends Factory
         $code = (string) $this->faker->numberBetween(10000, 99999);
 
         return [
-            'name' => $this->faker->city(),
-            'code' => $code,
-            'region_id' => $regionId,
+            'name' => $this->faker->city,
+            'code' => $this->faker->postcode,
+            'region_id' => \App\Models\Region::factory(),
         ];
     }
 }
