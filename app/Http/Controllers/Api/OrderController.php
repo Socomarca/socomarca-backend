@@ -42,6 +42,8 @@ class OrderController extends Controller
 
     public function createFromCart()
     {
+
+        //$this->createCart();
         $carts = CartItem::where('user_id', Auth::user()->id)->get();
 
         if ($carts->isEmpty()) {
@@ -99,30 +101,33 @@ class OrderController extends Controller
         }
     }
 
-    public function payOrder()
+    public function payOrder(PayOrderRequest $request)
     {
+
+        $data = $request->validated();
+        
         $orderInfo = $this->createFromCart();
 
-        if (!$orderInfo->id) {
-            return response()->json(['message' => 'Orden no encontrada'], 404);
+        if (is_object($orderInfo) && property_exists($orderInfo, 'id')) {
+            if ($orderInfo->status !== 'pending') {
+                return response()->json(['message' => 'La orden no está pendiente de pago'], 400);
+            }
+            $order = Order::find($orderInfo->id);
+
+            try {
+                $paymentResponse = $this->webpayService->createTransaction($order);
+
+                return new PaymentResource((object)[
+                    'order' => $order,
+                    'payment_url' => $paymentResponse['url'],
+                    'token' => $paymentResponse['token']
+                ]);
+            } catch (\Exception $e) {
+                return response()->json(['message' => 'Error al procesar el pago: ' . $e->getMessage(), 'order' => $order], 500);
+            }
         }
 
-        if ($orderInfo->status !== 'pending') {
-            return response()->json(['message' => 'La orden no está pendiente de pago'], 400);
-        }
-        $order = Order::find($orderInfo->id);
-
-        try {
-            $paymentResponse = $this->webpayService->createTransaction($order);
-
-            return new PaymentResource((object)[
-                'order' => $order,
-                'payment_url' => $paymentResponse['url'],
-                'token' => $paymentResponse['token']
-            ]);
-        } catch (\Exception $e) {
-            return response()->json(['message' => 'Error al procesar el pago: ' . $e->getMessage(), 'order' => $order], 500);
-        }
+        return $orderInfo; // Devolver la respuesta original si el carrito está vacío
     }
 
 

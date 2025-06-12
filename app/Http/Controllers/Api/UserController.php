@@ -51,7 +51,10 @@ class UserController extends Controller
             ], 404);
         }
 
-        $users = User::where('id', $id)->get();
+        $users = User::with(['addresses' => function($query) {
+            $query->where('type', 'billing')
+                  ->with('municipality.region');
+        }])->where('id', $id)->get();
 
         $data = new UserCollection($users);
 

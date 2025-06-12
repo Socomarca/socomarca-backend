@@ -10,6 +10,7 @@ use App\Http\Requests\Addresses\UpdateRequest;
 use App\Http\Resources\Addresses\AddressCollection;
 use App\Models\Address;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 
 class AddressController extends Controller
 {
@@ -17,9 +18,9 @@ class AddressController extends Controller
     {
         $data = $indexRequest->validated();
 
-        $userId = $indexRequest->user_id;
-
-        $addresses = Address::where('user_id', $userId)->get();
+        $addresses = Address::with('municipality.region')
+            ->where('user_id', Auth::user()->id)
+            ->get();
 
         $data = new AddressCollection($addresses);
 
