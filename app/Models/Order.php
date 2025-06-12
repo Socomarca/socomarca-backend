@@ -14,12 +14,31 @@ class Order extends Model
         'user_id',
         'subtotal',
         'amount',
-        'status'
+        'status',
+        'name',
+        'rut',
+        'email',
+        'phone',
+        'address',
+        'region_id',
+        'municipality_id',
+        'billing_address',
+        'billing_address_details'
     ];
 
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function region()
+    {
+        return $this->belongsTo(Region::class);
+    }
+
+    public function municipality()
+    {
+        return $this->belongsTo(Municipality::class);
     }
 
     public function orderDetails()

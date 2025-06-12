@@ -5,7 +5,8 @@ namespace Database\Factories;
 use App\Models\Order;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
-
+use App\Models\Region;
+use App\Models\Municipality;
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Order>
  */
@@ -26,12 +27,30 @@ class OrderFactory extends Factory
     public function definition(): array
     {
         $subtotal = fake()->randomFloat(2, 1000, 100000);
+
+        //Factory 10 Region and Municipality
+        $regions = Region::factory()->count(10)->create();
+        foreach ($regions as $region) {
+            Municipality::factory()->count(10)->create([
+                'region_id' => $region->id
+            ]);
+        }
+
         
         return [
             'user_id' => User::factory(),
             'subtotal' => $subtotal,
             'amount' => $subtotal,
             'status' => fake()->randomElement(['pending', 'processing', 'on_hold', 'completed', 'canceled', 'refunded', 'failed']),
+            'name' => fake()->name(),
+            'rut' => fake()->numerify('########-#'),
+            'email' => fake()->email(),
+            'phone' => fake()->phoneNumber(),
+            'address' => fake()->address(),
+            'region_id' => Region::inRandomOrder()->first()->id,
+            'municipality_id' => Municipality::inRandomOrder()->first()->id,
+            'billing_address' => fake()->address(),
+            'billing_address_details' => fake()->address(),
         ];
     }
 

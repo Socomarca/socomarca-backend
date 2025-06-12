@@ -8,6 +8,8 @@ use App\Models\Subcategory;
 use App\Models\Brand;
 use App\Models\CartItem;
 use App\Models\Price;
+use App\Models\Region;
+use App\Models\Municipality;
 use App\Services\WebpayService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
@@ -96,9 +98,22 @@ test('puede crear una orden desde el carrito', function () {
         'price' => $price1->price
     ]);
 
+    $region = Region::factory()->create();
+    $municipality = Municipality::factory()->create([
+        'region_id' => $region->id
+    ]);
+
     // Act
     $response = $this->postJson('/api/orders/create-from-cart', [
-        'user_id' => $this->user->id
+        'user_id' => $this->user->id,
+        "name" => fake()->name(),
+        "rut" => fake()->numerify('########-#'),
+        "email" => fake()->email(),
+        "phone" => fake()->phoneNumber(),
+        "address" => fake()->address(),
+        "region_id" => $region->id,
+        "municipality_id" => $municipality->id,
+        "billing_address" => fake()->address()
     ]);
     
     // Assert - Verificar estado de la base de datos
@@ -109,11 +124,22 @@ test('puede crear una orden desde el carrito', function () {
 });
 
 test('no puede crear una orden con carrito vacío', function () {
-    // Arrange - No se necesita configuración adicional
-
+    // Arrange 
+    $region = Region::factory()->create();
+    $municipality = Municipality::factory()->create([
+        'region_id' => $region->id
+    ]);
     // Act
     $response = $this->postJson('/api/orders/create-from-cart', [
-        'user_id' => $this->user->id
+        'user_id' => $this->user->id,
+        "name" => fake()->name(),
+        "rut" => fake()->numerify('########-#'),
+        "email" => fake()->email(),
+        "phone" => fake()->phoneNumber(),
+        "address" => fake()->address(),
+        "region_id" => $region->id,
+        "municipality_id" => $municipality->id,
+        "billing_address" => fake()->address()
     ]);
 
     // Assert
