@@ -15,15 +15,7 @@ class Order extends Model
         'subtotal',
         'amount',
         'status',
-        'name',
-        'rut',
-        'email',
-        'phone',
-        'address',
-        'region_id',
-        'municipality_id',
-        'billing_address',
-        'billing_address_details'
+        'order_meta'
     ];
 
     public function user()
