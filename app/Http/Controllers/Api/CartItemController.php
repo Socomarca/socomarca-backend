@@ -26,7 +26,7 @@ class CartItemController extends Controller
             ->first();
 
         if ($item) {
-            $item->quantity = $data['quantity'];
+            $item->quantity = $item->quantity + $data['quantity'];
             $item->save();
         } else {
             $item = new CartItem;
@@ -68,7 +68,7 @@ class CartItemController extends Controller
         if (($item->quantity - $data['quantity']) == 0) {
             $item->delete();
         } else {
-            $item->quantity -= $data['quantity'];
+            $item->quantity = $item->quantity - $data['quantity'];
             $item->save();
         }
 
