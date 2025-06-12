@@ -43,7 +43,7 @@ class ProductSeeder extends Seeder
                         Price::factory([
                             'is_active' => true,
                             'price' => random_int(50000, 100000)
-                        ])->count(2)
+                        ])->count(1)
                     )
                     ->count(15)
                     ->create();
