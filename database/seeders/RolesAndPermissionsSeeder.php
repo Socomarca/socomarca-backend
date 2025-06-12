@@ -16,16 +16,23 @@ class RolesAndPermissionsSeeder extends Seeder
     {
         // Lista de permisos
         $permissions = [
-            "can-see-own-purchases",
-            "can-see-all-reports",
-            "can-see-all-products",
-            "can-see-all-clients",
-            "can-see-all-purchases",
-            "can-edit-content",
-            "can-edit-products",
-            "can-manage-users",
-            "can-manage-categories",
-            "can-manage-admins",
+            "see-own-purchases",
+            "see-all-reports",
+            "see-all-products",
+            "see-all-clients",
+            "see-all-purchases",
+            "edit-content",
+            "edit-products",
+            "manage-users",
+            "manage-categories",
+            "manage-admins",
+
+            // Address related permissions
+            "see-all-addresses",
+            "see-own-addresses",
+            "store-address",
+            "update-address",
+            "delete-address",
         ];
 
         // Crear permisos si no existen
@@ -45,7 +52,14 @@ class RolesAndPermissionsSeeder extends Seeder
                 "edit-products",
                 "manage-users",
                 "manage-categories",
-                "manage-admins"
+                "manage-admins",
+
+                // Address related permissions
+                "see-all-addresses",
+                "see-own-addresses",
+                "store-address",
+                "update-address",
+                "delete-address",
             ],
             'admin' => [
                 "see-own-purchases",
@@ -56,7 +70,14 @@ class RolesAndPermissionsSeeder extends Seeder
                 "edit-content",
                 "edit-products",
                 "manage-users",
-                "manage-categories"
+                "manage-categories",
+
+                // Address related permissions
+                "see-all-addresses",
+                "see-own-addresses",
+                "store-address",
+                "update-address",
+                "delete-address",
             ],
             'supervisor' => [
                 "see-own-purchases",
@@ -71,7 +92,11 @@ class RolesAndPermissionsSeeder extends Seeder
                 "edit-content"
             ],
             'cliente' => [
-                "see-own-purchases"
+                "see-own-purchases",
+                "see-own-addresses",
+                "store-address",
+                "update-address",
+                "delete-address",
             ],
         ];
 

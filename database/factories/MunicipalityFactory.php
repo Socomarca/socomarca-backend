@@ -17,15 +17,13 @@ class MunicipalityFactory extends Factory
      */
     public function definition(): array
     {
-        $regionId = \App\Models\Region::inRandomOrder()->value('id');
-
         // Genera un código numérico de 5 dígitos como string (ej: '13101')
         $code = (string) $this->faker->numberBetween(10000, 99999);
 
         return [
             'name' => $this->faker->city(),
             'code' => $code,
-            'region_id' => $regionId,
+            'region_id' => Region::factory(),
         ];
     }
 }
