@@ -87,9 +87,6 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Rutas de orden
     Route::get('/orders', [OrderController::class, 'index']);
-    Route::post('/orders/create-from-cart', [OrderController::class, 'createFromCart']);
-
-    // Rutas de Webpay
     Route::post('/orders/pay', [OrderController::class, 'payOrder']);
     
    

@@ -40,9 +40,8 @@ class OrderController extends Controller
         return new OrderCollection($orders);
     }
 
-    public function createFromCart(CreateFromCartRequest $request)
+    public function createFromCart()
     {
-        $data = $request->validated();
         $carts = CartItem::where('user_id', Auth::user()->id)->get();
 
         if ($carts->isEmpty()) {
@@ -91,6 +90,8 @@ class OrderController extends Controller
 
             DB::commit();
 
+            return $order;
+
             return new OrderResource($order);
         } catch (\Exception $e) {
             DB::rollBack();
@@ -98,22 +99,18 @@ class OrderController extends Controller
         }
     }
 
-    public function payOrder(PayOrderRequest $request)
+    public function payOrder()
     {
-        $data = $request->validated();
-        $order = Order::find($data['order_id']);
+        $orderInfo = $this->createFromCart();
 
-        if (!$order) {
+        if (!$orderInfo->id) {
             return response()->json(['message' => 'Orden no encontrada'], 404);
         }
 
-        if ($order->user_id !== $data['user_id']) {
-            return response()->json(['message' => 'No tienes permiso para pagar esta orden'], 403);
-        }
-
-        if ($order->status !== 'pending') {
+        if ($orderInfo->status !== 'pending') {
             return response()->json(['message' => 'La orden no está pendiente de pago'], 400);
         }
+        $order = Order::find($orderInfo->id);
 
         try {
             $paymentResponse = $this->webpayService->createTransaction($order);
