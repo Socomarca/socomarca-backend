@@ -36,6 +36,14 @@ class OrderSeeder extends Seeder
                 $subtotal = 0;
                 $amount = 0;
 
+                $user = User::find($userId);
+                $address = $user->addresses()->where('type', 'billing')->first();
+                $order_meta = json_encode([
+                    'user' => $user->toArray(),
+                    'address' => $address ? $address->toArray() : null,
+                ]);
+
+       
                 $order = \App\Models\Order::create([
                     'user_id' => $userId,
                     'subtotal' => 0,
@@ -43,6 +51,7 @@ class OrderSeeder extends Seeder
                     'status' => fake()->randomElement([
                         'pending', 'processing', 'on_hold', 'completed', 'canceled', 'refunded', 'failed'
                     ]),
+                    'order_meta' => $order_meta,
                     'created_at' => $date,
                     'updated_at' => $date,
                 ]);
