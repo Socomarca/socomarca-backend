@@ -42,7 +42,8 @@ class ProductSeeder extends Seeder
                     ->has(
                         Price::factory([
                             'is_active' => true,
-                            'price' => random_int(50000, 100000)
+                            'price' => random_int(50000, 100000),
+                            'unit' => fake()->randomElement(['un', 'kg', 'lt', 'gr']),
                         ])->count(1)
                     )
                     ->count(15)

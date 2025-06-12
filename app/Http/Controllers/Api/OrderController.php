@@ -15,9 +15,9 @@ use App\Models\OrderItem;
 use App\Models\Product;
 use Illuminate\Support\Facades\DB;
 use App\Services\WebpayService;
-use Illuminate\Support\Facades\Log;
-
-
+use App\Models\Municipality;
+use Illuminate\Support\Facades\Auth;
+use App\Models\User;
 use App\Models\Category;
 use App\Models\Subcategory;
 use App\Models\Brand;
@@ -36,14 +36,14 @@ class OrderController extends Controller
     public function index(IndexRequest $request)
     {
         $data = $request->validated();
-        $orders = Order::where('user_id', $data['user_id'])->get();
+        $orders = Order::where('user_id', Auth::user()->id)->get();
         return new OrderCollection($orders);
     }
 
     public function createFromCart(CreateFromCartRequest $request)
     {
         $data = $request->validated();
-        $carts = CartItem::where('user_id', $data['user_id'])->get();
+        $carts = CartItem::where('user_id', Auth::user()->id)->get();
 
         if ($carts->isEmpty()) {
             return response()->json(['message' => 'El carrito está vacío'], 400);
@@ -54,41 +54,40 @@ class OrderController extends Controller
 
             // Calcular totales
             $subtotal = $carts->sum(function ($cart) {
-                return $cart->price * $cart->quantity;
+                $price = $cart->product->prices->where('unit', $cart->unit)->first();
+                return $price->price * $cart->quantity;
             });
 
-            // Crear la orden
-            $order = Order::create([
-                'user_id' => $data['user_id'],
+            $user = User::find(Auth::user()->id);
+            $address = $user->addresses()->where('type', 'billing')->first();
+
+            $order_meta = [
+                'user' => $user->toArray(),
+                'address' => $address ? $address->toArray() : null,
+            ];
+
+            $data = [
+                'user_id' => $user->id,
                 'subtotal' => $subtotal,
                 'amount' => $subtotal,
                 'status' => 'pending',
-                'name' => $data['name'],
-                'rut' => $data['rut'],
-                'email' => $data['email'],
-                'phone' => $data['phone'],
-                'address' => $data['address'],
-                'region_id' => $data['region_id'],
-                'municipality_id' => $data['municipality_id'],
-                'billing_address' => $data['billing_address'],
-                'billing_address_details' => $data['billing_address_details'] ?? null,
-            ]);
+                'order_meta' => json_encode($order_meta),
+            ];
+
+            // Crear la orden
+            $order = Order::create($data);
 
             // Crear los items de la orden
             foreach ($carts as $cart) {
-                $price = $cart->product->prices->where('is_active', true)->first();
-                
+                $price = $cart->product->prices->where('unit', $cart->unit)->first();
                 OrderItem::create([
                     'order_id' => $order->id,
                     'product_id' => $cart->product_id,
-                    'unit' => $price->unit ?? 'unidad',
+                    'unit' => $price->unit,
                     'quantity' => $cart->quantity,
                     'price' => $price->price ?? 0
                 ]);
             }
-
-            // Limpiar el carrito
-            CartItem::where('user_id', $data['user_id'])->delete();
 
             DB::commit();
 
@@ -156,10 +155,11 @@ class OrderController extends Controller
         ]);
     
         CartItem::create([
-            'user_id' => 12,
+            'user_id' => Auth::user()->id,
             'product_id' => $price1->product_id,
             'quantity' => 2,
-            'price' => $price1->price
+            'price' => $price1->price,
+            'unit' => $price1->unit,
         ]);
     }
 }
