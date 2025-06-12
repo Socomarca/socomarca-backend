@@ -9,7 +9,8 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        if (app()->environment(['local', 'qa'])) {
+
+        if (app()->environment(['local', 'qa','testing'])) {
             $this->call([
                 RegionSeeder::class,
                 UserSeeder::class,

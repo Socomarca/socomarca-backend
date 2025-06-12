@@ -86,3 +86,17 @@ Finally you will be able to run all the tests
 ```bash
 php artisan test --env=testing
 ```
+
+Run a specific test
+```bash
+docker compose exec workcontainer php artisan test tests/Feature/CartItemTest.php
+```
+
+Run a specific test with a specific filter
+```bash
+docker compose exec workcontainer ./vendor/bin/pest tests/Feature/CartItemTest.php --filter="puede agregar un item al carrito"
+```
+
+
+
+

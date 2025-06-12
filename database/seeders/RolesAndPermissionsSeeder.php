@@ -16,16 +16,16 @@ class RolesAndPermissionsSeeder extends Seeder
     {
         // Lista de permisos
         $permissions = [
-            "can-see-own-purchases",
-            "can-see-all-reports",
-            "can-see-all-products",
-            "can-see-all-clients",
-            "can-see-all-purchases",
-            "can-edit-content",
-            "can-edit-products",
-            "can-manage-users",
-            "can-manage-categories",
-            "can-manage-admins",
+            "see-own-purchases",
+            "see-all-reports",
+            "see-all-products",
+            "see-all-clients",
+            "see-all-purchases",
+            "edit-content",
+            "edit-products",
+            "manage-users",
+            "manage-categories",
+            "manage-admins",
         ];
 
         // Crear permisos si no existen
