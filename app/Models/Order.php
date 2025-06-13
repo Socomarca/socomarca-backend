@@ -18,6 +18,13 @@ class Order extends Model
         'order_meta'
     ];
 
+    protected function casts(): array
+    {
+        return [
+            'order_meta' => 'array'
+        ];
+    }
+
     public function user()
     {
         return $this->belongsTo(User::class);
@@ -113,7 +120,7 @@ class Order extends Model
                     DB::raw('SUM(order_items.quantity) as total_sales'),
                     DB::raw('SUM(order_items.price * order_items.quantity) as subtotal')
                 )
-                ->whereBetween('orders.created_at', [$start, $end]) 
+                ->whereBetween('orders.created_at', [$start, $end])
                 ->groupBy('month', 'order_items.product_id')
                 ->orderBy('month')
                 ->orderByDesc('total_sales');
