@@ -7,8 +7,10 @@ use App\Http\Requests\Users\DestroyRequest;
 use App\Http\Requests\Users\ShowRequest;
 use App\Http\Requests\Users\StoreRequest;
 use App\Http\Requests\Users\UpdateRequest;
+use App\Http\Resources\Users\ProfileResource;
 use App\Http\Resources\Users\UserCollection;
 use App\Models\User;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 
@@ -105,5 +107,12 @@ class UserController extends Controller
         $user->delete();
 
         return response()->json(['message' => 'The selected user has been deleted']);
+    }
+
+    public function profile(Request $request)
+    {
+        $user = $request->user();
+        return $user->toResource(ProfileResource::class);
+        // return $user->toResource();
     }
 }
