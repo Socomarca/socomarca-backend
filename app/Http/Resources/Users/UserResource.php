@@ -26,28 +26,8 @@ class UserResource extends JsonResource
             'is_active' => $this->is_active,
             'last_login' => $this->last_login,
             'password_changed_at' => $this->password_changed_at,
-            'billing_addresses' => $this->addresses->map(function($address) {
-                return [
-                    'id' => $address->id,
-                    'address_line1' => $address->address_line1,
-                    'address_line2' => $address->address_line2,
-                    'postal_code' => $address->postal_code,
-                    'is_default' => $address->is_default,
-                    'type' => $address->type,
-                    'phone' => $address->phone,
-                    'contact_name' => $address->contact_name,
-                    'municipality' => [
-                        'id' => $address->municipality->id,
-                        'name' => $address->municipality->name,
-                        'code' => $address->municipality->code,
-                        'region' => [
-                            'id' => $address->municipality->region->id,
-                            'name' => $address->municipality->region->name,
-                            'code' => $address->municipality->region->code,
-                        ]
-                    ]
-                ];
-            }),
+            'billing_address' => $this->billing_address,
+            'shipping_addresses' => $this->shipping_addresses,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];
