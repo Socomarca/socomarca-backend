@@ -23,7 +23,6 @@ class IndexRequest extends FormRequest
     {
         return
         [
-            'user_id' => 'bail|required|integer|exists:addresses,user_id',
         ];
     }
 
@@ -31,9 +30,6 @@ class IndexRequest extends FormRequest
     {
         return
         [
-            'user_id.required' => 'The user_id field in query params is required.',
-            'user_id.integer' => 'The user_id field in query params must be an integer.',
-            'user_id.exists' => 'The selected user in query params is invalid.',
         ];
     }
 }
