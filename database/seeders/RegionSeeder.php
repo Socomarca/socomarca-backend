@@ -20,7 +20,7 @@ class RegionSeeder extends Seeder
         $regions = $this->getFakeRegions();
         foreach ($regions as $region) {
             Region::create([
-                'id' => $region->id,
+                //'id' => $region->id,
                 'code' => $region->code,
                 'name' => $region->name,
             ]);

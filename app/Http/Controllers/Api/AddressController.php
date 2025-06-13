@@ -18,12 +18,12 @@ class AddressController extends Controller
         $user = $request->user();
         $addresses = null;
 
-        if (Gate::authorize('viewAny', Address::class)) {
+        if ($user->can('see-all-addresses')) {
             $addresses = Address::all();
-        } elseif (Gate::authorize('view', Address::class)) {
+        } elseif ($user->can('see-own-addresses')) {
             $addresses = Address::where('user_id', $user->id)->get();
         } else {
-            return abort(403, 'Forbidden');
+            abort(403, 'Forbidden');
         }
 
         $data = new AddressCollection($addresses);
@@ -33,7 +33,9 @@ class AddressController extends Controller
 
     public function store(StoreRequest $storeRequest)
     {
-        if (!Gate::authorize('create', Address::class)) {
+        $user = $storeRequest->user();
+        
+        if (!$user->can('store-address')) {
             return abort(403, 'Forbidden');
         }
 
@@ -41,7 +43,7 @@ class AddressController extends Controller
 
         $data['is_default'] === true &&
             DB::table('addresses')
-                ->where('user_id', $data['user_id'])
+                ->where('user_id', $user->id)
                 ->update(['is_default' => false]);
 
         $address = new Address;
@@ -51,9 +53,9 @@ class AddressController extends Controller
         $address->postal_code = $data['postal_code'];
         $address->is_default = $data['is_default'];
         $address->type = $data['type'];
+        $address->phone = $data['phone'];
         $address->contact_name = $data['contact_name'];
-
-        $address->user_id = $data['user_id'];
+        $address->user_id = $user->id;
         $address->municipality_id = $data['municipality_id'];
 
         $address->save();
@@ -74,7 +76,9 @@ class AddressController extends Controller
 
     public function update(UpdateRequest $updateRequest, Address $address)
     {
-        if (!Gate::authorize('update', $address)) {
+        $user = $updateRequest->user();
+
+        if (!$user->can('store-address')) {
             return abort(403, 'Forbidden');
         }
 
@@ -82,7 +86,7 @@ class AddressController extends Controller
 
         $data['is_default'] === true &&
             DB::table('addresses')
-                ->where('user_id', $data['user_id'])
+                ->where('user_id',$user->id)
                 ->update(['is_default' => false]);
 
         $address->address_line1 = $data['address_line1'];
@@ -92,7 +96,7 @@ class AddressController extends Controller
         $address->type = $data['type'];
         $address->contact_name = $data['contact_name'];
 
-        $address->user_id = $data['user_id'];
+        $address->user_id = $user->id;
         $address->municipality_id = $data['municipality_id'];
 
         $address->save();

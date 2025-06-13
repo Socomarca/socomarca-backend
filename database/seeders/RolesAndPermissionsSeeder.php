@@ -110,6 +110,10 @@ class RolesAndPermissionsSeeder extends Seeder
         $superadmin = User::find(1);
         if ($superadmin) {
             $superadmin->assignRole('superadmin');
+            $superadmin->givePermissionTo([
+                "see-all-addresses",
+                "store-address",
+            ]);
         }
 
         $admin = User::find(2);
@@ -120,6 +124,10 @@ class RolesAndPermissionsSeeder extends Seeder
         $supervisor = User::find(3);
         if ($supervisor) {
             $supervisor->assignRole('supervisor');
+            $supervisor->givePermissionTo([
+                "see-all-addresses",
+                
+            ]);
         }
 
         $editor = User::find(4);
@@ -130,6 +138,15 @@ class RolesAndPermissionsSeeder extends Seeder
         $cliente = User::find(5);
         if ($cliente) {
             $cliente->assignRole('cliente');
+            $cliente->givePermissionTo([
+                "see-all-addresses",
+                "store-address",
+                "update-address",
+                "delete-address",
+                "see-own-addresses",
+                "see-own-purchases",
+                "see-all-products",
+            ]);
         }
     }
 }

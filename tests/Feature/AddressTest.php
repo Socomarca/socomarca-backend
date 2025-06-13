@@ -112,3 +112,73 @@ test('verify address not found', function ()
         ->getJson($route)
         ->assertNotFound();
 });
+
+test('verify customer can add a new address', function () {
+    Address::truncate();
+    $user = User::factory()->create();
+    $user->assignRole('cliente');
+
+    $municipality = \App\Models\Municipality::factory()->create();
+
+    $payload = [
+        'address_line1' => 'Calle Falsa 123',
+        'address_line2' => 'Depto 4B',
+        'postal_code' => '1234567',
+        'is_default' => true,
+        'type' => 'shipping',
+        'phone' => '987654321',
+        'contact_name' => 'Juan Pérez',
+        'municipality_id' => $municipality->id,
+    ];
+
+    $route = route('addresses.store');
+
+    $response = $this->actingAs($user, 'sanctum')
+        ->postJson($route, $payload);
+
+    $response->assertStatus(201)
+        ->assertJsonFragment(['message' => 'The address has been added']);
+
+    $this->assertDatabaseHas('addresses', [
+        'address_line1' => 'Calle Falsa 123',
+        'user_id' => $user->id,
+        'municipality_id' => $municipality->id,
+    ]);
+});
+
+test('verify customer can update an address', function () {
+    Address::truncate();
+    $user = User::factory()->create();
+    $user->assignRole('cliente');
+
+    $municipality = \App\Models\Municipality::factory()->create();
+    $address = Address::factory()->create([
+        'user_id' => $user->id,
+        'municipality_id' => $municipality->id,
+    ]);
+
+    $payload = [
+        'address_line1' => 'Nueva Calle 456',
+        'address_line2' => 'Depto 8C',
+        'postal_code' => 7654321,
+        'is_default' => false,
+        'type' => 'billing', 
+        'phone' => 123456789,
+        'contact_name' => 'Ana Gómez',
+        'municipality_id' => $municipality->id,
+    ];
+
+    $route = route('addresses.update', ['address' => $address->id]);
+
+    $response = $this->actingAs($user, 'sanctum')
+        ->putJson($route, $payload);
+
+    $response->assertStatus(200)
+        ->assertJsonFragment(['message' => 'The selected address has been updated']);
+
+    $this->assertDatabaseHas('addresses', [
+        'id' => $address->id,
+        'address_line1' => 'Nueva Calle 456',
+        'contact_name' => 'Ana Gómez',
+    ]);
+});
