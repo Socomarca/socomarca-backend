@@ -139,7 +139,6 @@ class RolesAndPermissionsSeeder extends Seeder
         if ($cliente) {
             $cliente->assignRole('cliente');
             $cliente->givePermissionTo([
-                "see-all-addresses",
                 "store-address",
                 "update-address",
                 "delete-address",
