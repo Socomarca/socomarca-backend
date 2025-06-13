@@ -75,6 +75,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/favorites/{id}', [FavoriteController::class, 'destroy']);
 
     Route::get('/cart', [CartController::class, 'index']);
+    Route::delete('/cart', [CartItemController::class, 'emptyCart'])->name('cart.empty');
     Route::post('/cart/items', [CartItemController::class, 'store']);
     Route::delete('/cart/items', [CartItemController::class, 'destroy']);
 

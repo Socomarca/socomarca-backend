@@ -477,3 +477,71 @@ test('requiere autenticacion para eliminar items', function () {
     // Assert
     $response->assertStatus(401);
 });
+
+test('vaciar su carrito', function () {
+    
+    \App\Models\CartItem::truncate();
+
+    $user = \App\Models\User::factory()->create();
+    
+    $product = \App\Models\Product::factory()->create();
+
+    
+    \App\Models\CartItem::factory()->create([
+        'user_id' => $user->id,
+        'product_id' => $product->id,
+        'quantity' => 2,
+    ]);
+    \App\Models\CartItem::factory()->create([
+        'user_id' => $user->id,
+        'product_id' => $product->id,
+        'quantity' => 1,
+    ]);
+
+    $this->assertDatabaseCount('cart_items', 2);
+
+    $route = route('cart.empty');
+
+    $response = $this->actingAs($user, 'sanctum')
+        ->deleteJson($route);
+
+    $response->assertStatus(200)
+        ->assertJsonFragment(['message' => 'The cart has been emptied']);
+
+    
+    $this->assertDatabaseMissing('cart_items', [
+        'user_id' => $user->id,
+    ]);
+});
+
+test('cliente no puede vaciar carros de otros', function () {
+    
+    $userA = \App\Models\User::factory()->create();
+    
+    $userB = \App\Models\User::factory()->create();
+    
+
+    $product = \App\Models\Product::factory()->create();
+
+    // Agrega ítems al carrito de userB
+    \App\Models\CartItem::factory()->create([
+        'user_id' => $userB->id,
+        'product_id' => $product->id,
+        'quantity' => 2,
+    ]);
+
+    // userA intenta vaciar el carrito (la ruta solo debe vaciar su propio carrito)
+    $route = route('cart.empty');
+
+    $response = $this->actingAs($userA, 'sanctum')
+        ->deleteJson($route);
+
+    $response->assertStatus(200)
+        ->assertJsonFragment(['message' => 'The cart has been emptied']);
+
+    // El carrito de userB debe seguir teniendo sus ítems
+    $this->assertDatabaseHas('cart_items', [
+        'user_id' => $userB->id,
+        'product_id' => $product->id,
+    ]);
+});
