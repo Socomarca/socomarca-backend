@@ -35,7 +35,8 @@ class CartItemSeeder extends Seeder
                 CartItem::create([
                     'user_id' => $user->id,
                     'product_id' => $product->id,
-                    'quantity' => $quantity
+                    'quantity' => $quantity,
+                    'unit' => $product->prices->where('is_active', true)->first()->unit,
                 ]);
             }
         }
