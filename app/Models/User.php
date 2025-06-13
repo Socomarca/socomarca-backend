@@ -80,6 +80,13 @@ class User extends Authenticatable
             ->where('type', 'shipping');
     }
 
+    public function default_shipping_address()
+    {
+        return $this->hasOne(Address::class)
+            ->where('type', 'shipping')
+            ->where('is_default', 1);
+    }
+
     public function favoritesList()
     {
         return $this->hasMany(FavoriteList::class);
