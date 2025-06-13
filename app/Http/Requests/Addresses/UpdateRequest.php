@@ -24,7 +24,7 @@ class UpdateRequest extends FormRequest
     {
         return
         [
-            'id' => 'bail|integer|exists:addresses,id',
+            
             'address_line1' => 'bail|required|string',
             'address_line2' => 'bail|required|string',
             'postal_code' => 'bail|required|integer',
@@ -32,16 +32,10 @@ class UpdateRequest extends FormRequest
             'type' => ['bail', 'required', Rule::in(['billing', 'shipping'])],
             'phone' => 'bail|required|integer|digits:9',
             'contact_name' => 'bail|required|string',
-            'user_id' => 'bail|required|integer|exists:users,id',
+            
             'municipality_id' => 'bail|required|integer|exists:municipalities,id',
         ];
     }
 
-    protected function prepareForValidation()
-    {
-        $this->merge(
-        [
-            'id' => $this->route('id'),
-        ]);
-    }
+    
 }
