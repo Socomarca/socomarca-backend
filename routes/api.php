@@ -66,15 +66,15 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('products/{id}', [ProductController::class, 'show']);
     Route::post('/products/search', [ProductController::class, 'search'])->name('products.search');
 
-    Route::get('/favorites-list', [FavoriteListController::class, 'index']);
-    Route::post('/favorites-list', [FavoriteListController::class, 'store']);
-    Route::get('/favorites-list/{id}', [FavoriteListController::class, 'show']);
-    Route::put('/favorites-list/{id}', [FavoriteListController::class, 'update']);
-    Route::delete('/favorites-list/{id}', [FavoriteListController::class, 'destroy']);
+    Route::get('/favorites-list', [FavoriteListController::class, 'index'])->name('favorites-list.index');
+    Route::post('/favorites-list', [FavoriteListController::class, 'store'])->name('favorites-list.store');
+    Route::get('/favorites-list/{id}', [FavoriteListController::class, 'show'])->name('favorites-list.show');
+    Route::put('/favorites-list/{id}', [FavoriteListController::class, 'update'])->name('favorites-list.update');
+    Route::delete('/favorites-list/{id}', [FavoriteListController::class, 'destroy'])->name('favorites-list.destroy');
 
-    Route::get('/favorites', [FavoriteController::class, 'index']);
-    Route::post('/favorites', [FavoriteController::class, 'store']);
-    Route::delete('/favorites/{id}', [FavoriteController::class, 'destroy']);
+    Route::get('/favorites', [FavoriteController::class, 'index'])->name('favorites.index');
+    Route::post('/favorites', [FavoriteController::class, 'store'])->name('favorites.store');
+    Route::delete('/favorites/{id}', [FavoriteController::class, 'destroy'])->name('favorites.destroy');
 
     Route::get('/cart', [CartController::class, 'index']);
     Route::delete('/cart', [CartItemController::class, 'emptyCart'])->name('cart.empty');
