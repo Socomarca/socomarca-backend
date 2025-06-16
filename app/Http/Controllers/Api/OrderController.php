@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Orders\IndexRequest;
 use App\Http\Requests\Orders\PayOrderRequest;
 use App\Http\Resources\Orders\OrderCollection;
 use App\Http\Resources\Orders\OrderResource;
@@ -30,9 +29,8 @@ class OrderController extends Controller
         $this->webpayService = $webpayService;
     }
 
-    public function index(IndexRequest $request)
+    public function index()
     {
-        $data = $request->validated();
         $orders = Order::where('user_id', Auth::user()->id)->get();
         return new OrderCollection($orders);
     }
