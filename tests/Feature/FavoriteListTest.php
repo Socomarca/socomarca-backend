@@ -3,89 +3,88 @@
 use App\Models\FavoriteList;
 use App\Models\User;
 
-beforeEach(function ()
+test('query of user favorites lists failed authentication with no user', function ()
 {
-    $this->user = createUserHasFavoriteList();
+    $route = route('favorites-list.index');
+    $this->getJson($route)->assertStatus(401);
 });
 
-/**
- * Prueba que valida que el token sea obligatorio.
- */
-test('validate_token', function ()
+test('successful query of user favorites lists', function ()
 {
-    $response = $this->withHeaders(['Accept' => 'application/json'])
-        ->get('/api/favorites-list');
+    $user = User::factory()->has(FavoriteList::factory(), 'favoritesList')
+        ->create();
+    $route = route('favorites-list.index');
 
-    $response->assertStatus(401);
-});
+    $response = $this->actingAs($user, 'sanctum')
+        ->getJson($route);
 
-/**
- * Prueba de respuesta exitosa.
- */
-test('validate_status_code_200', function ()
-{
-    $userId = $this->user->id;
-
-    $response = $this->actingAs($this->user, 'sanctum')
-        ->withHeaders(['Accept' => 'application/json'])
-        ->get('/api/favorites-list?user_id=' . $userId);
+    $favoriteList = $user->favoritesList()->first();
 
     $response
         ->assertStatus(200)
-        ->assertJsonStructure(
-        [
-            'data' => array
-            (
+        ->assertJsonStructure([
+            'data' => [
                 [
                     'id',
                     'name',
-                    'user' =>
-                    [
-                        'id',
-                        'name',
-                        'email',
-                        'phone',
-                        'rut',
-                        'business_name',
-                        'created_at',
-                        'updated_at',
-                    ],
-                    'favorites',
-                    'created_at',
-                    'updated_at',
+                    'user_id',
                 ],
-            ),
+            ],
+        ])
+        ->assertJsonFragment([
+            'id' => $favoriteList->id,
+            'name' => $favoriteList->name,
         ]);
 });
 
-/**
- * Prueba que valida que el campo user_id en query params sea válido en la tabla favorites_list.
- */
-test('test_user_is_invalid', function ()
+test('favorites list not found', function ()
 {
-    $userId = $this->user->id;
-
-    User::truncate();
-
-    $response = $this->actingAs($this->user, 'sanctum')
-        ->withHeaders(['Accept' => 'application/json'])
-        ->get('/api/favorites-list?user_id=' . $userId);
-
-    $response->assertStatus(422);
+    $user = User::factory()->create();
+    $route = route('favorites-list.show', ['id' => 4304993]);
+    $this->actingAs($user, 'sanctum')
+        ->getJson($route)
+        ->assertNotFound();
 });
 
-/**
- * Prueba que valida que el campo id en params sea válido en la tabla favorites_list.
- */
-test('test_favorites_list_not_found', function ()
-{
-    $id = $this->user->favoritesList['0']->id;
+test('favorite list store error because of validation failure', function () {
+    $user = User::factory()->create();
+    $route = route('favorites-list.store');
 
-    FavoriteList::truncate();
+    $this->actingAs($user, 'sanctum')
+        ->postJson($route)
+        ->assertInvalid(['name']);
+});
 
-    $response = $this->actingAs($this->user, 'sanctum')
-        ->withHeaders(['Accept' => 'application/json'])
-        ->get('/api/favorites-list/' . $id);
+test('new favorite list succesfully stored', function () {
+    $user = User::factory()->create();
+    $route = route('favorites-list.store');
+    $this->actingAs($user, 'sanctum')
+        ->postJson($route, ['name' => 'Nueva lista favorita'])
+        ->assertCreated();
 
-    $response->assertStatus(404);
+    $route = route('favorites-list.index');
+    $newList = $this->actingAs($user, 'sanctum')
+        ->getJson($route)
+        ->json('data.0');
+
+    $user = User::find($user->id);
+    $list = $user->favoritesList()->first();
+    expect($newList['id'] == $list->id)->toBeTrue();
+    expect($newList['name'] == $list->name)->toBeTrue();
+});
+
+test('favorite list updated', function () {
+    $user = User::factory()->has(FavoriteList::factory(), 'favoritesList')
+        ->create();
+    $route = route('favorites-list.update', [
+        'id' => $user->favoritesList()->first()->id
+    ]);
+    $newListName = 'Nueva lista de favoritos actualizada';
+
+    $this->actingAs($user, 'sanctum')
+        ->putJson($route, ['name' => $newListName])
+        ->assertOk();
+
+    $list = FavoriteList::find($user->favoritesList()->first()->id);
+    expect($list->name == $newListName)->toBeTrue();
 });
