@@ -26,6 +26,13 @@ class RolesAndPermissionsSeeder extends Seeder
             "manage-users",
             "manage-categories",
             "manage-admins",
+
+            // Address related permissions
+            "see-all-addresses",
+            "see-own-addresses",
+            "store-address",
+            "update-address",
+            "delete-address",
         ];
 
         // Crear permisos si no existen
@@ -45,7 +52,14 @@ class RolesAndPermissionsSeeder extends Seeder
                 "edit-products",
                 "manage-users",
                 "manage-categories",
-                "manage-admins"
+                "manage-admins",
+
+                // Address related permissions
+                "see-all-addresses",
+                "see-own-addresses",
+                "store-address",
+                "update-address",
+                "delete-address",
             ],
             'admin' => [
                 "see-own-purchases",
@@ -56,7 +70,14 @@ class RolesAndPermissionsSeeder extends Seeder
                 "edit-content",
                 "edit-products",
                 "manage-users",
-                "manage-categories"
+                "manage-categories",
+
+                // Address related permissions
+                "see-all-addresses",
+                "see-own-addresses",
+                "store-address",
+                "update-address",
+                "delete-address",
             ],
             'supervisor' => [
                 "see-own-purchases",
@@ -71,7 +92,11 @@ class RolesAndPermissionsSeeder extends Seeder
                 "edit-content"
             ],
             'cliente' => [
-                "see-own-purchases"
+                "see-own-purchases",
+                "see-own-addresses",
+                "store-address",
+                "update-address",
+                "delete-address",
             ],
         ];
 
@@ -85,6 +110,10 @@ class RolesAndPermissionsSeeder extends Seeder
         $superadmin = User::find(1);
         if ($superadmin) {
             $superadmin->assignRole('superadmin');
+            $superadmin->givePermissionTo([
+                "see-all-addresses",
+                "store-address",
+            ]);
         }
 
         $admin = User::find(2);
@@ -95,6 +124,10 @@ class RolesAndPermissionsSeeder extends Seeder
         $supervisor = User::find(3);
         if ($supervisor) {
             $supervisor->assignRole('supervisor');
+            $supervisor->givePermissionTo([
+                "see-all-addresses",
+                
+            ]);
         }
 
         $editor = User::find(4);
@@ -105,6 +138,14 @@ class RolesAndPermissionsSeeder extends Seeder
         $cliente = User::find(5);
         if ($cliente) {
             $cliente->assignRole('cliente');
+            $cliente->givePermissionTo([
+                "store-address",
+                "update-address",
+                "delete-address",
+                "see-own-addresses",
+                "see-own-purchases",
+                "see-all-products",
+            ]);
         }
     }
 }

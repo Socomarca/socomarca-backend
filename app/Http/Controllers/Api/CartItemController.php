@@ -6,7 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\CartItems\DestroyRequest;
 use App\Http\Requests\CartItems\StoreRequest;
 use App\Models\CartItem;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+
 
 class CartItemController extends Controller
 {
@@ -75,5 +77,14 @@ class CartItemController extends Controller
         return [
             'message' => 'Product item quantity has been removed from cart'
         ];
+    }
+
+    public function emptyCart(Request $request)
+    {
+        $user = $request->user();
+
+        $user->cartItems()->delete();
+
+        return response()->json(['message' => 'The cart has been emptied'], 200);
     }
 }

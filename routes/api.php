@@ -49,11 +49,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/users/{id}', [UserController::class, 'update']);
     Route::delete('/users/{id}', [UserController::class, 'destroy']);
 
-    Route::get('/addresses', [AddressController::class, 'index']);
-    Route::post('/addresses', [AddressController::class, 'store']);
-    Route::get('/addresses/{id}', [AddressController::class, 'show']);
-    Route::put('/addresses/{id}', [AddressController::class, 'update']);
-    Route::delete('/addresses/{id}', [AddressController::class, 'destroy']);
+    Route::get('/addresses', [AddressController::class, 'index'])->name('addresses.index');
+    Route::post('/addresses', [AddressController::class, 'store'])->name('addresses.store');
+    Route::get('/addresses/{address}', [AddressController::class, 'show'])->name('addresses.show');
+    Route::put('/addresses/{address}', [AddressController::class, 'update'])->name('addresses.update');
+    Route::delete('/addresses/{address}', [AddressController::class, 'destroy'])->name('addresses.destroy');
 
     Route::get('/categories', [CategoryController::class,'index'])->name('categories.index');
     Route::get('/categories/{id}', [CategoryController::class,'show'])->name('categories.show');
@@ -75,6 +75,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/favorites/{id}', [FavoriteController::class, 'destroy']);
 
     Route::get('/cart', [CartController::class, 'index']);
+    Route::delete('/cart', [CartItemController::class, 'emptyCart'])->name('cart.empty');
     Route::post('/cart/items', [CartItemController::class, 'store']);
     Route::delete('/cart/items', [CartItemController::class, 'destroy']);
 
@@ -88,8 +89,8 @@ Route::middleware('auth:sanctum')->group(function () {
     // Rutas de orden
     Route::get('/orders', [OrderController::class, 'index']);
     Route::post('/orders/pay', [OrderController::class, 'payOrder']);
-    
-   
+
+
     Route::middleware(['auth:sanctum', 'permission:see-all-reports'])->group(function () {
         Route::post('/orders/reports', [ReportController::class, 'report']);
 

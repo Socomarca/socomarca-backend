@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Orders\CreateFromCartRequest;
 use App\Http\Requests\Orders\IndexRequest;
 use App\Http\Requests\Orders\PayOrderRequest;
 use App\Http\Resources\Orders\OrderCollection;
@@ -15,14 +14,12 @@ use App\Models\OrderItem;
 use App\Models\Product;
 use Illuminate\Support\Facades\DB;
 use App\Services\WebpayService;
-use App\Models\Municipality;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
 use App\Models\Category;
 use App\Models\Subcategory;
 use App\Models\Brand;
 use App\Models\Price;
-
 
 class OrderController extends Controller
 {
@@ -40,8 +37,10 @@ class OrderController extends Controller
         return new OrderCollection($orders);
     }
 
-    public function createFromCart()
+    public function createFromCart($addressId)
     {
+
+        //$this->createCart();
         $carts = CartItem::where('user_id', Auth::user()->id)->get();
 
         if ($carts->isEmpty()) {
@@ -58,7 +57,7 @@ class OrderController extends Controller
             });
 
             $user = User::find(Auth::user()->id);
-            $address = $user->addresses()->where('type', 'billing')->first();
+            $address = $user->addresses()->where('id', $addressId)->first();
 
             $order_meta = [
                 'user' => $user->toArray(),
@@ -70,7 +69,7 @@ class OrderController extends Controller
                 'subtotal' => $subtotal,
                 'amount' => $subtotal,
                 'status' => 'pending',
-                'order_meta' => json_encode($order_meta),
+                'order_meta' => $order_meta,
             ];
 
             // Crear la orden
@@ -99,30 +98,30 @@ class OrderController extends Controller
         }
     }
 
-    public function payOrder()
+    public function payOrder(PayOrderRequest $request)
     {
-        $orderInfo = $this->createFromCart();
+        $orderInfo = $this->createFromCart($request->input('address_id'));
 
-        if (!$orderInfo->id) {
-            return response()->json(['message' => 'Orden no encontrada'], 404);
+        if ($orderInfo instanceof Order && $orderInfo->id) {
+            if ($orderInfo->status !== 'pending') {
+                return response()->json(['message' => 'La orden no está pendiente de pago'], 400);
+            }
+            $order = Order::find($orderInfo->id);
+
+            try {
+                $paymentResponse = $this->webpayService->createTransaction($order);
+
+                return new PaymentResource((object)[
+                    'order' => $order,
+                    'payment_url' => $paymentResponse['url'],
+                    'token' => $paymentResponse['token']
+                ]);
+            } catch (\Exception $e) {
+                return response()->json(['message' => 'Error al procesar el pago: ' . $e->getMessage(), 'order' => $order], 500);
+            }
         }
 
-        if ($orderInfo->status !== 'pending') {
-            return response()->json(['message' => 'La orden no está pendiente de pago'], 400);
-        }
-        $order = Order::find($orderInfo->id);
-
-        try {
-            $paymentResponse = $this->webpayService->createTransaction($order);
-
-            return new PaymentResource((object)[
-                'order' => $order,
-                'payment_url' => $paymentResponse['url'],
-                'token' => $paymentResponse['token']
-            ]);
-        } catch (\Exception $e) {
-            return response()->json(['message' => 'Error al procesar el pago: ' . $e->getMessage(), 'order' => $order], 500);
-        }
+        return $orderInfo; // Devolver la respuesta original si el carrito está vacío
     }
 
 
@@ -133,13 +132,13 @@ class OrderController extends Controller
             'category_id' => $category->id
         ]);
         $brand = Brand::factory()->create();
-    
+
         $product = Product::factory()->create([
             'category_id' => $category->id,
             'subcategory_id' => $subcategory->id,
             'brand_id' => $brand->id
         ]);
-    
+
         // Crear productos con sus precios
         $price1 = Price::factory()->create([
             'product_id' => $product->id,
@@ -150,7 +149,7 @@ class OrderController extends Controller
             'valid_to' => null,
             'is_active' => true
         ]);
-    
+
         CartItem::create([
             'user_id' => Auth::user()->id,
             'product_id' => $price1->product_id,

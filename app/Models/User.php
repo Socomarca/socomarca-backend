@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
-use Spatie\Permission\Traits\HasRoles; 
+use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
 {
@@ -59,8 +59,34 @@ class User extends Authenticatable
         return $this->hasMany(Address::class);
     }
 
+    /**
+     * Retorna solo la dirección de facturación
+     *
+     * @return [type]
+     */
+    public function billing_address()
+    {
+        return $this->hasOne(Address::class)->where('type', 'billing');
+    }
+
+    /**
+     * Retorna las direcciones de envío
+     *
+     * @return [type]
+     */
+    public function shipping_addresses()
+    {
+        return $this->hasMany(Address::class)
+            ->where('type', 'shipping');
+    }
+
     public function favoritesList()
     {
         return $this->hasMany(FavoriteList::class);
+    }
+
+    public function cartItems()
+    {
+        return $this->hasMany(CartItem::class);
     }
 }

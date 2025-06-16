@@ -14,12 +14,27 @@ class PayOrderRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'address_id' => [
+                'required',
+                'exists:addresses,id',
+                function ($attribute, $value, $fail) {
+                    $address = \App\Models\Address::where('id', $value)
+                        ->where('user_id', \Illuminate\Support\Facades\Auth::id())
+                        ->first();
+                    
+                    if (!$address) {
+                        $fail('La dirección no pertenece al usuario actual.');
+                    }
+                },
+            ],
         ];
     }
 
     public function messages(): array
     {
         return [
+            'address_id.required' => 'El debe seleccionar una dirección de envío.',
+            'address_id.exists' => 'La dirección seleccionada no es válida.',
         ];
     }
 

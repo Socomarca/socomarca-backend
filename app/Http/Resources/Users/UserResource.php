@@ -26,6 +26,8 @@ class UserResource extends JsonResource
             'is_active' => $this->is_active,
             'last_login' => $this->last_login,
             'password_changed_at' => $this->password_changed_at,
+            'billing_address' => $this->billing_address,
+            'shipping_addresses' => $this->shipping_addresses,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];

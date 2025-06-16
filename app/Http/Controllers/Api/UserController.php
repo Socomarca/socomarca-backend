@@ -10,6 +10,7 @@ use App\Http\Requests\Users\UpdateRequest;
 use App\Http\Resources\Users\UserCollection;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 
 class UserController extends Controller
 {
@@ -51,7 +52,10 @@ class UserController extends Controller
             ], 404);
         }
 
-        $users = User::where('id', $id)->get();
+        $users = User::with('billing_address')
+            ->with('shipping_addresses')
+            ->where('id', $id)
+            ->get();
 
         $data = new UserCollection($users);
 
