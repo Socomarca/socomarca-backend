@@ -70,7 +70,7 @@ describe('OrderController', function () {
             ]);
 
             // Act
-            $response = $this->getJson('/api/orders?user_id=' . $this->user->id);
+            $response = $this->getJson('/api/orders');
 
             // Assert
             $response->assertOk()
@@ -97,7 +97,7 @@ describe('OrderController', function () {
             \Illuminate\Support\Facades\Auth::logout();
 
             // Act
-            $response = $this->getJson('/api/orders?user_id=' . $this->user->id);
+            $response = $this->getJson('/api/orders');
 
             // Assert
             $response->assertUnauthorized();
