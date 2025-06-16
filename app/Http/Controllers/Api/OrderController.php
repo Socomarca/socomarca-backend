@@ -14,6 +14,7 @@ use App\Models\Product;
 use Illuminate\Support\Facades\DB;
 use App\Services\WebpayService;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Category;
 use App\Models\Subcategory;
@@ -29,9 +30,10 @@ class OrderController extends Controller
         $this->webpayService = $webpayService;
     }
 
-    public function index()
+    public function index(Request $request)
     {
-        $orders = Order::where('user_id', Auth::user()->id)->get();
+        $perPage = $request->input('per_page', 20);
+        $orders = Order::where('user_id', Auth::user()->id)->paginate($perPage);
         return new OrderCollection($orders);
     }
 
