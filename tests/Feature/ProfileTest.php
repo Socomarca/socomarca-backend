@@ -73,3 +73,19 @@ test('usuario puede ver la información de su propio perfil', function () {
                 ->etc()
         );;
 });
+
+test('usuario puede ver su propio perfil aunque no tenga direcciones asociadas', function () {
+    $user = User::factory()->create();
+    Address::where('user_id', $user->id)->delete();
+
+    $this->actingAs($user, 'sanctum')
+        ->getJson('/api/profile')
+        ->assertStatus(200)
+        ->assertJson(fn (AssertableJson $json) =>
+            $json->where('rut', $user->rut)
+                ->where('name', $user->name)
+                ->where('billing_address', null)
+                ->where('default_shipping_address', null)
+                ->etc()
+        );
+});

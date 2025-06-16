@@ -17,6 +17,11 @@ class ProfileResource extends JsonResource
     {
         self::withoutWrapping();
 
+        $billingAddress = $this->billing_address ?
+            $this->billing_address->toResource(AddressResource::class) : null;
+        $defaultShippingAddress = $this->default_shipping_address ?
+            $this->default_shipping_address->toResource(AddressResource::class) : null;
+
         return [
             'rut'=> $this->rut,
             'name' => $this->name,
@@ -24,8 +29,8 @@ class ProfileResource extends JsonResource
             'email'=> $this->email,
             'phone'=> $this->phone,
             'is_active'=> $this->is_active,
-            'billing_address' => $this->billing_address->toResource(AddressResource::class),
-            'default_shipping_address' => $this->default_shipping_address->toResource(AddressResource::class),
+            'billing_address' => $billingAddress,
+            'default_shipping_address' => $defaultShippingAddress,
         ];
     }
 }
