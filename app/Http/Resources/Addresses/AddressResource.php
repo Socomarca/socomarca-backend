@@ -26,18 +26,9 @@ class AddressResource extends JsonResource
             'type' => $this->type,
             'phone' => $this->phone,
             'contact_name' => $this->contact_name,
-            'municipality' => [
-                'id' => $this->municipality->id,
-                'name' => $this->municipality->name,
-                'code' => $this->municipality->code,
-                'region' => [
-                    'id' => $this->municipality->region->id,
-                    'name' => $this->municipality->region->name,
-                    'code' => $this->municipality->region->code,
-                ]
-            ],
-            'created_at' => $this->created_at,
-            'updated_at' => $this->updated_at,
+            'municipality_name' => $this->municipality->name,    
+            'region_name' => $this->municipality->region->name,
+            'alias' => $this->alias,
         ];
     }
 }

@@ -93,6 +93,7 @@ test('verify customer can add a new address', function () {
         'phone' => '987654321',
         'contact_name' => 'Juan Pérez',
         'municipality_id' => $municipality->id,
+        'alias' => 'Casa',
     ];
 
     $route = route('addresses.store');
@@ -130,6 +131,7 @@ test('verify customer can update an address', function () {
         'phone' => 123456789,
         'contact_name' => 'Ana Gómez',
         'municipality_id' => $municipality->id,
+        'alias' => 'Oficina',
     ];
 
     $route = route('addresses.update', ['address' => $address->id]);
@@ -145,4 +147,66 @@ test('verify customer can update an address', function () {
         'address_line1' => 'Nueva Calle 456',
         'contact_name' => 'Ana Gómez',
     ]);
+});
+
+test('validate required fields when creating an address', function () {
+    $user = \App\Models\User::factory()->create();
+    $user->assignRole('cliente');
+
+    $route = route('addresses.store');
+
+    // Payload vacío para forzar errores de validación
+    $payload = [];
+
+    $response = $this->actingAs($user, 'sanctum')
+        ->postJson($route, $payload);
+
+    $response->assertStatus(422)
+        ->assertJsonValidationErrors([
+            'address_line1',
+            'address_line2',
+            'postal_code',
+            'is_default',
+            'type',
+            'phone',
+            'contact_name',
+            'municipality_id',
+            'alias',
+        ]);
+});
+
+
+test('validate invalid fields when creating an address', function () {
+    $user = \App\Models\User::factory()->create();
+    $user->assignRole('cliente');
+
+    $route = route('addresses.store');
+
+    $payload = [
+        'address_line1' => '', // vacío, debe ser requerido
+        'address_line2' => 123, // debe ser string
+        'postal_code' => 'no-numero', // debe ser integer
+        'is_default' => 'not-boolean', // debe ser boolean
+        'type' => 'otro', // debe ser 'billing' o 'shipping'
+        'phone' => 'abc', // debe ser integer y 9 dígitos
+        'contact_name' => '', // requerido
+        'municipality_id' => 999999, // no existe
+        'alias' => str_repeat('a', 100), // excede max:50
+    ];
+
+    $response = $this->actingAs($user, 'sanctum')
+        ->postJson($route, $payload);
+
+    $response->assertStatus(422)
+        ->assertJsonValidationErrors([
+            'address_line1',
+            'address_line2',
+            'postal_code',
+            'is_default',
+            'type',
+            'phone',
+            'contact_name',
+            'municipality_id',
+            'alias',
+        ]);
 });

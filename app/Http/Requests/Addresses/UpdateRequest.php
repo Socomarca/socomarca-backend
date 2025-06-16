@@ -32,8 +32,8 @@ class UpdateRequest extends FormRequest
             'type' => ['bail', 'required', Rule::in(['billing', 'shipping'])],
             'phone' => 'bail|required|integer|digits:9',
             'contact_name' => 'bail|required|string',
-            
             'municipality_id' => 'bail|required|integer|exists:municipalities,id',
+            'alias' => 'bail|required|string|max:50',
         ];
     }
 
