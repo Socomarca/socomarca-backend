@@ -92,18 +92,6 @@ describe('OrderController', function () {
                 ]);
         });
 
-        test('devuelve error si el usuario no tiene órdenes', function () {
-            // Act
-            $response = $this->getJson('/api/orders?user_id=' . $this->user->id);
-
-            // Assert
-            $response->assertStatus(422)
-                ->assertJsonValidationErrors('user_id')
-                ->assertJson([
-                    'message' => 'El usuario no tiene órdenes registradas.'
-                ]);
-        });
-
         test('requiere autenticación para listar órdenes', function () {
             // Arrange
             \Illuminate\Support\Facades\Auth::logout();

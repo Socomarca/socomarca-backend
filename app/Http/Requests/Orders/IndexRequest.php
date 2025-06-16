@@ -22,16 +22,12 @@ class IndexRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'user_id' => 'bail|required|integer|exists:orders,user_id',
         ];
     }
 
     public function messages()
     {
         return [
-            'user_id.required' => 'El ID del usuario es requerido.',
-            'user_id.integer' => 'El ID del usuario debe ser un número entero.',
-            'user_id.exists' => 'El usuario no tiene órdenes registradas.',
         ];
     }
 } 
