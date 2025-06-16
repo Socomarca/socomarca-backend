@@ -36,12 +36,7 @@ class OrderFactory extends Factory
             ]);
         }
 
-        
-        return [
-            'user_id' => User::factory(),
-            'subtotal' => $subtotal,
-            'amount' => $subtotal,
-            'status' => fake()->randomElement(['pending', 'processing', 'on_hold', 'completed', 'canceled', 'refunded', 'failed']),
+        $meta = [
             'name' => fake()->name(),
             'rut' => fake()->numerify('########-#'),
             'email' => fake()->email(),
@@ -51,6 +46,14 @@ class OrderFactory extends Factory
             'municipality_id' => Municipality::inRandomOrder()->first()->id,
             'billing_address' => fake()->address(),
             'billing_address_details' => fake()->address(),
+        ];
+        
+        return [
+            'user_id' => User::factory(),
+            'subtotal' => $subtotal,
+            'amount' => $subtotal,
+            'status' => fake()->randomElement(['pending', 'processing', 'on_hold', 'completed', 'canceled', 'refunded', 'failed']),
+            'order_meta' => json_encode($meta),
         ];
     }
 

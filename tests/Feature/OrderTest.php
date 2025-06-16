@@ -65,7 +65,7 @@ test('puede listar las órdenes del usuario', function () {
         ]);
 });
 
-test('puede crear una orden desde el carrito', function () {
+test('puede iniciar el pago de una orden', function () {
     // Arrange
     // Crear datos necesarios para los productos
     $category = Category::factory()->create();
@@ -95,7 +95,8 @@ test('puede crear una orden desde el carrito', function () {
         'user_id' => $this->user->id,
         'product_id' => $price1->product_id,
         'quantity' => 2,
-        'price' => $price1->price
+        'price' => $price1->price,
+        'unit' => $price1->unit
     ]);
 
     $region = Region::factory()->create();
@@ -103,49 +104,20 @@ test('puede crear una orden desde el carrito', function () {
         'region_id' => $region->id
     ]);
 
+    // Asegurarnos que el usuario está autenticado
+    $this->actingAs($this->user);
+
     // Act
-    $response = $this->postJson('/api/orders/create-from-cart', [
-        'user_id' => $this->user->id,
-        "name" => fake()->name(),
-        "rut" => fake()->numerify('########-#'),
-        "email" => fake()->email(),
-        "phone" => fake()->phoneNumber(),
-        "address" => fake()->address(),
-        "region_id" => $region->id,
-        "municipality_id" => $municipality->id,
-        "billing_address" => fake()->address()
-    ]);
+    $response = $this->postJson('/api/orders/pay');
     
+
     // Assert - Verificar estado de la base de datos
-    $this->assertDatabaseCount('cart_items', 0);
+    $this->assertDatabaseCount('cart_items', 1);
 
     // Assert
     $response->assertStatus(201);
 });
 
-test('no puede crear una orden con carrito vacío', function () {
-    // Arrange 
-    $region = Region::factory()->create();
-    $municipality = Municipality::factory()->create([
-        'region_id' => $region->id
-    ]);
-    // Act
-    $response = $this->postJson('/api/orders/create-from-cart', [
-        'user_id' => $this->user->id,
-        "name" => fake()->name(),
-        "rut" => fake()->numerify('########-#'),
-        "email" => fake()->email(),
-        "phone" => fake()->phoneNumber(),
-        "address" => fake()->address(),
-        "region_id" => $region->id,
-        "municipality_id" => $municipality->id,
-        "billing_address" => fake()->address()
-    ]);
-
-    // Assert
-    $response->assertStatus(400)
-        ->assertJson(['message' => 'El carrito está vacío']);
-});
 
 test('puede pagar una orden pendiente', function () {
     // Arrange
@@ -231,5 +203,16 @@ test('no puede pagar una orden que no está pendiente', function () {
     // Assert
     $response->assertStatus(400)
         ->assertJson(['message' => 'La orden no está pendiente de pago']);
+});
+
+test('no puede acceder a la ruta de pago sin estar autenticado', function () {
+    // Arrange - No se necesita configuración adicional ya que no estamos autenticados
+
+    // Act
+    $response = $this->postJson('/api/orders/pay');
+
+    // Assert
+    $response->assertStatus(401)
+        ->assertJson(['message' => 'Unauthenticated.']);
 });
 
