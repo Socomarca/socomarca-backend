@@ -57,6 +57,7 @@ class AddressController extends Controller
         $address->contact_name = $data['contact_name'];
         $address->user_id = $user->id;
         $address->municipality_id = $data['municipality_id'];
+        $address->alias = $data['alias'];
 
         $address->save();
 
@@ -95,10 +96,9 @@ class AddressController extends Controller
         $address->is_default = $data['is_default'];
         $address->type = $data['type'];
         $address->contact_name = $data['contact_name'];
-
         $address->user_id = $user->id;
         $address->municipality_id = $data['municipality_id'];
-
+        $address->alias = $data['alias'];
         $address->save();
 
         return response()->json(['message' => 'The selected address has been updated']);

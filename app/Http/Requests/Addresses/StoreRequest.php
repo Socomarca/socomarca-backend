@@ -32,6 +32,7 @@ class StoreRequest extends FormRequest
             'phone' => 'bail|required|integer|digits:9',
             'contact_name' => 'bail|required|string',
             'municipality_id' => 'bail|required|integer|exists:municipalities,id',
+            'alias' => 'bail|string|max:50',
         ];
     }
 }

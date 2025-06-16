@@ -19,6 +19,7 @@ class Address extends Model
         'type',
         'phone',
         'contact_name',
+        'alias',
     ];
 
     protected function casts(): array
