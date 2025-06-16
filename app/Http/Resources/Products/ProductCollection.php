@@ -4,6 +4,7 @@ namespace App\Http\Resources\Products;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\ResourceCollection;
+use Illuminate\Support\Facades\Auth;
 
 class ProductCollection extends ResourceCollection
 {
@@ -33,6 +34,16 @@ class ProductCollection extends ResourceCollection
                     return true;
                 })
                 ->map(function ($price) use ($product) {
+                    // Verificar si el producto es favorito para el usuario autenticado
+                    $isFavorite = false;
+                    if (Auth::check()) {
+                        $isFavorite = $product->favorites()
+                            ->whereHas('favoriteList', function ($q) {
+                                $q->where('user_id', Auth::id());
+                            })
+                            ->exists();
+                    }
+                    
                     return [
                         'id' => $product->id,
                         'name' => $product->name,
@@ -54,7 +65,7 @@ class ProductCollection extends ResourceCollection
                         'stock' => isset($price->stock) ? (int) $price->stock : null,
                         'image' => $product->image ?? null,
                         'sku' => $product->sku ?? null,
-                        'is_favorite' => false, 
+                        'is_favorite' => $isFavorite, 
                     ];
                 });
         })->values();

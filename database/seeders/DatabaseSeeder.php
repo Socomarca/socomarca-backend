@@ -23,6 +23,7 @@ class DatabaseSeeder extends Seeder
                 RolesAndPermissionsSeeder::class,
                 OrderSeeder::class,
                 CartItemSeeder::class,
+                FavoriteSeeder::class,
             ]);
 
         }else{

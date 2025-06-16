@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Auth;
 
 class Product extends Model
 {
@@ -38,6 +39,10 @@ class Product extends Model
         [
             'field' => 'brand_id',
             'operators' => ['=', '!=',],
+        ],
+        [
+            'field' => 'is_favorite',
+            'operators' => ['='],
         ],
         [
             'field' => 'name',
@@ -126,6 +131,28 @@ class Product extends Model
                 // Ordenar por precio si se solicita en el filtro
                 if (isset($filter['sort']) && in_array(strtolower($filter['sort']), ['asc', 'desc'])) {
                     $sortByPrice = strtolower($filter['sort']);
+                }
+                continue;
+            }
+
+            // Filtro especial para favoritos
+            if (isset($filter['field']) && $filter['field'] === 'is_favorite') {
+                $value = filter_var($filter['value'], FILTER_VALIDATE_BOOLEAN);
+                
+                if ($value === true) {
+                    // Solo productos que son favoritos del usuario autenticado
+                    $query->whereHas('favorites', function ($q) {
+                        $q->whereHas('favoriteList', function ($subQ) {
+                            $subQ->where('user_id', Auth::id());
+                        });
+                    });
+                } else {
+                    // Solo productos que NO son favoritos del usuario autenticado
+                    $query->whereDoesntHave('favorites', function ($q) {
+                        $q->whereHas('favoriteList', function ($subQ) {
+                            $subQ->where('user_id', Auth::id());
+                        });
+                    });
                 }
                 continue;
             }
