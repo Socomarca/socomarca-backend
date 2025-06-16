@@ -171,6 +171,7 @@ test('validate required fields when creating an address', function () {
             'phone',
             'contact_name',
             'municipality_id',
+            'alias',
         ]);
 });
 
