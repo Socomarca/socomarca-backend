@@ -17,9 +17,10 @@ class FavoriteController extends Controller
     public function index(){
        
         $userId = Auth::user()->id;
-        $lists = FavoriteList::with('favorites.product')
-            ->where('user_id', $userId)
-            ->get();
+        $lists = FavoriteList::with([
+            'favorites.product.category',
+            'favorites.product.subcategory'
+        ])->where('user_id', $userId)->get();
 
         return FavoriteListResource::collection($lists);
     }
