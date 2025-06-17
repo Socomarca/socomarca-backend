@@ -6,12 +6,14 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Categories\ShowRequest;
 use App\Http\Resources\Categories\CategoryCollection;
 use App\Models\Category;
+use Illuminate\Http\Request;
 
 class CategoryController extends Controller
 {
     public function index()
     {
-        $categories = Category::all();
+        $perPage = request()->input('per_page', 20);
+        $categories = Category::withCount(['subcategories', 'products'])->paginate($perPage);
 
         $data = new CategoryCollection($categories);
 
@@ -33,5 +35,27 @@ class CategoryController extends Controller
         $data = new CategoryCollection($categories);
 
         return response()->json($data[0]);
+    }
+
+    /**
+     * Search categories by filters
+     *
+     * @param Request $request
+     *
+     * @return CategoryCollection
+     */
+    public function search(Request $request)
+    {
+        $perPage = $request->input('per_page', 20);
+        $filters = $request->input('filters', []);
+        
+        $result = Category::select("categories.*")
+            ->withCount(['subcategories', 'products'])
+            ->filter($filters)
+            ->paginate($perPage);
+
+        $data = new CategoryCollection($result);
+
+        return $data;
     }
 }
