@@ -55,6 +55,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::middleware(['role:admin|superadmin'])->group(function () {
         Route::get('/roles/users', [RoleController::class, 'rolesWithUsers']);
         Route::get('/roles/{user}', [RoleController::class, 'userRoles']);
+        Route::post('/users/search', [RoleController::class, 'searchUsers']);
     });
 
     Route::get('/addresses', [AddressController::class, 'index'])->name('addresses.index');
