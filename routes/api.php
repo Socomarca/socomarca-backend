@@ -59,6 +59,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/addresses/{address}', [AddressController::class, 'destroy'])->name('addresses.destroy');
 
     Route::get('/categories', [CategoryController::class,'index'])->name('categories.index');
+    Route::post('/categories/search', [CategoryController::class, 'search'])->name('categories.search');
     Route::get('/categories/{id}', [CategoryController::class,'show'])->name('categories.show');
     Route::get('/subcategories', [SubcategoryController::class,'index'])->name('subcategories.index');
     Route::get('/subcategories/{id}', [SubcategoryController::class,'show'])->name('subcategories.show');
