@@ -18,7 +18,8 @@ class UserController extends Controller
 {
     public function index()
     {
-        $users = User::paginate(20);
+        $perPage = request()->input('per_page', 20);
+        $users = User::with('roles')->paginate($perPage);
 
         $data = new UserCollection($users);
 
@@ -114,5 +115,28 @@ class UserController extends Controller
         $user = $request->user();
         return $user->toResource(ProfileResource::class);
         // return $user->toResource();
+    }
+
+    /**
+     * Search users by filters
+     * Requires manage-users permission
+     *
+     * @param Request $request
+     *
+     * @return UserCollection
+     */
+    public function search(Request $request)
+    {
+        $perPage = $request->input('per_page', 20);
+        $filters = $request->input('filters', []);
+        
+        $result = User::select("users.*")
+            ->with('roles')
+            ->filter($filters)
+            ->paginate($perPage);
+
+        $data = new UserCollection($result);
+
+        return $data;
     }
 }
