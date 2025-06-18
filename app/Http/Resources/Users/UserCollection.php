@@ -14,6 +14,20 @@ class UserCollection extends ResourceCollection
      */
     public function toArray(Request $request): array
     {
-        return parent::toArray($request);
+        return $this->collection->map(function ($user) {
+            return [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'phone' => $user->phone,
+                'rut' => $user->rut,
+                'business_name' => $user->business_name,
+                'is_active' => $user->is_active,
+                'last_login' => $user->last_login,
+                'roles' => $user->roles ? $user->roles->pluck('name') : [],
+                'created_at' => $user->created_at,
+                'updated_at' => $user->updated_at,
+            ];
+        })->toArray();
     }
 }
