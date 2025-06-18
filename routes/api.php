@@ -52,11 +52,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/users/{id}', [UserController::class, 'show']);
     Route::put('/users/{id}', [UserController::class, 'update']);
     Route::delete('/users/{id}', [UserController::class, 'destroy']);
+    Route::post('/users/search', [UserController::class, 'searchUsers'])->middleware('role:admin|superadmin');
 
     Route::middleware(['role:admin|superadmin'])->group(function () {
         Route::get('/roles/users', [RoleController::class, 'rolesWithUsers']);
         Route::get('/roles/{user}', [RoleController::class, 'userRoles']);
-        Route::post('/users/search', [RoleController::class, 'searchUsers']);
     });
 
     Route::get('/addresses', [AddressController::class, 'index'])->name('addresses.index');
