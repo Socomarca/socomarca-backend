@@ -23,7 +23,13 @@ class StoreRequest extends FormRequest
     {
         return
         [
-            'product_id' => 'bail|required|integer|exists:products,id',
+            'favorite_list_id' => 'required',
+            'product_id' => 'required|exists:products,id',
+            'unit' => [
+                'required',
+                'string',
+                new \App\Rules\ProductHasUnit($this->input('product_id')),
+            ],
         ];
     }
 
