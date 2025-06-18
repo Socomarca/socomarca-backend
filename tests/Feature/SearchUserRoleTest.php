@@ -29,7 +29,7 @@ test('puede buscar usuarios agrupados por rol y ordenados por nombre', function 
     $adminUser = User::factory()->create();
     $adminUser->assignRole('admin');
 
-    $route = '/api/users/search';
+    $route = '/api/users/search-roles';
 
     $payload = [
         'roles' => ['admin', 'cliente', 'supervisor', 'editor', 'superadmin'],
@@ -51,7 +51,7 @@ test('valida que los roles sean válidos', function () {
     $admin = User::factory()->create();
     $admin->assignRole('admin');
 
-    $route = '/api/users/search';
+    $route = '/api/users/search-roles';
 
     $payload = [
         'roles' => ['noexiste', 'admin'],
@@ -67,7 +67,7 @@ test('valida que sort_field y sort_direction sean válidos', function () {
     $admin = User::factory()->create();
     $admin->assignRole('admin');
 
-    $route = '/api/users/search';
+    $route = '/api/users/search-roles';
 
     $payload = [
         'sort_field' => 'noexiste',
