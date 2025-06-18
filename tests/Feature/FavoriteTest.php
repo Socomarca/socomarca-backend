@@ -2,6 +2,7 @@
 
 use App\Models\Favorite;
 use App\Models\FavoriteList;
+use App\Models\Price;
 use App\Models\Product;
 use App\Models\User;
 use Illuminate\Testing\Fluent\AssertableJson;
@@ -11,21 +12,28 @@ test('query of user favorites failed authentication with no user', function () {
     $this->getJson($route)->assertStatus(401);
 });
 
-test('successful query of user favorites', function () {
+test('successful query of user favorites with products', function () {
     $route = route('favorites.index');
     $user = User::factory()
         ->has(
             FavoriteList::factory()
-                ->has(Favorite::factory()->count(15))
+                ->has(
+                    Favorite::factory()
+                        ->for(
+                            Product::factory(['name' => 'Product 1'])
+                                ->has(Price::factory()->count(2), 'prices'),
+                            'product'
+                        )
+                        ->count(10)
+                )
                 ->count(2),
             'favoritesList'
         )
         ->create();
 
-    $favorite = $user->favoritesList()->first()->favorites()->first();
-
     $this->actingAs($user, 'sanctum')
         ->getJson($route)
+        ->ddJson()
         ->assertOk()
         ->assertJsonStructure([
             'data' => [
@@ -64,18 +72,32 @@ test('successful query of user favorites', function () {
         );
 });
 
-test('favorite store error because of validation failure', function () {
+test('favorite store error because of validation and authorization failure', function () {
     $user = User::factory()->create();
     $route = route('favorites.store');
 
-    $this->actingAs($user, 'sanctum')
-        ->postJson($route)
-        ->assertInvalid(['favorite_list_id', 'product_id']);
+    $user2 = User::factory()
+        ->has(
+            FavoriteList::factory(),
+            'favoritesList'
+        )
+        ->create();
 
-    // TODO Complementar aserciones
+    $this->actingAs($user, 'sanctum')
+        ->postJson($route, [
+            'product_id' => Product::factory()->create()->id,
+            'favorite_list_id' => FavoriteList::factory()->create()->id,
+        ])
+        ->assertForbidden();
+
+    $this->actingAs($user2, 'sanctum')
+        ->postJson($route, [
+            'favorite_list_id' => $user2->favoritesList()->first()->id,
+        ])
+        ->assertInvalid(['product_id']);
 });
 
-test('new favorite list succesfully stored', function () {
+test('new favorite succesfully stored', function () {
     $route = route('favorites.store');
     $user = User::factory()->has(
         FavoriteList::factory(),
@@ -107,7 +129,7 @@ test('new favorite list succesfully stored', function () {
         );
 });
 
-test('favorite list deleted', function () {
+test('favorite deleted', function () {
     $route = route('favorites.store');
     $user = User::factory()->has(
         FavoriteList::factory(),
