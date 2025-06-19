@@ -11,7 +11,7 @@ class DestroyRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return true;
+        return $this->user()->can('manage-users');
     }
 
     /**
@@ -23,7 +23,7 @@ class DestroyRequest extends FormRequest
     {
         return
         [
-            'id' => 'bail|integer',
+            'id' => 'bail|integer|exists:users,id',
         ];
     }
 
@@ -31,7 +31,8 @@ class DestroyRequest extends FormRequest
     {
         return
         [
-            'id.integer' => 'The id field in params must be an integer.',
+            'id.integer' => 'El id en los parámetros debe ser un entero.',
+            'id.exists' => 'El usuario no existe.',
         ];
     }
 
