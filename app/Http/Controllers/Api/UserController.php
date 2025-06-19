@@ -131,7 +131,7 @@ class UserController extends Controller
         $perPage = $request->input('per_page', 20);
         $filters = $request->input('filters', []);
 
-        // Si recibes roles como array, agrégalo como filtro especial
+        
         $roles = $request->input('roles', []);
         if (!empty($roles)) {
             if (count($roles) === 1) {

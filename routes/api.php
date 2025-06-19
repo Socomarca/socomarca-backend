@@ -52,7 +52,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/users/{id}', [UserController::class, 'show']);
     Route::put('/users/{id}', [UserController::class, 'update']);
     Route::delete('/users/{id}', [UserController::class, 'destroy']);
-    Route::post('/users/search-roles', [UserController::class, 'searchUsers'])->middleware('role:admin|superadmin');
+    
 
     Route::middleware(['role:admin|superadmin'])->group(function () {
         Route::get('/roles/users', [RoleController::class, 'rolesWithUsers']);
