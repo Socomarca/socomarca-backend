@@ -16,15 +16,32 @@ class FavoriteResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        $favoriteListId = $this->favorite_list_id;
-        $productId = $this->product_id;
+        $product = $this->product;
 
-        return
-        [
+        return [
             'id' => $this->id,
-            'favorite_list' => FavoriteList::select('id', 'name')->where('id', $favoriteListId)->first(),
-            'product' => Product::select('id', 'name', 'description', 'sku', 'status')->where('id', $productId)->first(),
-            
+            'unit' => $this->unit,
+            'product' => [
+                'id' => $product->id,
+                'name' => $product->name,
+                'category' => $product->category ? [
+                    'id' => $product->category->id,
+                    'name' => $product->category->name,
+                ] : null,
+                'subcategory' => $product->subcategory ? [
+                    'id' => $product->subcategory->id,
+                    'name' => $product->subcategory->name,
+                ] : null,
+                'brand' => $product->brand ? [
+                    'id' => $product->brand->id,
+                    'name' => $product->brand->name,
+                ] : null,
+                'unit' => $product->prices()->where('unit', $this->unit)->first()?->unit,
+                'price' => $product->prices()->where('unit', $this->unit)->first()?->price,
+                'stock' => $product->prices()->where('unit', $this->unit)->first()?->stock,
+                'image' => $product->image,
+                'sku' => $product->sku,
+            ]
         ];
     }
 }

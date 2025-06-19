@@ -19,7 +19,12 @@ class FavoriteFactory extends Factory
         return
         [
             'favorite_list_id' => \App\Models\FavoriteList::factory(),
-            'product_id' => \App\Models\Product::factory(),
+            'product_id' => \App\Models\Product::factory()
+                ->has(\App\Models\Price::factory()->count(2), 'prices'),
+            'unit' => function (array $attributes) {
+                $product = \App\Models\Product::find($attributes['product_id']);
+                return $product->prices()->first()->unit;
+            }
         ];
     }
 }
