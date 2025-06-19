@@ -19,6 +19,7 @@ use App\Http\Controllers\Api\CartItemController;
 use App\Http\Controllers\Api\PaymentMethodController;
 use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\ReportController;
+use App\Http\Controllers\Api\RoleController;
 use App\Http\Controllers\Api\WebpayController;
 
 
@@ -51,6 +52,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/users/{id}', [UserController::class, 'show']);
     Route::put('/users/{id}', [UserController::class, 'update']);
     Route::delete('/users/{id}', [UserController::class, 'destroy']);
+    
+
+    Route::middleware(['role:admin|superadmin'])->group(function () {
+        Route::get('/roles/users', [RoleController::class, 'rolesWithUsers']);
+        Route::get('/roles/{user}', [RoleController::class, 'userRoles']);
+    });
 
     Route::get('/addresses', [AddressController::class, 'index'])->name('addresses.index');
     Route::post('/addresses', [AddressController::class, 'store'])->name('addresses.store');
