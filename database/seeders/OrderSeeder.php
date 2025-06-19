@@ -38,12 +38,12 @@ class OrderSeeder extends Seeder
 
                 $user = User::find($userId);
                 $address = $user->addresses()->where('type', 'billing')->first();
-                $order_meta = json_encode([
+                $order_meta = [
                     'user' => $user->toArray(),
                     'address' => $address ? $address->toArray() : null,
-                ]);
+                ];
 
-       
+
                 $order = \App\Models\Order::create([
                     'user_id' => $userId,
                     'subtotal' => 0,

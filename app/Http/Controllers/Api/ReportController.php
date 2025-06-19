@@ -22,6 +22,25 @@ class ReportController extends Controller
 
         $type = $request->input('type', 'sales'); 
 
+        if ($type === 'top-municipalities') {
+            $topMunicipalities = \App\Models\Order::searchReport($start, $end, 'top-municipalities')->get();
+
+            // Calcula los totales sumando los meses consultados
+            $total_purchases = $topMunicipalities->sum(function($item) {
+                return (int) $item->total_purchases;
+            });
+            $quantity = $topMunicipalities->sum(function($item) {
+                return (int) $item->quantity;
+            });
+
+            return response()->json([
+                'top_municipalities' => $topMunicipalities,
+                'total_purchases' => $total_purchases,
+                'quantity' => $quantity,
+            ]);
+        }
+
+        // Solo para los tipos que usan Eloquent y relaciones:
         $orders = \App\Models\Order::searchReport($start, $end, $type)->with('user')->get();
 
         if ($type === 'top-customers') {
