@@ -130,43 +130,55 @@ class UserController extends Controller
     {
         $perPage = $request->input('per_page', 20);
         $filters = $request->input('filters', []);
-        
+
+        // Si recibes roles como array, agrégalo como filtro especial
+        $roles = $request->input('roles', []);
+        if (!empty($roles)) {
+            if (count($roles) === 1) {
+                $filters[] = [
+                    'field' => 'role',
+                    'operator' => '=',
+                    'value' => $roles[0],
+                ];
+            } else {
+                $filters[] = [
+                    'field' => 'role',
+                    'operator' => 'IN',
+                    'value' => $roles,
+                ];
+            }
+        }
+
+        $sortField = $request->input('sort_field', 'name');
+        $sortDirection = $request->input('sort_direction', 'asc');
+
         $result = User::select("users.*")
             ->with('roles')
             ->filter($filters)
+            ->orderBy($sortField, $sortDirection)
             ->paginate($perPage);
 
-        $data = new UserCollection($result);
-
-        return $data;
+        return new \App\Http\Resources\Users\UserCollection($result);
     }
 
-        public function searchUsers(SearchUsersRequest $request)
+    public function searchUsers(Request $request)
     {
-        // Obtén los roles a filtrar (o todos si no se especifica)
-        $roles = $request->input('roles', ['admin', 'superadmin', 'supervisor', 'editor', 'cliente']);
-        if (is_string($roles)) {
-            $roles = explode(',', $roles);
-        }
+        $roles = $request->input('roles', []);
+        $sortField = $request->input('sort_field', 'name');
+        $sortDirection = $request->input('sort_direction', 'asc');
+        $perPage = $request->input('per_page', 20);
 
         $result = [];
 
-        foreach ($roles as $roleName) {
-            $users = User::role($roleName)
-                ->when($request->filled('name'), function ($q) use ($request) {
-                    $q->where('name', 'like', '%' . $request->input('name') . '%');
-                })
-                ->when($request->filled('email'), function ($q) use ($request) {
-                    $q->where('email', 'like', '%' . $request->input('email') . '%');
-                })
-                ->orderBy(
-                    $request->input('sort_field', 'name'),
-                    $request->input('sort_direction', 'asc')
-                )
-                ->get(['id', 'name', 'email', 'created_at']);
+        foreach ($roles as $role) {
+            $users = User::role($role)
+                ->with('roles')
+                ->orderBy($sortField, $sortDirection)
+                ->paginate($perPage, ['*'], $role.'_page')
+                ->items();
 
             $result[] = [
-                'role' => $roleName,
+                'role' => $role,
                 'users' => $users,
             ];
         }
