@@ -55,11 +55,5 @@ class ValidateRut implements ValidationRule
         if (strtoupper($dv) != strtoupper($dvEsperado)) {
             $fail('El RUT ingresado no es válido.');
         }
-
-        $user = User::where('rut', $value)->first();
-
-        if ($user === null) {
-            $fail('RUT inválido');
-        }
     }
 }

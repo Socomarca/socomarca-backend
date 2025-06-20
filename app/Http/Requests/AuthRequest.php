@@ -70,6 +70,11 @@ class AuthRequest extends FormRequest
     protected function passedValidation()
     {
         $user = User::where('rut', $this->input('rut'))->first();
+        
+        if (!$user) {
+            abort(401, 'Usuario no encontrado');
+        }
+        
         $isPasswordValid = Hash::check(
             $this->input('password'),
             $user->password

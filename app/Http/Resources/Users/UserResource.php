@@ -28,6 +28,7 @@ class UserResource extends JsonResource
             'password_changed_at' => $this->password_changed_at,
             'billing_address' => $this->billing_address,
             'shipping_addresses' => $this->shipping_addresses,
+            'roles' => $this->roles ? $this->roles->pluck('name') : [],
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];
