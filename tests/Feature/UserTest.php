@@ -287,3 +287,28 @@ test('combina múltiples filtros', function () {
     expect($response->json('data')[0]['is_active'])->toBeTrue();
     $response->assertStatus(200);
 }); 
+
+test('filtra usuarios por roles', function () {
+    \App\Models\User::truncate();
+
+    $admin = User::factory()->create(['name' => 'Ana Admin']);
+    $admin->assignRole('admin');
+
+    $cliente = User::factory()->create(['name' => 'Carlos Cliente']);
+    $cliente->assignRole('cliente');
+
+
+    $response = $this->actingAs($this->adminUser, 'sanctum')
+        ->postJson('/api/users/search', [
+            'roles' => ['admin', 'cliente'],
+            'sort_field' => 'name',
+            'sort_direction' => 'asc'
+        ]);
+
+    $data = $response->json('data');
+    expect($data)->toHaveCount(2);
+    expect(collect($data)->pluck('name'))->toContain('Ana Admin');
+    expect(collect($data)->pluck('name'))->toContain('Carlos Cliente');
+    
+    $response->assertStatus(200);
+});

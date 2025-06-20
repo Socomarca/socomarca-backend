@@ -165,6 +165,15 @@ class User extends Authenticatable
     public function scopeFilter($query, array $filters)
     {
         foreach ($filters as $filter) {
+            if ($filter['field'] === 'role' && !empty($filter['value'])) {
+                if (($filter['operator'] ?? '=') === 'IN' && is_array($filter['value'])) {
+                    $query->role($filter['value']);
+                } else {
+                    $query->role($filter['value']);
+                }
+                continue;
+            }
+
             $field = array_find($this->allowedFilters, function ($item) use ($filter) {
                 return $item['field'] === $filter['field'];
             });

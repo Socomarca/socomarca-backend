@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\SearchUsersRequest;
 use App\Http\Requests\Users\DestroyRequest;
 use App\Http\Requests\Users\ShowRequest;
 use App\Http\Requests\Users\StoreRequest;
@@ -279,15 +280,60 @@ class UserController extends Controller
     {
         $perPage = $request->input('per_page', 20);
         $filters = $request->input('filters', []);
+
         
+        $roles = $request->input('roles', []);
+        if (!empty($roles)) {
+            if (count($roles) === 1) {
+                $filters[] = [
+                    'field' => 'role',
+                    'operator' => '=',
+                    'value' => $roles[0],
+                ];
+            } else {
+                $filters[] = [
+                    'field' => 'role',
+                    'operator' => 'IN',
+                    'value' => $roles,
+                ];
+            }
+        }
+
+        $sortField = $request->input('sort_field', 'name');
+        $sortDirection = $request->input('sort_direction', 'asc');
+
         $result = User::select("users.*")
             ->with('roles')
             ->filter($filters)
+            ->orderBy($sortField, $sortDirection)
             ->paginate($perPage);
 
-        $data = new UserCollection($result);
+        return new \App\Http\Resources\Users\UserCollection($result);
+    }
 
-        return $data;
+    public function searchUsers(Request $request)
+    {
+        $roles = $request->input('roles', []);
+        $sortField = $request->input('sort_field', 'name');
+        $sortDirection = $request->input('sort_direction', 'asc');
+        $perPage = $request->input('per_page', 20);
+
+        $result = [];
+
+        foreach ($roles as $role) {
+            $users = User::role($role)
+                ->with('roles')
+                ->orderBy($sortField, $sortDirection)
+                ->paginate($perPage, ['*'], $role.'_page')
+                ->items();
+
+            $result[] = [
+                'role' => $role,
+                'users' => $users,
+            ];
+        }
+
+        return response()->json($result);
     }
 
     /**
