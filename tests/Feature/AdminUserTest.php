@@ -249,9 +249,8 @@ test('puede obtener lista de usuarios', function () {
                     'roles'
                 ]
             ],
-            'current_page',
-            'per_page',
-            'total'
+            'links',
+            'meta'
         ]);
 });
 
@@ -269,16 +268,14 @@ test('puede obtener usuario especifico', function () {
     // Assert
     $response->assertStatus(200)
         ->assertJsonStructure([
-            'data' => [
-                'id',
-                'name',
-                'email',
-                'phone',
-                'rut',
-                'business_name',
-                'is_active',
-                'roles'
-            ]
+            'id',
+            'name',
+            'email',
+            'phone',
+            'rut',
+            'business_name',
+            'is_active',
+            'roles'
         ]);
 });
 
@@ -309,7 +306,15 @@ test('puede buscar usuarios con filtros', function () {
 
     // Act
     $response = $this->actingAs($admin, 'sanctum')
-        ->getJson('/api/users/search?filters[name]=Juan');
+        ->postJson('/api/users/search', [
+            'filters' => [
+                [
+                    'field' => 'name',
+                    'operator' => 'ILIKE',
+                    'value' => '%Juan%'
+                ]
+            ]
+        ]);
 
     // Assert
     $response->assertStatus(200)
@@ -321,6 +326,8 @@ test('puede buscar usuarios con filtros', function () {
                     'email',
                     'roles'
                 ]
-            ]
+            ],
+            'links',
+            'meta'
         ]);
 }); 
