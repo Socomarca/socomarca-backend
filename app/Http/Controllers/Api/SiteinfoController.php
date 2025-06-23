@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\SiteInfo\SiteinfoResource;
 use App\Models\Siteinfo;
 use Illuminate\Http\Request;
 
@@ -21,9 +22,20 @@ class SiteinfoController extends Controller
         $social = Siteinfo::where('key', 'social_media')->first();
 
         return response()->json([
-            'header' => $header ? $header->value : new \stdClass(),
-            'footer' => $footer ? $footer->value : new \stdClass(),
-            'social_media' => $social ? $social->value : [],
+            'header' => $header ? $header->value : (object)[
+                'contact_phone' => '',
+                'contact_email' => ''
+            ],
+            'footer' => $footer ? $footer->value : (object)[
+                'contact_phone' => '',
+                'contact_email' => ''
+            ],
+            'social_media' => $social ? $social->value : [
+                [
+                    'label' => '',
+                    'link' => ''
+                ]
+            ],
         ]);
     }   
     
@@ -68,9 +80,7 @@ class SiteinfoController extends Controller
     {
         $terms = Siteinfo::where('key', 'terms')->first();
 
-        return response()->json([
-            'content' => $terms ? $terms->content : '',
-        ]);
+        return $terms ? new SiteinfoResource($terms) : response()->json(['content' => '']);
     }
 
     /**
@@ -102,9 +112,7 @@ class SiteinfoController extends Controller
     {
         $privacy = Siteinfo::where('key', 'privacy_policy')->first();
 
-        return response()->json([
-            'content' => $privacy ? $privacy->content : '',
-        ]);
+        return $privacy ? new SiteinfoResource($privacy) : response()->json(['content' => '']);
     }
 
     /**
