@@ -233,7 +233,7 @@ class UserController extends Controller
             if ($currentUser && $user->id === $currentUser->id) {
                 return response()->json([
                     'message' => 'No puedes eliminar tu propia cuenta.',
-                ], 422);
+                ], 403);
             }
             $user->cartItems()->delete();
             $user->favoritesList()->delete();

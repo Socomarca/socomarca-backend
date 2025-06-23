@@ -159,7 +159,7 @@ test('usuario no puede eliminarse a si mismo', function () {
         ->deleteJson("/api/users/{$admin->id}");
 
     // Assert
-    $response->assertStatus(422)
+    $response->assertForbidden()
         ->assertJson([
             'message' => 'No puedes eliminar tu propia cuenta.'
         ]);
