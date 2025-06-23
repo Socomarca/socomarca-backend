@@ -79,8 +79,10 @@ class SiteinfoController extends Controller
     public function terms()
     {
         $terms = Siteinfo::where('key', 'terms')->first();
-
-        return $terms ? new SiteinfoResource($terms) : response()->json(['content' => '']);
+        return response()->json([
+            'content' => $terms ? $terms->content : '',
+        ]);
+        
     }
 
     /**
@@ -112,7 +114,9 @@ class SiteinfoController extends Controller
     {
         $privacy = Siteinfo::where('key', 'privacy_policy')->first();
 
-        return $privacy ? new SiteinfoResource($privacy) : response()->json(['content' => '']);
+        return response()->json([
+            'content' => $privacy ? $privacy->content : '',
+        ]);
     }
 
     /**

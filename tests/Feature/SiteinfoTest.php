@@ -88,12 +88,12 @@ class SiteinfoTest extends TestCase
         $this->getJson('/api/terms')
         ->assertOk()
         ->assertJson([
-            'data' => ['content' => '<h1>Terms</h1>']
+            'content' => '<h1>Terms</h1>'
         ]);
         $this->getJson('/api/privacy-policy')
         ->assertOk()
         ->assertJson([
-            'data' => ['content' => '<h1>Policy</h1>']
+            'content' => '<h1>Policy</h1>'
         ]);
     }
 
