@@ -180,19 +180,21 @@ class SiteinfoController extends Controller
             'modal_enabled' => 'required|boolean',
         ]);
 
-        
+        $customerMessage = Siteinfo::where('key', 'customer_message')->first();
+        $oldValue = $customerMessage ? $customerMessage->value : [];
+
         $bannerDesktopImage = $request->file('banner_desktop_image')
             ? $request->file('banner_desktop_image')->store('customer-message', 'public')
-            : (Siteinfo::where('key', 'customer_message')->value('value.banner.desktop_image') ?? '');
+            : ($oldValue['banner']['desktop_image'] ?? '');
 
         $bannerMobileImage = $request->file('banner_mobile_image')
             ? $request->file('banner_mobile_image')->store('customer-message', 'public')
-            : (Siteinfo::where('key', 'customer_message')->value('value.banner.mobile_image') ?? '');
+            : ($oldValue['banner']['mobile_image'] ?? '');
 
         $modalImage = $request->file('modal_image')
             ? $request->file('modal_image')->store('customer-message', 'public')
-            : (Siteinfo::where('key', 'customer_message')->value('value.modal.image') ?? '');
-
+            : ($oldValue['modal']['image'] ?? '');        
+        
         $value = [
             'header' => [
                 'color' => $data['header_color'],
