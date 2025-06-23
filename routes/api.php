@@ -20,6 +20,7 @@ use App\Http\Controllers\Api\PaymentMethodController;
 use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\ReportController;
 use App\Http\Controllers\Api\RoleController;
+use App\Http\Controllers\Api\SiteinfoController;
 use App\Http\Controllers\Api\WebpayController;
 
 
@@ -119,6 +120,19 @@ Route::middleware('auth:sanctum')->group(function () {
 Route::get('/webpay/return', [WebpayController::class, 'return'])->name('webpay.return');
 Route::get('/webpay/status', [WebpayController::class, 'status']);
 Route::post('/webpay/refund', [WebpayController::class, 'refund']);
+
+
+Route::get('/siteinfo', [SiteinfoController::class, 'show']);
+Route::get('/terms', [SiteinfoController::class, 'terms']);
+Route::get('/privacy-policy', [SiteinfoController::class, 'privacyPolicy']);
+Route::get('/customer-message', [SiteinfoController::class, 'customerMessage']);
+
+Route::middleware(['auth:sanctum', 'role:editor|admin|superadmin'])->group(function () {
+    Route::put('/siteinfo', [SiteinfoController::class, 'update']);
+    Route::put('/terms', [SiteinfoController::class, 'updateTerms']);
+    Route::put('/privacy-policy', [SiteinfoController::class, 'updatePrivacyPolicy']);
+    Route::post('/customer-message', [SiteinfoController::class, 'updateCustomerMessage']);
+});
 
 // Ruta catch-all al final
 Route::any('{url}', function() {
