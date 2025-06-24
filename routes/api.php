@@ -21,6 +21,7 @@ use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\ReportController;
 use App\Http\Controllers\Api\RoleController;
 use App\Http\Controllers\Api\WebpayController;
+use App\Http\Controllers\Api\FaqController;
 
 
 
@@ -111,6 +112,16 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/orders/reports/failed-transactions-list', [ReportController::class, 'failedTransactionsList']);
     });
 
+});
+
+Route::get('/faq', [FaqController::class, 'index'])->name('faq.index');
+Route::post('/faq/search', [FaqController::class, 'search'])->name('faq.search');
+
+Route::middleware(['auth:sanctum'])->group(function () {
+    Route::get('/faq/{faq}', [FaqController::class, 'show'])->name('faq.show');
+    Route::post('/faq', [FaqController::class, 'store'])->name('faq.store')->middleware('permission:store-faq');
+    Route::put('/faq/{faq}', [FaqController::class, 'update'])->name('faq.update')->middleware('permission:update-faq');
+    Route::delete('/faq/{faq}', [FaqController::class, 'destroy'])->name('faq.destroy')->middleware('permission:delete-faq');
 });
 
 //Se sacan de la autenticacion porque es confirmacion de pago.
