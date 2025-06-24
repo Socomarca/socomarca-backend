@@ -13,6 +13,29 @@ use Spatie\Permission\Models\Role;
 
 class RoleController extends Controller
 {
+    /**
+     * Obtener todos los roles del sistema
+     * Solo accesible para usuarios con roles admin y superadmin
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function index()
+    {
+        $roles = Role::with('permissions')->get();
+
+        $result = $roles->map(function($role) {
+            return [
+                'id' => $role->id,
+                'name' => $role->name,
+                'permissions' => $role->permissions->pluck('name'),
+                'created_at' => $role->created_at,
+                'updated_at' => $role->updated_at,
+            ];
+        });
+
+        return response()->json($result);
+    }
+
     public function rolesWithUsers()
     {
         $roles = Role::all();
