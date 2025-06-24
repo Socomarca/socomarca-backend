@@ -35,18 +35,9 @@ test('usuario puede ver la información de su propio perfil', function () {
             'type',
             'phone',
             'contact_name',
-            'municipality' => [
-                'id',
-                'name',
-                'code',
-                'region' => [
-                    'id',
-                    'name',
-                    'code',
-                ]
-            ],
-            'created_at',
-            'updated_at',
+            'municipality_name',
+            'region_name',
+            'alias',
         ];
 
     $structure = [
