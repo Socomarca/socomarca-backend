@@ -11,7 +11,7 @@ class SubcategoryController extends Controller
 {
     public function index()
     {
-        $subcategories = Subcategory::all();
+        $subcategories = Subcategory::with('category')->get();
 
         $data = new SubcategoryCollection($subcategories);
 
@@ -28,7 +28,7 @@ class SubcategoryController extends Controller
             ], 404);
         }
 
-        $subcategories = Subcategory::where('id', $id)->get();
+        $subcategories = Subcategory::with('category')->where('id', $id)->get();
 
         $data = new SubcategoryCollection($subcategories);
 
