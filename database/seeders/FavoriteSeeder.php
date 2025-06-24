@@ -16,7 +16,7 @@ class FavoriteSeeder extends Seeder
      */
     public function run(): void
     {
-        
+
         $users = User::all();
         $products = Product::all();
 
@@ -24,7 +24,7 @@ class FavoriteSeeder extends Seeder
             $this->command->error('No hay usuarios o productos disponibles para crear listas de favoritos y favoritos.');
             return;
         }
-        
+
         $favoriteListNames = [
             'Favoritos',
             'Lista de deseos',
@@ -43,18 +43,18 @@ class FavoriteSeeder extends Seeder
         foreach ($users as $user) {
             $numLists = rand(1, 3);
             $usedNames = [];
-            
+
             for ($i = 0; $i < $numLists; $i++) {
-                
+
                 $availableNames = array_diff($favoriteListNames, $usedNames);
-                
+
                 if (empty($availableNames)) {
-                    break; 
+                    break;
                 }
-                
+
                 $listName = $availableNames[array_rand($availableNames)];
                 $usedNames[] = $listName;
-                
+
                 $favoriteList = FavoriteList::create([
                     'name' => $listName,
                     'user_id' => $user->id,
@@ -63,27 +63,30 @@ class FavoriteSeeder extends Seeder
                 $createdLists[] = $favoriteList;
             }
         }
-        
+
         $totalFavorites = 0;
         foreach ($createdLists as $favoriteList) {
             $numFavorites = rand(3, 8);
-            $usedProducts = []; 
-            
+            $usedProducts = [];
+
             for ($i = 0; $i < $numFavorites; $i++) {
-                
+
                 $availableProducts = $products->whereNotIn('id', $usedProducts);
-                
+
                 if ($availableProducts->isEmpty()) {
-                    break; 
+                    break;
                 }
-                
+
                 $product = $availableProducts->random();
                 $usedProducts[] = $product->id;
 
-                
+                $price = $product->prices()->first();
+
+
                 Favorite::create([
                     'favorite_list_id' => $favoriteList->id,
                     'product_id' => $product->id,
+                    'unit' => $price->unit,
                 ]);
 
                 $totalFavorites++;
@@ -91,4 +94,4 @@ class FavoriteSeeder extends Seeder
         }
 
     }
-} 
+}

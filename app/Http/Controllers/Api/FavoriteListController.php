@@ -8,7 +8,9 @@ use App\Http\Requests\FavoritesList\IndexRequest;
 use App\Http\Requests\FavoritesList\ShowRequest;
 use App\Http\Requests\FavoritesList\StoreRequest;
 use App\Http\Requests\FavoritesList\UpdateRequest;
+use App\Http\Resources\Favorites\FavoriteResource;
 use App\Http\Resources\FavoritesList\FavoriteListCollection;
+use App\Http\Resources\FavoritesList\FavoriteListResource;
 use App\Models\FavoriteList;
 use Illuminate\Support\Facades\Auth;
 
@@ -40,23 +42,13 @@ class FavoriteListController extends Controller
         return response()->json(['message' => 'The favorites list has been added'], 201);
     }
 
-    public function show($id)
+    public function show(FavoriteList $favoriteList)
     {
-        if (!FavoriteList::find($id))
-        {
-            return response()->json(
-            [
-                'message' => 'Favorites list not found.',
-            ], 404);
+        if ($favoriteList->user_id !== Auth::user()->id) {
+            abort(403, 'Unauthorized action');
         }
 
-        $favoritesList = FavoriteList::where('id', $id)
-        ->where('user_id', Auth::user()->id)
-        ->first();
-
-        $data = new FavoriteListCollection($favoritesList);
-
-        return response()->json($data[0]);
+        return $favoriteList->toResource(FavoriteListResource::class);
     }
 
     public function update(UpdateRequest $updateRequest, $id)
@@ -76,7 +68,7 @@ class FavoriteListController extends Controller
         }
 
         $favoriteList->name = $data['name'];
-        
+
 
         $favoriteList->save();
 

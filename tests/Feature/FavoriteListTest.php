@@ -40,7 +40,7 @@ test('successful query of user favorites lists', function ()
 test('favorites list not found', function ()
 {
     $user = User::factory()->create();
-    $route = route('favorites-list.show', ['id' => 4304993]);
+    $route = route('favorites-list.show', ['favoriteList' => 4304993]);
     $this->actingAs($user, 'sanctum')
         ->getJson($route)
         ->assertNotFound();

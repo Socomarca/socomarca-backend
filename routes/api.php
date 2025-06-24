@@ -53,7 +53,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/users/{id}', [UserController::class, 'show']);
     Route::put('/users/{id}', [UserController::class, 'update']);
     Route::delete('/users/{id}', [UserController::class, 'destroy']);
-    
+
 
     Route::middleware(['role:admin|superadmin'])->group(function () {
         Route::get('/roles', [RoleController::class, 'index']);
@@ -79,7 +79,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('/favorites-list', [FavoriteListController::class, 'index'])->name('favorites-list.index');
     Route::post('/favorites-list', [FavoriteListController::class, 'store'])->name('favorites-list.store');
-    Route::get('/favorites-list/{id}', [FavoriteListController::class, 'show'])->name('favorites-list.show');
+    Route::get('/favorites-list/{favoriteList}', [FavoriteListController::class, 'show'])->name('favorites-list.show');
     Route::put('/favorites-list/{id}', [FavoriteListController::class, 'update'])->name('favorites-list.update');
     Route::delete('/favorites-list/{id}', [FavoriteListController::class, 'destroy'])->name('favorites-list.destroy');
 
