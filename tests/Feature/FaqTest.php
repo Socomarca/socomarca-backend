@@ -3,11 +3,18 @@
 use App\Models\Faq;
 use App\Models\User;
 use Spatie\Permission\Models\Role;
+use Spatie\Permission\Models\Permission;
 
 beforeEach(function () {
     // Crear roles si no existen
     Role::firstOrCreate(['name' => 'admin']);
     Role::firstOrCreate(['name' => 'superadmin']);
+    
+    // Crear permisos para FAQ si no existen
+    Permission::firstOrCreate(['name' => 'manage-faq']);
+    Permission::firstOrCreate(['name' => 'store-faq']); 
+    Permission::firstOrCreate(['name' => 'update-faq']);
+    Permission::firstOrCreate(['name' => 'delete-faq']);
     
     $this->user = createUser();
     $this->admin = User::factory()->create([
@@ -15,6 +22,14 @@ beforeEach(function () {
         'password' => bcrypt('password'),
     ]);
     $this->admin->assignRole('admin');
+    $this->admin->givePermissionTo(['manage-faq', 'store-faq', 'update-faq', 'delete-faq']);
+    
+    $this->superadmin = User::factory()->create([
+        'email' => 'superadmin@test.com',
+        'password' => bcrypt('password'),
+    ]);
+    $this->superadmin->assignRole('superadmin');
+    $this->superadmin->givePermissionTo(['manage-faq', 'store-faq', 'update-faq', 'delete-faq']);
     
     $this->faq = Faq::factory()->create();
 
@@ -276,6 +291,57 @@ test('busqueda por texto completo en pregunta y respuesta', function () {
         ]);
 
     expect($response->json('data'))->toHaveCount(1);
+});
+
+// Tests de superadmin
+test('superadmin puede crear faq', function () {
+    $faqData = [
+        'question' => '¿Nueva pregunta de superadmin?',
+        'answer' => 'Esta es la respuesta de superadmin.'
+    ];
+
+    $response = $this->actingAs($this->superadmin, 'sanctum')
+        ->withHeaders(['Accept' => 'application/json'])
+        ->postJson('/api/faq', $faqData);
+
+    $response
+        ->assertStatus(201)
+        ->assertJsonStructure($this->faqResourceStructure);
+
+    $this->assertDatabaseHas('faqs', $faqData);
+});
+
+test('superadmin puede actualizar faq', function () {
+    $updateData = [
+        'question' => 'Pregunta actualizada por superadmin',
+        'answer' => 'Respuesta actualizada por superadmin'
+    ];
+
+    $response = $this->actingAs($this->superadmin, 'sanctum')
+        ->withHeaders(['Accept' => 'application/json'])
+        ->putJson("/api/faq/{$this->faq->id}", $updateData);
+
+    $response
+        ->assertStatus(200)
+        ->assertJsonStructure($this->faqResourceStructure);
+
+    $this->assertDatabaseHas('faqs', [
+        'id' => $this->faq->id,
+        'question' => 'Pregunta actualizada por superadmin',
+        'answer' => 'Respuesta actualizada por superadmin'
+    ]);
+});
+
+test('superadmin puede eliminar faq', function () {
+    $response = $this->actingAs($this->superadmin, 'sanctum')
+        ->withHeaders(['Accept' => 'application/json'])
+        ->deleteJson("/api/faq/{$this->faq->id}");
+
+    $response
+        ->assertStatus(200)
+        ->assertJson(['message' => 'FAQ eliminada exitosamente.']);
+
+    $this->assertDatabaseMissing('faqs', ['id' => $this->faq->id]);
 });
 
 

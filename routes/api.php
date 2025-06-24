@@ -111,10 +111,10 @@ Route::get('/faq', [FaqController::class, 'index'])->name('faq.index');
 Route::post('/faq/search', [FaqController::class, 'search'])->name('faq.search');
 
 Route::middleware(['auth:sanctum'])->group(function () {
-    Route::post('/faq', [FaqController::class, 'store'])->name('faq.store');
     Route::get('/faq/{faq}', [FaqController::class, 'show'])->name('faq.show');
-    Route::put('/faq/{faq}', [FaqController::class, 'update'])->name('faq.update');
-    Route::delete('/faq/{faq}', [FaqController::class, 'destroy'])->name('faq.destroy');
+    Route::post('/faq', [FaqController::class, 'store'])->name('faq.store')->middleware('permission:store-faq');
+    Route::put('/faq/{faq}', [FaqController::class, 'update'])->name('faq.update')->middleware('permission:update-faq');
+    Route::delete('/faq/{faq}', [FaqController::class, 'destroy'])->name('faq.destroy')->middleware('permission:delete-faq');
 });
 
 //Se sacan de la autenticacion porque es confirmacion de pago.
