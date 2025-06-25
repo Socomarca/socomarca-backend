@@ -6,6 +6,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\DB;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
 
@@ -181,16 +182,27 @@ class User extends Authenticatable
             if ($field !== null) {
                 $value = $filter['value'];
                 $operator = array_find($field['operators'], function ($item) use ($filter) {
-                    return $item === $filter['operator'];
+                    return $item === ($filter['operator'] ?? '=');
                 });
+
+                // Si no se especifica operador, usar '=' por defecto
+                if ($operator === null && empty($filter['operator'])) {
+                    $operator = '=';
+                }
 
                 if ($operator !== null && $operator !== 'fulltext') {
                     $query->where($field['field'], $operator, $value);
                 } elseif ($operator === 'fulltext') {
-                    $query
-                        ->selectRaw("similarity(users.{$field['field']}, ?) AS similarity_index", [$value])
-                        ->whereRaw("users.{$field['field']} % ?", [$value])
-                        ->orderBy("similarity_index", "DESC");
+                    // Verificar si pg_trgm está disponible
+                    if ($this->isPgTrgmAvailable()) {
+                        $query
+                            ->selectRaw("similarity(users.{$field['field']}, ?) AS similarity_index", [$value])
+                            ->whereRaw("users.{$field['field']} % ?", [$value])
+                            ->orderBy("similarity_index", "DESC");
+                    } else {
+                        // Fallback a ILIKE si pg_trgm no está disponible
+                        $query->where($field['field'], 'ILIKE', "%{$value}%");
+                    }
                 }
 
                 if (
@@ -204,5 +216,20 @@ class User extends Authenticatable
         }
 
         return $query;
+    }
+
+    /**
+     * Verificar si la extensión pg_trgm está disponible en PostgreSQL
+     *
+     * @return bool
+     */
+    private function isPgTrgmAvailable(): bool
+    {
+        try {
+            $result = DB::select("SELECT 1 FROM pg_extension WHERE extname = 'pg_trgm'");
+            return !empty($result);
+        } catch (\Exception $e) {
+            return false;
+        }
     }
 }
