@@ -97,6 +97,25 @@ Run a specific test with a specific filter
 docker compose exec workcontainer ./vendor/bin/pest tests/Feature/CartItemTest.php --filter="puede agregar un item al carrito"
 ```
 
+# Testing Random ERP Sync
+
+```bash
+# Ejecutar test básico
+docker compose exec workcontainer php artisan test tests/Feature/SyncProductTest.php --env=testing --filter="el job de sincronización procesa productos correctamente" 
+```
+
+### Probar rendimiento con muchos productos:
+```bash
+# Test de volumen
+docker compose exec workcontainer php artisan test tests/Feature/SyncProductIntegrationTest.php --env=testing --filter="sincronización con gran volumen de datos" 
+```
+
+### Verificar logs y monitoreo:
+```bash
+# Test de logs
+docker compose exec workcontainer php artisan test tests/Feature/SyncProductMonitoringTest.php --env=testing --filter="registra logs correctos" 
+```
+
 
 
 
