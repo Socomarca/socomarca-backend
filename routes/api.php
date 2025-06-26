@@ -22,6 +22,7 @@ use App\Http\Controllers\Api\ReportController;
 use App\Http\Controllers\Api\RoleController;
 use App\Http\Controllers\Api\SiteinfoController;
 use App\Http\Controllers\Api\WebpayController;
+use App\Http\Controllers\Api\FaqController;
 
 
 
@@ -53,9 +54,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/users/{id}', [UserController::class, 'show']);
     Route::put('/users/{id}', [UserController::class, 'update']);
     Route::delete('/users/{id}', [UserController::class, 'destroy']);
-    
+
 
     Route::middleware(['role:admin|superadmin'])->group(function () {
+        Route::get('/roles', [RoleController::class, 'index']);
         Route::get('/roles/users', [RoleController::class, 'rolesWithUsers']);
         Route::get('/roles/{user}', [RoleController::class, 'userRoles']);
     });
@@ -78,7 +80,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('/favorites-list', [FavoriteListController::class, 'index'])->name('favorites-list.index');
     Route::post('/favorites-list', [FavoriteListController::class, 'store'])->name('favorites-list.store');
-    Route::get('/favorites-list/{id}', [FavoriteListController::class, 'show'])->name('favorites-list.show');
+    Route::get('/favorites-list/{favoriteList}', [FavoriteListController::class, 'show'])->name('favorites-list.show');
     Route::put('/favorites-list/{id}', [FavoriteListController::class, 'update'])->name('favorites-list.update');
     Route::delete('/favorites-list/{id}', [FavoriteListController::class, 'destroy'])->name('favorites-list.destroy');
 
@@ -112,6 +114,16 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/orders/reports/failed-transactions-list', [ReportController::class, 'failedTransactionsList']);
     });
 
+});
+
+Route::get('/faq', [FaqController::class, 'index'])->name('faq.index');
+Route::post('/faq/search', [FaqController::class, 'search'])->name('faq.search');
+
+Route::middleware(['auth:sanctum'])->group(function () {
+    Route::get('/faq/{faq}', [FaqController::class, 'show'])->name('faq.show');
+    Route::post('/faq', [FaqController::class, 'store'])->name('faq.store')->middleware('permission:store-faq');
+    Route::put('/faq/{faq}', [FaqController::class, 'update'])->name('faq.update')->middleware('permission:update-faq');
+    Route::delete('/faq/{faq}', [FaqController::class, 'destroy'])->name('faq.destroy')->middleware('permission:delete-faq');
 });
 
 //Se sacan de la autenticacion porque es confirmacion de pago.

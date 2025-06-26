@@ -33,6 +33,12 @@ class RolesAndPermissionsSeeder extends Seeder
             "store-address",
             "update-address",
             "delete-address",
+
+            // FAQ related permissions
+            "manage-faq",
+            "store-faq",
+            "update-faq",
+            "delete-faq",
         ];
 
         // Crear permisos si no existen
@@ -60,6 +66,12 @@ class RolesAndPermissionsSeeder extends Seeder
                 "store-address",
                 "update-address",
                 "delete-address",
+
+                // FAQ related permissions
+                "manage-faq",
+                "store-faq",
+                "update-faq",
+                "delete-faq",
             ],
             'admin' => [
                 "see-own-purchases",
@@ -78,6 +90,12 @@ class RolesAndPermissionsSeeder extends Seeder
                 "store-address",
                 "update-address",
                 "delete-address",
+
+                // FAQ related permissions
+                "manage-faq",
+                "store-faq",
+                "update-faq",
+                "delete-faq",
             ],
             'supervisor' => [
                 "see-own-purchases",

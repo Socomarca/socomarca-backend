@@ -25,6 +25,12 @@ Install composer dependencies
 docker compose exec workcontainer composer install
 ```
 
+Run migrations and seeders
+```bash
+docker compose exec workcontainer php artisan migrate:fresh --seed
+```
+
+
 ## Commands
 
 Get into php container

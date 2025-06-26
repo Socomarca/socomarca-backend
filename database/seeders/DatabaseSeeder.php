@@ -24,6 +24,7 @@ class DatabaseSeeder extends Seeder
                 OrderSeeder::class,
                 CartItemSeeder::class,
                 FavoriteSeeder::class,
+                FaqSeeder::class,
             ]);
 
         }else{
