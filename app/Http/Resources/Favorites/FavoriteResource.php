@@ -40,7 +40,7 @@ class FavoriteResource extends JsonResource
                     'name' => $product->brand->name,
                 ] : null,
                 'unit' => $priceData?->unit,
-                'price' => $priceData?->price,
+                'price' => (int) $priceData?->price,
                 'stock' => $priceData?->stock,
                 'image' => $product->image,
                 'sku' => $product->sku,
