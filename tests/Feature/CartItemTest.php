@@ -7,6 +7,8 @@ use App\Models\Price;
 use App\Models\Product;
 use App\Models\Subcategory;
 use App\Models\User;
+use App\Models\Order;
+use App\Models\OrderItem;
 
 beforeEach(function () {
     // Crear usuario autenticado
@@ -544,4 +546,333 @@ test('cliente no puede vaciar carros de otros', function () {
         'user_id' => $userB->id,
         'product_id' => $product->id,
     ]);
+});
+
+test('puede agregar productos de una orden al carrito vacío', function () {
+    // Arrange
+    CartItem::where('user_id', $this->user->id)->delete();
+    
+    $order = Order::factory()->create([
+        'user_id' => $this->user->id,
+        'status' => 'completed'
+    ]);
+
+    $product2 = Product::factory()->create([
+        'category_id' => $this->product->category_id,
+        'subcategory_id' => $this->product->subcategory_id,
+        'brand_id' => $this->product->brand_id
+    ]);
+
+    Price::factory()->create([
+        'product_id' => $product2->id,
+        'unit' => 'g',
+        'price' => 50,
+        'is_active' => true
+    ]);
+
+    OrderItem::create([
+        'order_id' => $order->id,
+        'product_id' => $this->product->id,
+        'quantity' => 3,
+        'unit' => 'kg',
+        'price' => 100
+    ]);
+
+    OrderItem::create([
+        'order_id' => $order->id,
+        'product_id' => $product2->id,
+        'quantity' => 5,
+        'unit' => 'g',
+        'price' => 50
+    ]);
+
+    // Act
+    $response = $this->postJson('/api/cart/add-order', [
+        'order_id' => $order->id
+    ]);
+
+    // Assert
+    $response->assertStatus(200)
+        ->assertJson([
+            'message' => 'Productos de la orden agregados al carrito exitosamente',
+            'added_items' => 2,
+            'updated_items' => 0
+        ]);
+
+    $this->assertDatabaseHas('cart_items', [
+        'user_id' => $this->user->id,
+        'product_id' => $this->product->id,
+        'quantity' => 3,
+        'unit' => 'kg'
+    ]);
+
+    $this->assertDatabaseHas('cart_items', [
+        'user_id' => $this->user->id,
+        'product_id' => $product2->id,
+        'quantity' => 5,
+        'unit' => 'g'
+    ]);
+});
+
+test('puede sumar cantidades cuando el producto ya existe en el carrito', function () {
+    // Arrange
+    CartItem::where('user_id', $this->user->id)->delete();
+    
+    CartItem::create([
+        'user_id' => $this->user->id,
+        'product_id' => $this->product->id,
+        'quantity' => 2,
+        'unit' => 'kg'
+    ]);
+
+    $order = Order::factory()->create([
+        'user_id' => $this->user->id,
+        'status' => 'completed'
+    ]);
+
+    OrderItem::create([
+        'order_id' => $order->id,
+        'product_id' => $this->product->id,
+        'quantity' => 3,
+        'unit' => 'kg',
+        'price' => 100
+    ]);
+
+    // Act
+    $response = $this->postJson('/api/cart/add-order', [
+        'order_id' => $order->id
+    ]);
+
+    // Assert
+    $response->assertStatus(200)
+        ->assertJson([
+            'message' => 'Productos de la orden agregados al carrito exitosamente',
+            'added_items' => 0,
+            'updated_items' => 1
+        ]);
+
+    $this->assertDatabaseHas('cart_items', [
+        'user_id' => $this->user->id,
+        'product_id' => $this->product->id,
+        'quantity' => 5, // 2 + 3 = 5
+        'unit' => 'kg'
+    ]);
+
+    expect(CartItem::where('user_id', $this->user->id)
+        ->where('product_id', $this->product->id)
+        ->where('unit', 'kg')
+        ->count())->toBe(1);
+});
+
+test('puede manejar productos existentes y nuevos en la misma operación', function () {
+    // Arrange
+    CartItem::where('user_id', $this->user->id)->delete();
+    
+    CartItem::create([
+        'user_id' => $this->user->id,
+        'product_id' => $this->product->id,
+        'quantity' => 1,
+        'unit' => 'kg'
+    ]);
+
+    $product2 = Product::factory()->create([
+        'category_id' => $this->product->category_id,
+        'subcategory_id' => $this->product->subcategory_id,
+        'brand_id' => $this->product->brand_id
+    ]);
+
+    Price::factory()->create([
+        'product_id' => $product2->id,
+        'unit' => 'g',
+        'price' => 50,
+        'is_active' => true
+    ]);
+
+    $order = Order::factory()->create([
+        'user_id' => $this->user->id,
+        'status' => 'completed'
+    ]);
+
+    OrderItem::create([
+        'order_id' => $order->id,
+        'product_id' => $this->product->id,
+        'quantity' => 2,
+        'unit' => 'kg',
+        'price' => 100
+    ]);
+
+    OrderItem::create([
+        'order_id' => $order->id,
+        'product_id' => $product2->id,
+        'quantity' => 3,
+        'unit' => 'g',
+        'price' => 50
+    ]);
+
+    // Act
+    $response = $this->postJson('/api/cart/add-order', [
+        'order_id' => $order->id
+    ]);
+
+    // Assert
+    $response->assertStatus(200)
+        ->assertJson([
+            'message' => 'Productos de la orden agregados al carrito exitosamente',
+            'added_items' => 1,
+            'updated_items' => 1
+        ]);
+
+    $this->assertDatabaseHas('cart_items', [
+        'user_id' => $this->user->id,
+        'product_id' => $this->product->id,
+        'quantity' => 3, // 1 + 2 = 3
+        'unit' => 'kg'
+    ]);
+
+    $this->assertDatabaseHas('cart_items', [
+        'user_id' => $this->user->id,
+        'product_id' => $product2->id,
+        'quantity' => 3,
+        'unit' => 'g'
+    ]);
+});
+
+test('falla al agregar orden sin order_id', function () {
+    // Act
+    $response = $this->postJson('/api/cart/add-order', []);
+
+    // Assert
+    $response->assertStatus(422)
+        ->assertJsonValidationErrors(['order_id']);
+});
+
+test('falla al agregar orden con order_id inexistente', function () {
+    // Act
+    $response = $this->postJson('/api/cart/add-order', [
+        'order_id' => 99999
+    ]);
+
+    // Assert
+    $response->assertStatus(422)
+        ->assertJsonValidationErrors(['order_id']);
+});
+
+test('falla al agregar orden que no pertenece al usuario', function () {
+    // Arrange
+    $otherUser = User::factory()->create();
+    $order = Order::factory()->create([
+        'user_id' => $otherUser->id,
+        'status' => 'completed'
+    ]);
+
+    // Act
+    $response = $this->postJson('/api/cart/add-order', [
+        'order_id' => $order->id
+    ]);
+
+    // Assert
+    $response->assertStatus(403);
+});
+
+test('requiere autenticación para agregar orden al carrito', function () {
+    // Arrange
+    $this->app['auth']->forgetUser();
+    
+    $order = Order::factory()->create([
+        'user_id' => $this->user->id,
+        'status' => 'completed'
+    ]);
+
+    // Act
+    $response = $this->postJson('/api/cart/add-order', [
+        'order_id' => $order->id
+    ]);
+
+    // Assert
+    $response->assertStatus(401);
+});
+
+test('maneja orden sin items correctamente', function () {
+    // Arrange
+    $order = Order::factory()->create([
+        'user_id' => $this->user->id,
+        'status' => 'completed'
+    ]);
+
+    // Act
+    $response = $this->postJson('/api/cart/add-order', [
+        'order_id' => $order->id
+    ]);
+
+    // Assert
+    $response->assertStatus(200)
+        ->assertJson([
+            'message' => 'Productos de la orden agregados al carrito exitosamente',
+            'added_items' => 0,
+            'updated_items' => 0
+        ]);
+});
+
+test('respeta diferentes unidades del mismo producto de la orden', function () {
+    // Arrange
+    CartItem::where('user_id', $this->user->id)->delete();
+    
+    Price::factory()->create([
+        'product_id' => $this->product->id,
+        'unit' => 'g',
+        'price' => 30,
+        'is_active' => true
+    ]);
+
+    $order = Order::factory()->create([
+        'user_id' => $this->user->id,
+        'status' => 'completed'
+    ]);
+
+    OrderItem::create([
+        'order_id' => $order->id,
+        'product_id' => $this->product->id,
+        'quantity' => 2,
+        'unit' => 'kg',
+        'price' => 100
+    ]);
+
+    OrderItem::create([
+        'order_id' => $order->id,
+        'product_id' => $this->product->id,
+        'quantity' => 500,
+        'unit' => 'g',
+        'price' => 30
+    ]);
+
+    // Act
+    $response = $this->postJson('/api/cart/add-order', [
+        'order_id' => $order->id
+    ]);
+
+    // Assert
+    $response->assertStatus(200)
+        ->assertJson([
+            'message' => 'Productos de la orden agregados al carrito exitosamente',
+            'added_items' => 2,
+            'updated_items' => 0
+        ]);
+
+    $this->assertDatabaseHas('cart_items', [
+        'user_id' => $this->user->id,
+        'product_id' => $this->product->id,
+        'quantity' => 2,
+        'unit' => 'kg'
+    ]);
+
+    $this->assertDatabaseHas('cart_items', [
+        'user_id' => $this->user->id,
+        'product_id' => $this->product->id,
+        'quantity' => 500,
+        'unit' => 'g'
+    ]);
+
+    expect(CartItem::where('user_id', $this->user->id)
+        ->where('product_id', $this->product->id)
+        ->count())->toBe(2);
 });
