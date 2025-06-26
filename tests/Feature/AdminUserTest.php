@@ -6,16 +6,6 @@ use Illuminate\Support\Facades\Mail;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
 
-beforeEach(function () {
-    // Arrange: Crear roles básicos
-    Role::create(['name' => 'superadmin']);
-    Role::create(['name' => 'admin']);
-    Role::create(['name' => 'cliente']);
-    
-    // Arrange: Crear permisos
-    Permission::create(['name' => 'manage-users']);
-});
-
 test('usuario sin permisos no puede crear usuarios', function () {
     // Arrange
     $user = User::factory()->create();
