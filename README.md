@@ -15,21 +15,20 @@ Start docker composition
 docker compose up -d
 ```
 
-Setup app encryption key
-```bash
-docker compose exec workcontainer php artisan key:generate
-```
-
 Install composer dependencies
 ```bash
 docker compose exec workcontainer composer install
+```
+
+Setup app encryption key
+```bash
+docker compose exec workcontainer php artisan key:generate
 ```
 
 Run migrations and seeders
 ```bash
 docker compose exec workcontainer php artisan migrate:fresh --seed
 ```
-
 
 ## Commands
 
