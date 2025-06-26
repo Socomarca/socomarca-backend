@@ -74,6 +74,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/subcategories', [SubcategoryController::class,'index'])->name('subcategories.index');
     Route::get('/subcategories/{id}', [SubcategoryController::class,'show'])->name('subcategories.show');
 
+    Route::get('/products/price-extremes', [ProductController::class, 'getPriceExtremes'])->name('products.price-extremes');
     Route::get('products', [ProductController::class, 'index']);
     Route::get('products/{id}', [ProductController::class, 'show']);
     Route::post('/products/search', [ProductController::class, 'search'])->name('products.search');
