@@ -28,10 +28,14 @@ class RegionSeeder extends Seeder
 
         $comunas = $this->getFakeMunicipalities();
         foreach ($comunas as $comuna) {
-            Municipality::updateOrCreate(['code' => $comuna->code], [
+            Municipality::updateOrCreate(
+                ['code' => $comuna->code], 
+                [
                 'name' => $comuna->name,
                 'region_id' => $comuna->region_id,
-            ]);
+                'status' => $comuna->region_id == 7
+                ]
+            );
         }
     }
 

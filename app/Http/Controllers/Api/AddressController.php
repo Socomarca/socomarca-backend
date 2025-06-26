@@ -3,10 +3,13 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Addresses\PatchRequest;
 use App\Http\Requests\Addresses\StoreRequest;
 use App\Http\Requests\Addresses\UpdateRequest;
 use App\Http\Resources\Addresses\AddressCollection;
 use App\Models\Address;
+use App\Models\Municipality;
+use App\Models\Region;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
@@ -79,7 +82,7 @@ class AddressController extends Controller
     {
         $user = $updateRequest->user();
 
-        if (!$user->can('store-address')) {
+        if (!Gate::authorize('update', $address)) {
             return abort(403, 'Forbidden');
         }
 
@@ -114,5 +117,73 @@ class AddressController extends Controller
         $address->delete();
 
         return response()->json(['message' => 'The selected address has been deleted']);
+    }
+
+    
+    /**
+     * Get all regions
+     *
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    public function regions()
+    {
+        
+        return Region::select('id', 'name')->orderBy('id','ASC')->get();
+    }
+
+    /**
+     * Get municipalities by region ID
+     *
+     * @param \Illuminate\Http\Request $request
+     * @param int|null $regionId
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    public function municipalities(Request $request,$regionId = null)
+    {
+        if ($regionId !== null) {
+            $request->merge(['region_id' => $regionId]);
+        }
+        $validated = $request->validate([
+            'region_id' => 'nullable|integer|exists:regions,id',
+        ],
+        [
+            'region_id.exists' => 'error',
+            'region_id.integer' => 'error',
+        ]);
+
+        $query = Municipality::select('id', 'name', 'status');
+        if ($regionId) {
+            $query->where('region_id', $regionId);
+        }
+        return $query->orderBy('name')->get();
+    }
+
+    /**
+     * Patch an existing address
+     *
+     * @param PatchRequest $request
+     * @param Address $address
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function patch(PatchRequest $request, Address $address)
+    {
+        $user = $request->user();
+
+        if (!Gate::authorize('update', $address)) {
+            return abort(403, 'Forbidden');
+        }
+
+        $data = $request->validated();
+
+        // Si se quiere marcar como default
+        if (array_key_exists('is_default', $data) && $data['is_default'] === true) {
+            $user->addresses()->update(['is_default' => false]);
+            $address->is_default = true;
+        }
+
+        $address->fill($data);
+        $address->save();
+
+        return response()->json(['message' => 'The address has been updated']);
     }
 }

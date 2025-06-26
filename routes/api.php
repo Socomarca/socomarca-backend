@@ -67,6 +67,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/addresses/{address}', [AddressController::class, 'show'])->name('addresses.show');
     Route::put('/addresses/{address}', [AddressController::class, 'update'])->name('addresses.update');
     Route::delete('/addresses/{address}', [AddressController::class, 'destroy'])->name('addresses.destroy');
+    Route::patch('/addresses/{address}', [AddressController::class, 'patch'])->name('addresses.patch');
+
+    Route::get('/regions', [AddressController::class, 'regions'])->name('addresses.regions');
+    Route::get('/municipalities/{regionId?}', [AddressController::class, 'municipalities'])->name('addresses.municipalities');
 
     Route::get('/categories', [CategoryController::class,'index'])->name('categories.index');
     Route::post('/categories/search', [CategoryController::class, 'search'])->name('categories.search');
