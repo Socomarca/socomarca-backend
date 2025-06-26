@@ -111,90 +111,52 @@ class Product extends Model
      */
     public function scopeFilter($query, array $filters)
     {
-        $sortByPrice = null;
-        foreach ($filters as $filter) {
-            // Filtros especiales para precios
-            if (isset($filter['field']) && $filter['field'] === 'price') {
-                $query->whereHas('prices', function ($q) use ($filter) {
-                    if (isset($filter['min'])) {
-                        $q->where('price', '>=', $filter['min']);
-                    }
-                    if (isset($filter['max'])) {
-                        $q->where('price', '<=', $filter['max']);
-                    }
-                    if (isset($filter['unit'])) {
-                        $q->where('unit', $filter['unit']);
-                    }
-                    $q->where('is_active', true);
-                });
-
-                // Ordenar por precio si se solicita en el filtro
-                if (isset($filter['sort']) && in_array(strtolower($filter['sort']), ['asc', 'desc'])) {
-                    $sortByPrice = strtolower($filter['sort']);
-                }
-                continue;
+        // Filtro de Precio 
+        $priceFilter = $filters['price'];
+        $query->whereHas('prices', function ($q) use ($priceFilter) {
+            $q->where('price', '>=', $priceFilter['min'])
+              ->where('price', '<=', $priceFilter['max'])
+              ->where('is_active', true);
+            
+            // Opcional: filtrar por unidad si se envía
+            if (isset($priceFilter['unit'])) {
+                $q->where('unit', $priceFilter['unit']);
             }
+        });
 
-            // Filtro especial para favoritos
-            if (isset($filter['field']) && $filter['field'] === 'is_favorite') {
-                $value = filter_var($filter['value'], FILTER_VALIDATE_BOOLEAN);
-                
-                if ($value === true) {
-                    // Solo productos que son favoritos del usuario autenticado
-                    $query->whereHas('favorites', function ($q) {
-                        $q->whereHas('favoriteList', function ($subQ) {
-                            $subQ->where('user_id', Auth::id());
-                        });
-                    });
-                } else {
-                    // Solo productos que NO son favoritos del usuario autenticado
-                    $query->whereDoesntHave('favorites', function ($q) {
-                        $q->whereHas('favoriteList', function ($subQ) {
-                            $subQ->where('user_id', Auth::id());
-                        });
-                    });
-                }
-                continue;
-            }
+        // Filtro de Categoría
+        if (isset($filters['category_id'])) {
+            $query->where('category_id', $filters['category_id']);
+        }
 
-            $field = array_find($this->allowedFilters, function ($item) use ($filter) {
-                return $item['field'] === $filter['field'];
-            });
+        // Filtro de Subcategoría
+        if (isset($filters['subcategory_id'])) {
+            $query->where('subcategory_id', $filters['subcategory_id']);
+        }
 
-            if ($field !== null) {
-                $value = $filter['value'];
-                $operator = array_find($field['operators'], function ($item) use ($filter) {
-                    return $item === $filter['operator'];
+        // Filtro de Marca
+        if (isset($filters['brand_id'])) {
+            $query->where('brand_id', $filters['brand_id']);
+        }
+        
+        // Filtro por Nombre (búsqueda parcial)
+        if (isset($filters['name'])) {
+            $query->where('name', 'ILIKE', '%' . $filters['name'] . '%');
+        }
+
+        // Filtro de Favoritos
+        if (isset($filters['is_favorite']) && Auth::check()) {
+            if ($filters['is_favorite'] === true) {
+                $query->whereHas('favorites', function ($q) {
+                    $q->whereHas('favoriteList', fn($subQ) => $subQ->where('user_id', Auth::id()));
                 });
-
-                if ($operator !== null && $operator !== 'fulltext') {
-                    $query->where($field['field'], $operator, $value);
-                } elseif ($operator === 'fulltext') {
-                    $query
-                        ->selectRaw("similarity(products.{$field['field']}, ?) AS similarity_index", [$value])
-                        ->whereRaw("products.{$field['field']} % ?", [$value])
-                        ->orderBy("similarity_index", "DESC");
-                }
-
-                if (
-                    isset($filter['sort'])
-                    && in_array($filter['field'], $this->allowedSorts)
-                    && in_array($filter['sort'], ['ASC', 'DESC'])
-                ) {
-                    $query->orderBy($filter['field'], $filter['sort']);
-                }
+            } else {
+                $query->whereDoesntHave('favorites', function ($q) {
+                    $q->whereHas('favoriteList', fn($subQ) => $subQ->where('user_id', Auth::id()));
+                });
             }
         }
 
-        if ($sortByPrice) {
-            $query->selectRaw('products.*, MIN(prices.price) as min_price')
-                ->leftJoin('prices', function($join) {
-                    $join->on('products.id', '=', 'prices.product_id')
-                        ->where('prices.is_active', true);
-                })
-                ->groupBy('products.id')
-                ->orderBy('min_price', $sortByPrice);
-        }
         return $query;
     }
 }

@@ -8,6 +8,7 @@ use App\Http\Resources\Products\ProductCollection;
 use App\Http\Resources\Products\ProductResource;
 use App\Models\Product;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
 class ProductController extends Controller
 {
@@ -48,22 +49,38 @@ class ProductController extends Controller
      */
     public function search(Request $request)
     {
+         
+        $validator = Validator::make($request->all(), [
+            'filters' => 'required|array',
+            'filters.price' => 'required|array',
+            'filters.price.min' => 'required|numeric|min:0',
+            'filters.price.max' => 'required|numeric|gt:filters.price.min',
+            'filters.price.unit' => 'sometimes|string|max:10',
+            'filters.category_id' => 'sometimes|integer|exists:categories,id',
+            'filters.subcategory_id' => 'sometimes|integer|exists:subcategories,id', // <-- Nuevo
+            'filters.brand_id' => 'sometimes|integer|exists:brands,id',             // <-- Nuevo
+            'filters.name' => 'sometimes|string|max:255',    
+            'filters.is_favorite' => 'sometimes|boolean',
+            
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['message' => 'invalid data search.', 'errors' => $validator->errors()], 422);
+        }
+
+        $validatedFilters = $validator->validated()['filters'];
         $perPage = $request->input('per_page', 20);
-        $filters = $request->input('filters', []);
+
+        
         $result = Product::select("products.*")
-            ->filter($filters)
+            ->filter($validatedFilters)
             ->paginate($perPage);
 
-        $priceFilter = collect($filters)->firstWhere('field', 'price');
-        $minPrice = $priceFilter['min'] ?? null;
-        $maxPrice = $priceFilter['max'] ?? null;
-        $unit     = $priceFilter['unit'] ?? null;
-
+        
         $data = new ProductCollection($result)->additional([
             'filters' => [
-                'min_price' => $minPrice,
-                'max_price' => $maxPrice,
-                'unit' => $unit,
+                'min_price' => $validatedFilters['price']['min'],
+                'max_price' => $validatedFilters['price']['max'],
             ]
         ]);
 

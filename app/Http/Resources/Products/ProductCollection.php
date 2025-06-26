@@ -15,59 +15,41 @@ class ProductCollection extends ResourceCollection
      */
     public function toArray(Request $request)
     {
-        return $this->collection->flatMap(function ($product) use ($request) {
+        
+        return $this->collection->flatMap(function ($product) {
             
-            $filters = $request->input('filters', []);
-            $min = null;
-            $max = null;
-            foreach ($filters as $filter) {
-                if (isset($filter['field']) && $filter['field'] === 'price') {
-                    $min = isset($filter['min']) ? (float)$filter['min'] : null;
-                    $max = isset($filter['max']) ? (float)$filter['max'] : null;
-                }
+            $isFavorite = false;
+            if (Auth::check()) {
+                $isFavorite = $product->favorites()->whereHas('favoriteList', function ($q) {
+                    $q->where('user_id', Auth::id());
+                })->exists();
             }
 
-            return $product->prices
-                ->filter(function ($price) use ($min, $max) {
-                    if ($min !== null && $price->price < $min) return false;
-                    if ($max !== null && $price->price > $max) return false;
-                    return true;
-                })
-                ->map(function ($price) use ($product) {
-                    // Verificar si el producto es favorito para el usuario autenticado
-                    $isFavorite = false;
-                    if (Auth::check()) {
-                        $isFavorite = $product->favorites()
-                            ->whereHas('favoriteList', function ($q) {
-                                $q->where('user_id', Auth::id());
-                            })
-                            ->exists();
-                    }
-                    
-                    return [
-                        'id' => $product->id,
-                        'name' => $product->name,
-                        
-                        'category' => [
-                            'id' => $product->category->id,
-                            'name' => $product->category->name,
-                        ],
-                        'subcategory' => [
-                            'id' => $product->subcategory->id,
-                            'name' => $product->subcategory->name,
-                        ],
-                        'brand' => [
-                            'id' => $product->brand->id,
-                            'name' => $product->brand->name,
-                        ],
-                        'unit' => $price->unit,
-                        'price' => (float) $price->price,
-                        'stock' => isset($price->stock) ? (int) $price->stock : null,
-                        'image' => $product->image ?? null,
-                        'sku' => $product->sku ?? null,
-                        'is_favorite' => $isFavorite, 
-                    ];
-                });
+            
+            return $product->prices->map(function ($price) use ($product, $isFavorite) {
+                return [
+                    'id' => $product->id,
+                    'name' => $product->name,
+                    'category' => [
+                        'id' => $product->category->id,
+                        'name' => $product->category->name,
+                    ],
+                    'subcategory' => [
+                        'id' => $product->subcategory->id,
+                        'name' => $product->subcategory->name,
+                    ],
+                    'brand' => [
+                        'id' => $product->brand->id,
+                        'name' => $product->brand->name,
+                    ],
+                    'unit' => $price->unit,
+                    'price' => (float) $price->price,
+                    'stock' => isset($price->stock) ? (int) $price->stock : null,
+                    'image' => $product->image ?? null,
+                    'sku' => $product->sku ?? null,
+                    'is_favorite' => $isFavorite,
+                ];
+            });
         })->values();
     }
 }
