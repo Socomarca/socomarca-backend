@@ -17,6 +17,9 @@ class FavoriteResource extends JsonResource
     public function toArray(Request $request): array
     {
         $product = $this->product;
+        
+        // Encontrar el precio correspondiente a la unidad del favorito
+        $priceData = $product->prices->firstWhere('unit', $this->unit);
 
         return [
             'id' => $this->id,
@@ -36,9 +39,9 @@ class FavoriteResource extends JsonResource
                     'id' => $product->brand->id,
                     'name' => $product->brand->name,
                 ] : null,
-                'unit' => $product->prices()->where('unit', $this->unit)->first()?->unit,
-                'price' => $product->prices()->where('unit', $this->unit)->first()?->price,
-                'stock' => $product->prices()->where('unit', $this->unit)->first()?->stock,
+                'unit' => $priceData?->unit,
+                'price' => (int) $priceData?->price,
+                'stock' => $priceData?->stock,
                 'image' => $product->image,
                 'sku' => $product->sku,
             ]
