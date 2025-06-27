@@ -23,6 +23,7 @@ class RegionSeeder extends Seeder
                 //'id' => $region->id,
                 'code' => $region->code,
                 'name' => $region->name,
+                'status' => $region->status,
             ]);
         }
 
