@@ -15,47 +15,59 @@ class ProductSeeder extends Seeder
 {
     public function run(): void
     {
-        $fakeCategories = $this->getFakeCategories();
+        
+        $json = Storage::disk('local')->get('fake_seed_data/products.json');
+        $categories = json_decode($json, true);
 
-        foreach ($fakeCategories as $fc) {
-            $category = Category::create([
-                'name' => $fc->name,
-                'description' => $fc->description,
-                'code' => fake()->regexify('[A-Z]{10}'),
-                'level' => fake()->numberBetween(1, 10),
-                'key' => fake()->regexify('[A-Z]{4}'),
-            ]);
-
-            foreach ($fc->subcategories as $sc) {
-                $category->subcategories()->create([
-                    'name' => $sc->name,
-                    'description' => $sc->description,
+        foreach ($categories as $catData) {
+            // Crea la categoría o la busca si ya existe
+            $category = Category::firstOrCreate(
+                ['name' => $catData['name']],
+                [
+                    'description' => $catData['name'],
                     'code' => fake()->regexify('[A-Z]{10}'),
                     'level' => fake()->numberBetween(1, 10),
                     'key' => fake()->regexify('[A-Z]{4}'),
-                ]);
+                ]
+            );
 
-                Product::factory([
-                    'category_id' => $category->id,
-                    'subcategory_id' => $category->subcategories()->first()->id
-                ])
-                    ->has(
-                        Price::factory([
-                            'is_active' => true,
-                            'price' => random_int(50000, 100000),
-                            'unit' => fake()->randomElement(['un', 'kg', 'lt', 'gr']),
-                        ])->count(1)
-                    )
-                    ->count(15)
-                    ->create();
+            foreach ($catData['subcategories'] as $subcatData) {
+                // Crea la subcategoría o la busca si ya existe
+                $subcategory = $category->subcategories()->firstOrCreate(
+                    ['name' => $subcatData['name']],
+                    [
+                        'description' => $subcatData['name'],
+                        'code' => fake()->regexify('[A-Z]{10}'),
+                        'level' => fake()->numberBetween(1, 10),
+                        'key' => fake()->regexify('[A-Z]{4}'),
+                    ]
+                );
+
+                foreach ($subcatData['products'] as $productName) {
+                    $product = Product::factory()
+                        ->state([
+                            'name' => $productName,
+                            'category_id' => $category->id,
+                            'subcategory_id' => $subcategory->id
+                        ])
+                        ->has(
+                            Price::factory()
+                                ->state(function () {
+                                    return [
+                                        'is_active' => true,
+                                        'price' => random_int(5000, 70000),
+                                        'unit' => fake()->randomElement(['un', 'kg', 'lt', 'gr']),
+                                    ];
+                                })
+                                ->count(1)
+                        )
+                        ->create();
+                }
             }
         }
+        
+        
     }
 
-    public function getFakeCategories()
-    {
-        $categoriesJsonFile = Storage::disk('local')->get('fake_seed_data/categories.json');
-        $categories = json_decode($categoriesJsonFile);
-        return $categories;
-    }
+   
 }

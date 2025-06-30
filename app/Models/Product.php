@@ -142,9 +142,11 @@ class Product extends Model
         // Filtro por Nombre (búsqueda parcial)
         if (isset($filters['name'])) {
             $searchTerm = $filters['name'];
-            $query->whereRaw('similarity(name, ?) > 0.3', [$searchTerm])
-                  // Ordenamos por relevancia para mostrar los mejores resultados primero.
-                  ->orderByRaw('similarity(name, ?) DESC', [$searchTerm]);
+            $query->where(function($q) use ($searchTerm) {
+                $q->whereRaw('similarity(name, ?) > 0.3', [$searchTerm])
+                ->orWhere('name', 'ILIKE', "%{$searchTerm}%");
+            })
+            ->orderByRaw('similarity(name, ?) DESC', [$searchTerm]);
         }
 
         // Filtro de Favoritos
