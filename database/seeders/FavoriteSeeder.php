@@ -80,13 +80,12 @@ class FavoriteSeeder extends Seeder
                 $product = $availableProducts->random();
                 $usedProducts[] = $product->id;
 
-                $price = $product->prices()->first();
-
+                $unit = $product->prices()->first()?->unit ?? 'unidad';
 
                 Favorite::create([
                     'favorite_list_id' => $favoriteList->id,
                     'product_id' => $product->id,
-                    'unit' => $price->unit,
+                    'unit' => $unit,
                 ]);
 
                 $totalFavorites++;

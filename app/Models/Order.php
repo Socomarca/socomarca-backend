@@ -55,10 +55,37 @@ class Order extends Model
         return round($this->attributes['subtotal'], 0);
     }
 
+    public function getMunicipalityIdAttribute()
+    {
+        return $this->meta['municipality_id'] ?? null;
+    }
+
     public function scopeSearchReport($query, $start, $end, $type = 'sales')
     {
         $query->whereBetween('orders.created_at', [$start, $end]);
 
+        if ($type === 'top-municipalities') {
+            // Usamos una subconsulta para obtener solo la comuna top por mes
+            return DB::table(DB::raw('(
+                SELECT
+                    TO_CHAR(orders.created_at, \'YYYY-MM\') AS month,
+                    municipalities.name AS municipality,
+                    SUM(orders.amount) AS total_purchases,
+                    COUNT(*) AS quantity
+                FROM orders
+                JOIN municipalities
+                  ON (order_meta->\'address\'->>\'municipality_id\')::bigint = municipalities.id
+                WHERE orders.status = \'completed\'
+                  AND order_meta->\'address\'->>\'municipality_id\' IS NOT NULL
+                  AND orders.created_at BETWEEN \''.$start.'\' AND \''.$end.'\'
+                GROUP BY month, municipalities.name
+                ORDER BY month, total_purchases DESC
+            ) as t'))
+            ->selectRaw('DISTINCT ON (month) month, municipality, total_purchases::bigint, quantity')
+            ->orderBy('month')
+            ->orderByDesc('total_purchases');
+        }
+        
         if ($type === 'transactions') {
             // Solo órdenes exitosas (ajusta el estado según tu lógica)
             return $query->select(
