@@ -20,6 +20,7 @@ use App\Http\Controllers\Api\PaymentMethodController;
 use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\ReportController;
 use App\Http\Controllers\Api\RoleController;
+use App\Http\Controllers\Api\SiteinfoController;
 use App\Http\Controllers\Api\WebpayController;
 use App\Http\Controllers\Api\FaqController;
 
@@ -66,6 +67,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/addresses/{address}', [AddressController::class, 'show'])->name('addresses.show');
     Route::put('/addresses/{address}', [AddressController::class, 'update'])->name('addresses.update');
     Route::delete('/addresses/{address}', [AddressController::class, 'destroy'])->name('addresses.destroy');
+    Route::patch('/addresses/{address}', [AddressController::class, 'patch'])->name('addresses.patch');
+
+    Route::get('/regions', [AddressController::class, 'regions'])->name('addresses.regions');
+    Route::get('/municipalities/{regionId?}', [AddressController::class, 'municipalities'])->name('addresses.municipalities');
 
     Route::get('/categories', [CategoryController::class,'index'])->name('categories.index');
     Route::post('/categories/search', [CategoryController::class, 'search'])->name('categories.search');
@@ -73,6 +78,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/subcategories', [SubcategoryController::class,'index'])->name('subcategories.index');
     Route::get('/subcategories/{id}', [SubcategoryController::class,'show'])->name('subcategories.show');
 
+    Route::get('/products/price-extremes', [ProductController::class, 'getPriceExtremes'])->name('products.price-extremes');
     Route::get('products', [ProductController::class, 'index']);
     Route::get('products/{id}', [ProductController::class, 'show']);
     Route::post('/products/search', [ProductController::class, 'search'])->name('products.search');
@@ -89,6 +95,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('/cart', [CartController::class, 'index']);
     Route::delete('/cart', [CartItemController::class, 'emptyCart'])->name('cart.empty');
+    Route::post('/cart/add-order', [CartController::class, 'addOrderToCart']);
     Route::post('/cart/items', [CartItemController::class, 'store']);
     Route::delete('/cart/items', [CartItemController::class, 'destroy']);
 
@@ -131,6 +138,19 @@ Route::middleware(['auth:sanctum'])->group(function () {
 Route::get('/webpay/return', [WebpayController::class, 'return'])->name('webpay.return');
 Route::get('/webpay/status', [WebpayController::class, 'status']);
 Route::post('/webpay/refund', [WebpayController::class, 'refund']);
+
+
+Route::get('/siteinfo', [SiteinfoController::class, 'show']);
+Route::get('/terms', [SiteinfoController::class, 'terms']);
+Route::get('/privacy-policy', [SiteinfoController::class, 'privacyPolicy']);
+Route::get('/customer-message', [SiteinfoController::class, 'customerMessage']);
+
+Route::middleware(['auth:sanctum', 'role:editor|admin|superadmin'])->group(function () {
+    Route::put('/siteinfo', [SiteinfoController::class, 'update']);
+    Route::put('/terms', [SiteinfoController::class, 'updateTerms']);
+    Route::put('/privacy-policy', [SiteinfoController::class, 'updatePrivacyPolicy']);
+    Route::post('/customer-message', [SiteinfoController::class, 'updateCustomerMessage']);
+});
 
 // Ruta catch-all al final
 Route::any('{url}', function() {
