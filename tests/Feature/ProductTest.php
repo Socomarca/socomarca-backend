@@ -182,3 +182,46 @@ test('verifies is_favorite filter works correctly', function () {
     expect($responseNonFavorite->json('data.0.id'))->toBe($nonFavoriteProduct->id);
     expect($responseNonFavorite->json('data.0.is_favorite'))->toBeFalse();
 });
+
+test('products can be sorted by price, stock, category_name and id', function () {
+    Product::truncate();
+
+    // Crea categorías
+    $catA = \App\Models\Category::factory()->create(['name' => 'Alimentos']);
+    $catB = \App\Models\Category::factory()->create(['name' => 'Bebidas']);
+
+    // Crea productos con precios y stock distintos
+    $p1 = Product::factory()->for($catA)->has(Price::factory(['price' => 1000, 'stock' => 5, 'is_active' => true, 'unit' => 'kg']))->create(['name' => 'Producto 1']);
+    $p2 = Product::factory()->for($catB)->has(Price::factory(['price' => 2000, 'stock' => 10, 'is_active' => true, 'unit' => 'kg']))->create(['name' => 'Producto 2']);
+    $p3 = Product::factory()->for($catA)->has(Price::factory(['price' => 1500, 'stock' => 7, 'is_active' => true, 'unit' => 'kg']))->create(['name' => 'Producto 3']);
+
+    // Ordenar por price asc
+    $response = $this->actingAs($this->user, 'sanctum')
+        ->getJson('/api/products?sort=price&sort_direction=asc');
+    $response->assertStatus(200);
+    $prices = array_column($response->json('data'), 'price');
+    expect($prices)->toBe([1000, 1500, 2000]);
+
+    // Ordenar por stock desc
+    $response = $this->actingAs($this->user, 'sanctum')
+        ->getJson('/api/products?sort=stock&sort_direction=desc');
+    $response->assertStatus(200);
+    $stocks = array_column($response->json('data'), 'stock');
+    expect($stocks)->toBe([10, 7, 5]);
+
+    // Ordenar por category_name asc
+    $response = $this->actingAs($this->user, 'sanctum')
+        ->getJson('/api/products?sort=category_name&sort_direction=asc');
+    $response->assertStatus(200);
+    $categories = array_column($response->json('data'), 'category');
+    $categoryNames = array_column($categories, 'name');
+    expect($categoryNames)->toBe(['Alimentos', 'Alimentos', 'Bebidas']);
+
+    // Ordenar por id desc
+    $response = $this->actingAs($this->user, 'sanctum')
+        ->getJson('/api/products?sort=id&sort_direction=desc');
+    $response->assertStatus(200);
+    $ids = array_column($response->json('data'), 'id');
+    rsort($ids);
+    expect($response->json('data.0.id'))->toBe($ids[0]);
+});
