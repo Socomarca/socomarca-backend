@@ -48,12 +48,12 @@ Route::prefix('auth')->group(function () {
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/profile', [UserController::class, 'profile']);
 
-    Route::get('/users', [UserController::class, 'index']);
-    Route::post('/users', [UserController::class, 'store']);
+    Route::get('/users', [UserController::class, 'index'])->middleware('permission:manage-users');
+    Route::post('/users', [UserController::class, 'store'])->middleware('permission:manage-users');
     Route::post('/users/search', [UserController::class, 'search'])->middleware('permission:manage-users');
-    Route::get('/users/{id}', [UserController::class, 'show']);
-    Route::put('/users/{id}', [UserController::class, 'update']);
-    Route::delete('/users/{id}', [UserController::class, 'destroy']);
+    Route::get('/users/{id}', [UserController::class, 'show'])->middleware('permission:manage-users');
+    Route::put('/users/{id}', [UserController::class, 'update'])->middleware('permission:manage-users');
+    Route::delete('/users/{id}', [UserController::class, 'destroy'])->middleware('permission:manage-users');
 
 
     Route::middleware(['role:admin|superadmin'])->group(function () {

@@ -23,14 +23,17 @@ use Illuminate\Support\Str;
 
 class UserController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $perPage = request()->input('per_page', 20);
-        $users = User::with('roles')->paginate($perPage);
+        $sort = $request->input('sort', 'name');
+        $sortDirection = $request->input('sort_direction', 'asc');
 
-        $data = new UserCollection($users);
+        $users = User::with('roles')
+            ->orderBy($sort, $sortDirection)
+            ->paginate($perPage);
 
-        return $data;
+        return new UserCollection($users);
     }
 
     /**
