@@ -110,18 +110,23 @@ class UserController extends Controller
 
     public function show($id)
     {
-        if (!User::find($id))
-        {
-            return response()->json(
-            [
-                'message' => 'Usuario no encontrado.',
-            ], 404);
+        $authUser = request()->user();
+
+        // Permitir que el usuario vea su propio perfil
+        if ($authUser->id == $id || $authUser->can('manage-users')) {
+            $user = User::with(['billing_address', 'shipping_addresses', 'roles'])->find($id);
+
+            if (!$user) {
+                return response()->json([
+                    'message' => 'Usuario no encontrado.',
+                ], 404);
+            }
+
+            return response()->json(new UserResource($user));
         }
 
-        $user = User::with(['billing_address', 'shipping_addresses', 'roles'])
-            ->find($id);
-
-        return response()->json(new UserResource($user));
+        // Si no es su perfil ni tiene permiso, denegar acceso
+        return response()->json(['message' => 'No autorizado.'], 403);
     }
 
     /**
