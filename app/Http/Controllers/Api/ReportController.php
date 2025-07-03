@@ -380,4 +380,40 @@ class ReportController extends Controller
             ]
         ]);
     }
+
+    public function transactionId($id)
+    {
+        $order = Order::with(['user', 'orderDetails.product'])->find($id);
+
+        if (!$order) {
+            return response()->json(['message' => 'Transacción no encontrada.'], 404);
+        }
+        
+        return response()->json([
+            'order' => [
+                'id' => $order->id,
+                'user' => $order->user ? [
+                    'id' => $order->user->id,
+                    'name' => $order->user->name,
+                    'email' => $order->user->email,
+                ] : null,
+                'status' => $order->status,
+                'subtotal' => $order->subtotal,
+                'amount' => $order->amount,
+                'order_meta' => $order->order_meta,
+                'created_at' => $order->created_at,
+                'updated_at' => $order->updated_at,
+                'order_items' => $order->orderDetails->map(function($item) {
+                    return [
+                        'id' => $item->id,
+                        'product_id' => $item->product_id,
+                        'product' => $item->product ? $item->product->name : null,
+                        'quantity' => (int) $item->quantity,
+                        'price' => (int) $item->price,
+                        'subtotal' => (int) $item->price * (int) $item->quantity,
+                    ];
+                }),
+            ]
+        ]);
+    }
 }
