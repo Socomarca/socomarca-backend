@@ -39,6 +39,7 @@ class Category extends Model
      * Allowed sorts for the filter scope.
      */
     protected $allowedSorts = [
+        'id',
         'name',
         'description',
         'code',
@@ -74,7 +75,7 @@ class Category extends Model
      * @param array $filters
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function scopeFilter($query, array $filters)
+    public function scopeFilter($query, array $filters = [], $sort = null, $sortDirection = 'asc')
     {
         foreach ($filters as $filter) {
             $field = array_find($this->allowedFilters, function ($item) use ($filter) {
@@ -96,6 +97,7 @@ class Category extends Model
                         ->orderBy("similarity_index", "DESC");
                 }
 
+                // Ordenamiento por filtro individual (mantén esto si quieres soportar ambos)
                 if (
                     isset($filter['sort'])
                     && in_array($filter['field'], $this->allowedSorts)
@@ -104,6 +106,11 @@ class Category extends Model
                     $query->orderBy($filter['field'], $filter['sort']);
                 }
             }
+        }
+
+        // Ordenamiento global
+        if ($sort && in_array($sort, $this->allowedSorts)) {
+            $query->orderBy($sort, $sortDirection);
         }
 
         return $query;
