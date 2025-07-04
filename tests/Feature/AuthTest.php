@@ -89,6 +89,7 @@ test('usuario autenticado puede obtener su informacion', function () {
     $user = User::factory()->create([
         'rut' => '33333333-3'
     ]);
+    $user->assignRole('admin'); 
     Sanctum::actingAs($user);
 
     // Acción
@@ -96,4 +97,4 @@ test('usuario autenticado puede obtener su informacion', function () {
 
     // Aserción
     $response->assertStatus(200);
-}); 
+});

@@ -68,6 +68,7 @@ class User extends Authenticatable
      * Allowed sorts for the filter scope.
      */
     protected $allowedSorts = [
+        'id',
         'name',
         'email',
         'rut',
