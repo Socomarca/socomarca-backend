@@ -16,11 +16,11 @@ class ProductController extends Controller
     public function index(Request $request)
     {
         $perPage = $request->input('per_page', 20);
-        $products = Product::with(['prices' => function($q) {
-            $q->where('is_active', true);
-        }])->paginate($perPage);
-        $data = new ProductCollection($products);
-        return $data;
+        $filters = $request->all();
+
+        $products = Product::filter($filters)->paginate($perPage);
+
+        return new ProductCollection($products);
     }
 
     public function show($id)
@@ -58,10 +58,12 @@ class ProductController extends Controller
             'filters.price.max' => 'required|numeric|gt:filters.price.min',
             'filters.price.unit' => 'sometimes|string|max:10',
             'filters.category_id' => 'sometimes|integer|exists:categories,id',
-            'filters.subcategory_id' => 'sometimes|integer|exists:subcategories,id', // <-- Nuevo
-            'filters.brand_id' => 'sometimes|integer|exists:brands,id',             // <-- Nuevo
+            'filters.subcategory_id' => 'sometimes|integer|exists:subcategories,id',
+            'filters.brand_id' => 'sometimes|integer|exists:brands,id',             
             'filters.name' => 'sometimes|string|max:255',    
             'filters.is_favorite' => 'sometimes|boolean',
+            'filters.sort' => 'sometimes|string|in:price,stock,category_name,id,name,created_at,updated_at',
+            'filters.sort_direction' => 'sometimes|string|in:asc,desc',
             
         ]);
 
@@ -73,9 +75,8 @@ class ProductController extends Controller
         $perPage = $request->input('per_page', 20);
 
         
-        $result = Product::select("products.*")
-            ->filter($validatedFilters)
-            ->paginate($perPage);
+        $result = Product::filter($validatedFilters)
+        ->paginate($perPage);
 
         
         $data = new ProductCollection($result)->additional([

@@ -112,17 +112,23 @@ class Product extends Model
     public function scopeFilter($query, array $filters)
     {
         // Filtro de Precio 
-        $priceFilter = $filters['price'];
-        $query->whereHas('prices', function ($q) use ($priceFilter) {
-            $q->where('price', '>=', $priceFilter['min'])
-              ->where('price', '<=', $priceFilter['max'])
-              ->where('is_active', true);
-            
-            // Opcional: filtrar por unidad si se envía
-            if (isset($priceFilter['unit'])) {
-                $q->where('unit', $priceFilter['unit']);
-            }
-        });
+        if (isset($filters['price'])) {
+            $priceFilter = $filters['price'];
+            $query->whereHas('prices', function ($q) use ($priceFilter) {
+                if (isset($priceFilter['min'])) {
+                    $q->where('price', '>=', $priceFilter['min']);
+                }
+                if (isset($priceFilter['max'])) {
+                    $q->where('price', '<=', $priceFilter['max']);
+                }
+                $q->where('is_active', true);
+
+                // Opcional: filtrar por unidad si se envía
+                if (isset($priceFilter['unit'])) {
+                    $q->where('unit', $priceFilter['unit']);
+                }
+            });
+        }
 
         // Filtro de Categoría
         if (isset($filters['category_id'])) {
@@ -144,9 +150,13 @@ class Product extends Model
             $searchTerm = $filters['name'];
             $query->where(function($q) use ($searchTerm) {
                 $q->whereRaw('similarity(name, ?) > 0.3', [$searchTerm])
-                ->orWhere('name', 'ILIKE', "%{$searchTerm}%");
-            })
-            ->orderByRaw('similarity(name, ?) DESC', [$searchTerm]);
+                  ->orWhere('name', 'ILIKE', "%{$searchTerm}%");
+            });
+
+            // Solo aplica el orderByRaw si NO hay sort definido
+            if (!isset($filters['sort'])) {
+                $query->orderByRaw('similarity(name, ?) DESC', [$searchTerm]);
+            }
         }
 
         // Filtro de Favoritos
@@ -159,6 +169,53 @@ class Product extends Model
                 $query->whereDoesntHave('favorites', function ($q) {
                     $q->whereHas('favoriteList', fn($subQ) => $subQ->where('user_id', Auth::id()));
                 });
+            }
+        }
+
+        // Ordenamiento opcional
+        if (isset($filters['sort'])) {
+            $direction = $filters['sort_direction'] ?? 'asc';
+            switch ($filters['sort']) {
+                case 'category_name':
+                    $query->join('categories', 'products.category_id', '=', 'categories.id')
+                          ->leftJoin('prices', function($join) {
+                              $join->on('products.id', '=', 'prices.product_id')
+                                   ->where('prices.is_active', true);
+                          })
+                          ->orderBy('categories.name', $direction)
+                          ->select(
+                              'products.*',
+                              'prices.price as joined_price',
+                              'prices.stock as joined_stock',
+                              'prices.unit as joined_unit'
+                          );
+                    break;
+                case 'price':
+                case 'stock':
+                    $query->leftJoin('prices', function($join) {
+                            $join->on('products.id', '=', 'prices.product_id')
+                                 ->where('prices.is_active', true);
+                        })
+                        ->select(
+                            'products.*',
+                            'prices.price as joined_price',
+                            'prices.stock as joined_stock',
+                            'prices.unit as joined_unit'
+                        )
+                        ->orderBy('prices.' . $filters['sort'], $direction);
+                    break;
+                default:
+                    $query->leftJoin('prices', function($join) {
+                            $join->on('products.id', '=', 'prices.product_id')
+                                 ->where('prices.is_active', true);
+                        })
+                        ->select(
+                            'products.*',
+                            'prices.price as joined_price',
+                            'prices.stock as joined_stock',
+                            'prices.unit as joined_unit'
+                        )
+                        ->orderBy($filters['sort'], $direction);
             }
         }
 
