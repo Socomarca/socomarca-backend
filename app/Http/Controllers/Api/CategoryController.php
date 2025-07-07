@@ -10,14 +10,17 @@ use Illuminate\Http\Request;
 
 class CategoryController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $perPage = request()->input('per_page', 20);
-        $categories = Category::withCount(['subcategories', 'products'])->paginate($perPage);
+        $perPage = $request->input('per_page', 20);
+        $sort = $request->input('sort');
+        $sortDirection = $request->input('sort_direction', 'asc');
 
-        $data = new CategoryCollection($categories);
+        $categories = Category::withCount(['subcategories', 'products'])
+            ->filter([], $sort, $sortDirection)
+            ->paginate($perPage);
 
-        return $data;
+        return new CategoryCollection($categories);
     }
 
     public function show($id)
@@ -48,14 +51,13 @@ class CategoryController extends Controller
     {
         $perPage = $request->input('per_page', 20);
         $filters = $request->input('filters', []);
-        
-        $result = Category::select("categories.*")
-            ->withCount(['subcategories', 'products'])
-            ->filter($filters)
+        $sort = $request->input('sort');
+        $sortDirection = $request->input('sort_direction', 'asc');
+
+        $result = Category::withCount(['subcategories', 'products'])
+            ->filter($filters, $sort, $sortDirection)
             ->paginate($perPage);
 
-        $data = new CategoryCollection($result);
-
-        return $data;
+        return new CategoryCollection($result);
     }
 }

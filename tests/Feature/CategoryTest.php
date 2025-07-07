@@ -227,3 +227,64 @@ test('filtra categorias por nivel', function () {
     }
     $response->assertStatus(200);
 });
+
+test('ordena categorias por id ascendente y descendente', function () {
+    Category::truncate();
+
+    $catA = Category::factory()->create(['name' => 'Primera']);
+    $catB = Category::factory()->create(['name' => 'Segunda']);
+    $catC = Category::factory()->create(['name' => 'Tercera']);
+
+    // Orden ascendente
+    $responseAsc = $this->actingAs($this->user, 'sanctum')
+        ->postJson('/api/categories/search', [
+            'sort' => 'id',
+            'sort_direction' => 'asc'
+        ]);
+    $idsAsc = array_column($responseAsc->json('data'), 'id');
+    expect($idsAsc)->toBe([min($catA->id, $catB->id, $catC->id), ...array_diff([$catA->id, $catB->id, $catC->id], [min($catA->id, $catB->id, $catC->id), max($catA->id, $catB->id, $catC->id)]), max($catA->id, $catB->id, $catC->id)]);
+
+    // Orden descendente
+    $responseDesc = $this->actingAs($this->user, 'sanctum')
+        ->postJson('/api/categories/search', [
+            'sort' => 'id',
+            'sort_direction' => 'desc'
+        ]);
+    $idsDesc = array_column($responseDesc->json('data'), 'id');
+    expect($idsDesc)->toBe([max($catA->id, $catB->id, $catC->id), ...array_diff([$catA->id, $catB->id, $catC->id], [min($catA->id, $catB->id, $catC->id), max($catA->id, $catB->id, $catC->id)]), min($catA->id, $catB->id, $catC->id)]);
+});
+
+test('filtra y ordena categorias por nombre y id', function () {
+    Category::truncate();
+
+    $catA = Category::factory()->create(['name' => 'Alimentos']);
+    $catB = Category::factory()->create(['name' => 'Bebidas']);
+    $catC = Category::factory()->create(['name' => 'Carnes']);
+
+    // Filtrar por nombre parcial y ordenar por id descendente
+    $response = $this->actingAs($this->user, 'sanctum')
+        ->postJson('/api/categories/search', [
+            'filters' => [
+                [
+                    'field' => 'name',
+                    'operator' => 'ILIKE',
+                    'value' => '%a%',
+                ]
+            ],
+            'sort' => 'id',
+            'sort_direction' => 'desc'
+        ]);
+
+    $data = $response->json('data');
+    // Debe traer solo las categorías cuyo nombre contiene "a" (no sensible a mayúsculas)
+    $expected = collect([$catA, $catB, $catC])
+        ->filter(fn($cat) => stripos($cat->name, 'a') !== false)
+        ->sortByDesc('id')
+        ->pluck('id')
+        ->values()
+        ->all();
+
+    $ids = array_column($data, 'id');
+    expect($ids)->toBe($expected);
+    $response->assertStatus(200);
+});
