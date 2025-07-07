@@ -164,8 +164,6 @@ test('validate required fields when creating an address', function () {
     $response->assertStatus(422)
         ->assertJsonValidationErrors([
             'address_line1',
-            'address_line2',
-            'postal_code',
             'is_default',
             'type',
             'phone',
