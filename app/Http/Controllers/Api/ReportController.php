@@ -308,22 +308,46 @@ class ReportController extends Controller
 
     public function transactionsList(Request $request)
     {
-        $start = $request->input('start') 
-            ? date('Y-m-d', strtotime($request->input('start')))
-            : now()->subMonths(12)->startOfMonth()->toDateString();
+        $validated = $request->validate([
+            'start' => 'nullable|date',
+            'end' => 'nullable|date|after_or_equal:start',
+            'client' => 'nullable|string|exists:users,name',
+            'total_min' => 'nullable|numeric|min:0',
+            'total_max' => 'nullable|numeric|gte:total_min',
+            'per_page' => 'nullable|integer|min:1|max:100'
+        ], [
+            'end.after_or_equal' => 'La fecha final no puede ser menor que la inicial.',
+            'client.exists' => 'El cliente no existe en los registros.',
+            'total_max.gte' => 'El monto máximo no puede ser menor que el mínimo.',
+        ]);
 
-        $end = $request->input('end') 
-            ? date('Y-m-d', strtotime($request->input('end')))
-            : now()->endOfMonth()->toDateString();
+        $start = $validated['start'] ?? now()->subMonths(12)->startOfMonth()->toDateString();
+        $end = $validated['end'] ?? now()->endOfMonth()->toDateString();
+        $client = $validated['client'] ?? null;
+        $totalMin = $validated['total_min'] ?? null;
+        $totalMax = $validated['total_max'] ?? null;
+        $perPage = $validated['per_page'] ?? 15;
 
-        $perPage = $request->input('per_page', 15);
-
-        // Consulta directa, no agrupada
         $query = \App\Models\Order::with('user')
             ->where('status', 'completed')
-            ->whereBetween('created_at', [$start, $end])
-            ->orderByDesc('created_at');
+            ->whereBetween('created_at', [$start, $end]);
 
+        // Filtro por cliente
+        if ($client) {
+            $query->whereHas('user', function($q) use ($client) {
+                $q->where('name', $client);
+            });
+        }
+
+        // Filtros por monto
+        if ($totalMin !== null) {
+            $query->where('amount', '>=', $totalMin);
+        }
+        if ($totalMax !== null) {
+            $query->where('amount', '<=', $totalMax);
+        }
+
+        $query->orderByDesc('created_at');
         $ordersPaginated = $query->paginate($perPage);
 
         $detalleTabla = [];
@@ -350,21 +374,46 @@ class ReportController extends Controller
 
     public function clientsList(Request $request)
     {
-        $start = $request->input('start') 
-        ? date('Y-m-d', strtotime($request->input('start')))
-        : now()->subMonths(12)->startOfMonth()->toDateString();
+        $validated = $request->validate([
+            'start' => 'nullable|date',
+            'end' => 'nullable|date|after_or_equal:start',
+            'client' => 'nullable|string|exists:users,name',
+            'total_min' => 'nullable|numeric|min:0',
+            'total_max' => 'nullable|numeric|gte:total_min',
+            'per_page' => 'nullable|integer|min:1|max:100'
+        ], [
+            'end.after_or_equal' => 'La fecha final no puede ser menor que la inicial.',
+            'client.exists' => 'El cliente no existe en los registros.',
+            'total_max.gte' => 'El monto máximo no puede ser menor que el mínimo.',
+        ]);
 
-        $end = $request->input('end') 
-            ? date('Y-m-d', strtotime($request->input('end')))
-            : now()->endOfMonth()->toDateString();
-
-        $perPage = $request->input('per_page', 15);
+        $start = $validated['start'] ?? now()->subMonths(12)->startOfMonth()->toDateString();
+        $end = $validated['end'] ?? now()->endOfMonth()->toDateString();
+        $client = $validated['client'] ?? null;
+        $totalMin = $validated['total_min'] ?? null;
+        $totalMax = $validated['total_max'] ?? null;
+        $perPage = $validated['per_page'] ?? 15;
 
         $query = \App\Models\Order::with('user')
             ->where('status', 'completed')
-            ->whereBetween('created_at', [$start, $end])
-            ->orderByDesc('created_at');
+            ->whereBetween('created_at', [$start, $end]);
 
+        // Filtro por cliente
+        if ($client) {
+            $query->whereHas('user', function($q) use ($client) {
+                $q->where('name', $client);
+            });
+        }
+
+        // Filtros por monto
+        if ($totalMin !== null) {
+            $query->where('amount', '>=', $totalMin);
+        }
+        if ($totalMax !== null) {
+            $query->where('amount', '<=', $totalMax);
+        }
+
+        $query->orderByDesc('created_at');
         $ordersPaginated = $query->paginate($perPage);
 
         $detalleTabla = [];
@@ -391,21 +440,46 @@ class ReportController extends Controller
 
     public function failedTransactionsList(Request $request)
     {
-        $start = $request->input('start') 
-            ? date('Y-m-d', strtotime($request->input('start')))
-            : now()->subMonths(12)->startOfMonth()->toDateString();
+        $validated = $request->validate([
+            'start' => 'nullable|date',
+            'end' => 'nullable|date|after_or_equal:start',
+            'client' => 'nullable|string|exists:users,name',
+            'total_min' => 'nullable|numeric|min:0',
+            'total_max' => 'nullable|numeric|gte:total_min',
+            'per_page' => 'nullable|integer|min:1|max:100'
+        ], [
+            'end.after_or_equal' => 'La fecha final no puede ser menor que la inicial.',
+            'client.exists' => 'El cliente no existe en los registros.',
+            'total_max.gte' => 'El monto máximo no puede ser menor que el mínimo.',
+        ]);
 
-        $end = $request->input('end') 
-            ? date('Y-m-d', strtotime($request->input('end')))
-            : now()->endOfMonth()->toDateString();
-
-        $perPage = $request->input('per_page', 15);
+        $start = $validated['start'] ?? now()->subMonths(12)->startOfMonth()->toDateString();
+        $end = $validated['end'] ?? now()->endOfMonth()->toDateString();
+        $client = $validated['client'] ?? null;
+        $totalMin = $validated['total_min'] ?? null;
+        $totalMax = $validated['total_max'] ?? null;
+        $perPage = $validated['per_page'] ?? 15;
 
         $query = \App\Models\Order::with('user')
             ->where('status', 'failed')
-            ->whereBetween('created_at', [$start, $end])
-            ->orderByDesc('created_at');
+            ->whereBetween('created_at', [$start, $end]);
 
+        // Filtro por cliente
+        if ($client) {
+            $query->whereHas('user', function($q) use ($client) {
+                $q->where('name', $client);
+            });
+        }
+
+        // Filtros por monto
+        if ($totalMin !== null) {
+            $query->where('amount', '>=', $totalMin);
+        }
+        if ($totalMax !== null) {
+            $query->where('amount', '<=', $totalMax);
+        }
+
+        $query->orderByDesc('created_at');
         $ordersPaginated = $query->paginate($perPage);
 
         $detalleTabla = [];
