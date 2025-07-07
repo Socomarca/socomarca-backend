@@ -12,15 +12,26 @@ class ReportController extends Controller
 {
     public function report(Request $request)
     {
-        $start = $request->input('start') 
-            ? date('Y-m-d', strtotime($request->input('start')))
-            : now()->subMonths(12)->startOfMonth()->toDateString();
+        // Validación de filtros
+        $validated = $request->validate([
+            'start' => 'nullable|date',
+            'end' => 'nullable|date|after_or_equal:start',
+            'client' => 'nullable|string|exists:users,name',
+            'type' => 'nullable|string',
+            'total_min' => 'nullable|numeric|min:0',
+            'total_max' => 'nullable|numeric|gte:total_min',
+        ], [
+            'end.after_or_equal' => 'La fecha final no puede ser menor que la inicial.',
+            'client.exists' => 'El cliente no existe en los registros.',
+            'total_max.gte' => 'El monto máximo no puede ser menor que el mínimo.',
+        ]);
 
-        $end = $request->input('end') 
-            ? date('Y-m-d', strtotime($request->input('end')))
-            : now()->endOfMonth()->toDateString();
-
-        $type = $request->input('type', 'sales'); 
+        $start = $validated['start'] ?? now()->subMonths(12)->startOfMonth()->toDateString();
+        $end = $validated['end'] ?? now()->endOfMonth()->toDateString();
+        $type = $validated['type'] ?? 'sales';
+        $client = $validated['client'] ?? null;
+        $totalMin = $validated['total_min'] ?? null;
+        $totalMax = $validated['total_max'] ?? null;
 
         if ($type === 'top-municipalities') {
             $topMunicipalities = \App\Models\Order::searchReport($start, $end, 'top-municipalities')->get();
@@ -41,7 +52,16 @@ class ReportController extends Controller
         }
 
         // Solo para los tipos que usan Eloquent y relaciones:
-        $orders = \App\Models\Order::searchReport($start, $end, $type)->with('user')->get();
+        $ordersQuery = \App\Models\Order::searchReport($start, $end, $type);
+
+        // Aplica filtro de cliente si corresponde
+        if ($client) {
+            $ordersQuery = $ordersQuery->whereHas('user', function($q) use ($client) {
+                $q->where('name', $client);
+            });
+        }
+
+        $orders = $ordersQuery->with('user')->get();
 
         if ($type === 'top-customers') {
             $userIds = $orders->pluck('user_id')->unique()->all();
@@ -171,7 +191,7 @@ class ReportController extends Controller
             ]);
         }
 
-        // For sales and buyers
+        // For sales and buyers - AQUÍ SE APLICA EL FILTRO DE TOTALES POR CLIENTE
         $months = $orders->pluck('month')->unique()->sort()->values()->all();
         $clients = $orders->pluck('user.name')->unique()->values()->all();
 
@@ -187,22 +207,51 @@ class ReportController extends Controller
                 $total = $orders->where('month', $month)
                     ->where('user.name', $client)
                     ->sum('total');
-                $salesByClient[] = [
-                    'customer' => $client,
-                    'total' => $total
-                ];
-                $totalMonth += $total;
+                
+                // Aplica el filtro de totales por cliente
+                $clientPassesFilter = true;
+                if ($totalMin !== null) {
+                    $clientPassesFilter = $clientPassesFilter && $total >= $totalMin;
+                }
+                if ($totalMax !== null) {
+                    $clientPassesFilter = $clientPassesFilter && $total <= $totalMax;
+                }
+
+                // Solo incluye el cliente si pasa el filtro
+                if ($clientPassesFilter) {
+                    $salesByClient[] = [
+                        'customer' => $client,
+                        'total' => $total
+                    ];
+                    $totalMonth += $total;
+                }
             }
-            $totals[] = [
-                'month' => $month,
-                'sales_by_customer' => $salesByClient,
-                'total_month' => $totalMonth
-            ];
-            $totalBuyersPerMonth[] = [
-                'month' => $month,
-                'total_buyers' => $buyersMonth
-            ];
+            
+            // Solo incluye el mes si tiene clientes que pasaron el filtro
+            if (count($salesByClient) > 0) {
+                $totals[] = [
+                    'month' => $month,
+                    'sales_by_customer' => $salesByClient,
+                    'total_month' => $totalMonth
+                ];
+                $totalBuyersPerMonth[] = [
+                    'month' => $month,
+                    'total_buyers' => count($salesByClient)
+                ];
+            }
         }
+
+        // Actualiza los meses para que coincidan con los totales filtrados
+        $months = collect($totals)->pluck('month')->all();
+        
+        // Actualiza los clientes para que solo incluya los que pasaron el filtro
+        $clients = collect($totals)
+            ->pluck('sales_by_customer')
+            ->flatten(1)
+            ->pluck('customer')
+            ->unique()
+            ->values()
+            ->all();
 
         return response()->json([
             'months' => $months,
