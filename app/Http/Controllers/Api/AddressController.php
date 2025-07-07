@@ -52,8 +52,8 @@ class AddressController extends Controller
         $address = new Address;
 
         $address->address_line1 = $data['address_line1'];
-        $address->address_line2 = $data['address_line2'];
-        $address->postal_code = $data['postal_code'];
+        $address->address_line2 = $data['address_line2'] ?? null;
+        $address->postal_code = $data['postal_code'] ?? null;
         $address->is_default = $data['is_default'];
         $address->type = $data['type'];
         $address->phone = $data['phone'];
@@ -94,8 +94,8 @@ class AddressController extends Controller
                 ->update(['is_default' => false]);
 
         $address->address_line1 = $data['address_line1'];
-        $address->address_line2 = $data['address_line2'];
-        $address->postal_code = $data['postal_code'];
+        $address->address_line2 = $data['address_line2'] ?? null;
+        $address->postal_code = $data['postal_code'] ?? null;
         $address->is_default = $data['is_default'];
         $address->type = $data['type'];
         $address->contact_name = $data['contact_name'];

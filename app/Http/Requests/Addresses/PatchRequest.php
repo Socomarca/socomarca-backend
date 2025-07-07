@@ -15,7 +15,7 @@ class PatchRequest extends FormRequest
         return [
             'address_line1' => 'sometimes|string|max:255',
             'address_line2' => 'sometimes|nullable|string|max:255',
-            'postal_code'   => 'sometimes|string|max:20',
+            'postal_code'   => 'sometimes|nullable|string|max:20',
             'is_default'    => 'sometimes|boolean',
             'type'          => 'sometimes|string|max:50',
             'contact_name'  => 'sometimes|string|max:255',
