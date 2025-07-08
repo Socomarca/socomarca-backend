@@ -380,11 +380,13 @@ class ReportController extends Controller
             'client' => 'nullable|string|exists:users,name',
             'total_min' => 'nullable|numeric|min:0',
             'total_max' => 'nullable|numeric|gte:total_min',
-            'per_page' => 'nullable|integer|min:1|max:100'
+            'per_page' => 'nullable|integer|min:1|max:100',
+            'region' => 'nullable|string|exists:regions,code'
         ], [
             'end.after_or_equal' => 'La fecha final no puede ser menor que la inicial.',
             'client.exists' => 'El cliente no existe en los registros.',
             'total_max.gte' => 'El monto máximo no puede ser menor que el mínimo.',
+            'region.exists' => 'El código de región no existe en los registros.',
         ]);
 
         $start = $validated['start'] ?? now()->subMonths(12)->startOfMonth()->toDateString();
@@ -393,6 +395,7 @@ class ReportController extends Controller
         $totalMin = $validated['total_min'] ?? null;
         $totalMax = $validated['total_max'] ?? null;
         $perPage = $validated['per_page'] ?? 15;
+        $regionCode = $validated['region'] ?? null;
 
         $query = \App\Models\Order::with('user')
             ->where('status', 'completed')
@@ -413,17 +416,56 @@ class ReportController extends Controller
             $query->where('amount', '<=', $totalMax);
         }
 
+        // Filtro por código de región
+        if ($regionCode) {
+            // Obtener IDs de municipios que pertenecen a la región especificada
+            $municipalityIds = \App\Models\Municipality::whereHas('region', function($q) use ($regionCode) {
+                $q->where('code', $regionCode);
+            })->pluck('id')->toArray();
+
+            if (!empty($municipalityIds)) {
+                $query->whereIn('order_meta->address->municipality_id', $municipalityIds);
+            } else {
+                // Si no hay municipios para esta región, no devolver ningún resultado
+                $query->whereRaw('1 = 0');
+            }
+        }
+
         $query->orderByDesc('created_at');
         $ordersPaginated = $query->paginate($perPage);
 
+        // Obtener todos los municipality_id de las órdenes
+        $municipalityIds = [];
+        foreach ($ordersPaginated as $order) {
+            $orderMeta = $order->order_meta;
+            if (isset($orderMeta['address']['municipality_id'])) {
+                $municipalityIds[] = $orderMeta['address']['municipality_id'];
+            }
+        }
+
+        // Obtener municipios y regiones de una sola vez
+        $municipalities = [];
+        if (!empty($municipalityIds)) {
+            $municipalities = \App\Models\Municipality::with('region')
+                ->whereIn('id', array_unique($municipalityIds))
+                ->get()
+                ->keyBy('id');
+        }
+
         $detalleTabla = [];
         foreach ($ordersPaginated as $order) {
+            $orderMeta = $order->order_meta;
+            $municipalityId = $orderMeta['address']['municipality_id'] ?? null;
+            $municipality = $municipalities->get($municipalityId);
+            
             $detalleTabla[] = [
                 'id' => $order->id,
                 'customer' => $order->user ? $order->user->name : null,
                 'amount' => $order->amount,
                 'date' => $order->created_at->toDateString(),
                 'status' => $order->status,
+                'municipality_name' => $municipality ? $municipality->name : null,
+                'region_name' => $municipality && $municipality->region ? $municipality->region->name : null,
             ];
         }
 
