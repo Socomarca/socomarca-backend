@@ -15,9 +15,7 @@ class ProductCollection extends ResourceCollection
      */
     public function toArray(Request $request)
     {
-        
-        return $this->collection->flatMap(function ($product) {
-            
+        return $this->collection->map(function ($product) {
             $isFavorite = false;
             if (Auth::check()) {
                 $isFavorite = $product->favorites()->whereHas('favoriteList', function ($q) {
@@ -25,31 +23,33 @@ class ProductCollection extends ResourceCollection
                 })->exists();
             }
 
-            
-            return $product->prices->map(function ($price) use ($product, $isFavorite) {
-                return [
-                    'id' => $product->id,
-                    'name' => $product->name,
-                    'category' => [
-                        'id' => $product->category->id,
-                        'name' => $product->category->name,
-                    ],
-                    'subcategory' => [
-                        'id' => $product->subcategory->id,
-                        'name' => $product->subcategory->name,
-                    ],
-                    'brand' => [
-                        'id' => $product->brand->id,
-                        'name' => $product->brand->name,
-                    ],
-                    'unit' => $price->unit,
-                    'price' => (float) $price->price,
-                    'stock' => isset($price->stock) ? (int) $price->stock : null,
-                    'image' => $product->image ?? null,
-                    'sku' => $product->sku ?? null,
-                    'is_favorite' => $isFavorite,
-                ];
-            });
+            return [
+                'id' => $product->id,
+                'name' => $product->name,
+                'category' => [
+                    'id' => $product->category->id,
+                    'name' => $product->category->name,
+                ],
+                'subcategory' => [
+                    'id' => $product->subcategory->id,
+                    'name' => $product->subcategory->name,
+                ],
+                'brand' => [
+                    'id' => $product->brand->id,
+                    'name' => $product->brand->name,
+                ],
+                'unit' => $product->joined_unit
+                    ?? optional($product->prices()->where('is_active', true)->orderByDesc('valid_from')->first())->unit,
+                'price' => isset($product->joined_price)
+                    ? (float) $product->joined_price
+                    : (float) optional($product->prices()->where('is_active', true)->orderByDesc('valid_from')->first())->price,
+                'stock' => isset($product->joined_stock)
+                    ? (int) $product->joined_stock
+                    : (int) optional($product->prices()->where('is_active', true)->orderByDesc('valid_from')->first())->stock,
+                'image' => $product->image ?? null,
+                'sku' => $product->sku ?? null,
+                'is_favorite' => $isFavorite,
+            ];
         })->values();
     }
 }
