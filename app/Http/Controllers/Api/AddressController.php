@@ -87,11 +87,12 @@ class AddressController extends Controller
 
         $data = $updateRequest->validated();
 
-        $data['is_default'] === true &&
+        //$data['is_default'] === true &&
+        if (array_key_exists('is_default', $data) && $data['is_default'] === true) {
             DB::table('addresses')
                 ->where('user_id',$user->id)
                 ->update(['is_default' => false]);
-
+        }
         $data['user_id'] = $user->id;
         $address->update($data);
 

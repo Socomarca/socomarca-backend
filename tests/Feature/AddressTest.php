@@ -125,7 +125,7 @@ test('verify customer can update an address', function () {
     $payload = [
         'address_line1' => 'Nueva Calle 456',
         'address_line2' => 'Depto 8C',
-        'postal_code' => 7654321,
+        'postal_code' => '7654321',
         'is_default' => false,
         'type' => 'billing', 
         'phone' => 123456789,
@@ -207,4 +207,73 @@ test('validate invalid fields when creating an address', function () {
             'municipality_id',
             'alias',
         ]);
+});
+
+test('verify customer can update an address with PUT', function () {
+    Address::truncate();
+    $user = User::factory()->create();
+    $user->assignRole('cliente');
+
+    $municipality = \App\Models\Municipality::factory()->create();
+    $address = Address::factory()->create([
+        'user_id' => $user->id,
+        'municipality_id' => $municipality->id,
+    ]);
+
+    $payload = [
+        'address_line1' => 'Calle Actualizada 789',
+        'address_line2' => 'Depto 10A',
+        'postal_code' => '1234567',
+        'is_default' => true,
+        'type' => 'billing',
+        'phone' => '987654321',
+        'contact_name' => 'Carlos Actualizado',
+        'municipality_id' => $municipality->id,
+        'alias' => 'Nueva Oficina',
+    ];
+
+    $route = route('addresses.update', ['address' => $address->id]);
+
+    $response = $this->actingAs($user, 'sanctum')
+        ->patchJson($route, $payload);
+
+    $response->assertStatus(200)
+        ->assertJsonFragment(['message' => 'The selected address has been updated']);
+
+    $this->assertDatabaseHas('addresses', [
+        'id' => $address->id,
+        'address_line1' => 'Calle Actualizada 789',
+        'contact_name' => 'Carlos Actualizado',
+    ]);
+});
+
+test('verify customer can partially update an address with PATCH', function () {
+    Address::truncate();
+    $user = User::factory()->create();
+    $user->assignRole('cliente');
+
+    $municipality = \App\Models\Municipality::factory()->create();
+    $address = Address::factory()->create([
+        'user_id' => $user->id,
+        'municipality_id' => $municipality->id,
+        'address_line1' => 'Original',
+        'contact_name' => 'Nombre Original',
+    ]);
+
+    $payload = [
+        'address_line1' => 'Solo Cambio Calle',
+    ];
+
+    $route = route('addresses.update', ['address' => $address->id]);
+    $response = $this->actingAs($user, 'sanctum')
+        ->patchJson($route, $payload);
+
+    $response->assertStatus(200)    
+        ->assertJsonFragment(['message' => 'The selected address has been updated']);
+
+    $this->assertDatabaseHas('addresses', [
+        'id' => $address->id,
+        'address_line1' => 'Solo Cambio Calle',
+        'contact_name' => 'Nombre Original', // No cambia
+    ]);
 });

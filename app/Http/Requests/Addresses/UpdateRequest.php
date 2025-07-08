@@ -26,8 +26,8 @@ class UpdateRequest extends FormRequest
             case 'put':
                 return [
                     'address_line1' => 'bail|required|string',
-                    'address_line2' => 'bail|required|string',
-                    'postal_code' => 'bail|required|integer',
+                    'address_line2' => 'bail|nullable|string',
+                    'postal_code' => 'bail|nullable|string',
                     'is_default' => 'bail|required|boolean',
                     'type' => ['bail', 'required', Rule::in(['billing', 'shipping'])],
                     'phone' => 'bail|required|integer|digits:9',
