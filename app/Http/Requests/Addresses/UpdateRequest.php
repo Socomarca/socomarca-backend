@@ -22,20 +22,37 @@ class UpdateRequest extends FormRequest
      */
     public function rules(): array
     {
-        return
-        [
-            
-            'address_line1' => 'bail|required|string',
-            'address_line2' => 'bail|nullable|string',
-            'postal_code' => 'bail|nullable|integer',
-            'is_default' => 'bail|required|boolean',
-            'type' => ['bail', 'required', Rule::in(['billing', 'shipping'])],
-            'phone' => 'bail|required|integer|digits:9',
-            'contact_name' => 'bail|required|string',
-            'municipality_id' => 'bail|required|integer|exists:municipalities,id',
-            'alias' => 'bail|required|string|max:50',
-        ];
+        switch (strtolower($this->method())) {
+            case 'put':
+                return [
+                    'address_line1' => 'bail|required|string',
+                    'address_line2' => 'bail|required|string',
+                    'postal_code' => 'bail|required|integer',
+                    'is_default' => 'bail|required|boolean',
+                    'type' => ['bail', 'required', Rule::in(['billing', 'shipping'])],
+                    'phone' => 'bail|required|integer|digits:9',
+                    'contact_name' => 'bail|required|string',
+                    'municipality_id' => 'bail|required|integer|exists:municipalities,id',
+                    'alias' => 'bail|required|string|max:50',
+                ];
+
+            case 'patch':
+                return [
+                    'address_line1' => 'sometimes|string|max:255',
+                    'address_line2' => 'sometimes|nullable|string|max:255',
+                    'postal_code'   => 'sometimes|nullable|string|max:20',
+                    'is_default'    => 'sometimes|boolean',
+                    'type'          => 'sometimes|string|max:50',
+                    'contact_name'  => 'sometimes|string|max:255',
+                    'municipality_id' => 'sometimes|integer|exists:municipalities,id',
+                    'alias'         => 'sometimes|string|max:255',
+                    'phone'         => 'sometimes|string|max:30',
+                ];
+
+            default:
+                throw new \Exception('Method not allowed');
+        }
     }
 
-    
+
 }
