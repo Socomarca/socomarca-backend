@@ -113,6 +113,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::middleware(['auth:sanctum', 'permission:see-all-reports'])->group(function () {
         Route::post('/orders/reports', [ReportController::class, 'report']);
+        Route::get('/orders/reports/customers', [ReportController::class, 'customersList']);
 
         Route::post('/orders/reports/top-product-list', [ReportController::class, 'productsSalesList']);
         Route::post('/orders/reports/transactions-list', [ReportController::class, 'transactionsList']);
