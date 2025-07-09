@@ -53,6 +53,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/users/search', [UserController::class, 'search'])->middleware('permission:manage-users');
     Route::get('/users/{id}', [UserController::class, 'show'])->middleware('permission:manage-users');
     Route::put('/users/{id}', [UserController::class, 'update'])->middleware('permission:manage-users');
+    Route::patch('/users/{id}', [UserController::class, 'partialUpdate'])->middleware('permission:manage-users');
     Route::delete('/users/{id}', [UserController::class, 'destroy'])->middleware('permission:manage-users');
 
 
@@ -69,8 +70,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/addresses/{address}', [AddressController::class, 'destroy'])->name('addresses.destroy');
 
     Route::get('/regions', [AddressController::class, 'regions'])->name('addresses.regions');
-    Route::get('/municipalities/{regionId?}', [AddressController::class, 'municipalities'])->name('addresses.municipalities');
+    Route::get('/regions/{regionId?}', [AddressController::class, 'municipalities'])->name('addresses.municipalities');
 
+    Route::middleware(['auth:sanctum', 'permission:see-all-reports'])->group(function () {
+        Route::patch('/regions/{region}/municipalities/status', [AddressController::class, 'updateRegionMunicipalitiesStatus'])->name('addresses.regions.municipalities.status');
+        Route::patch('/municipalities/status', [AddressController::class, 'updateMunicipalitiesStatus'])->name('addresses.municipalities.bulk-status');
+    });
+    
     Route::get('/categories', [CategoryController::class,'index'])->name('categories.index');
     Route::post('/categories/search', [CategoryController::class, 'search'])->name('categories.search');
     Route::get('/categories/{id}', [CategoryController::class,'show'])->name('categories.show');

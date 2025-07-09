@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 class Municipality extends Model
 {
     use HasFactory;
-    protected $fillable = ['name', 'region_id', 'code'];
+    protected $fillable = ['name', 'region_id', 'code', 'status'];
 
     public function region()
     {

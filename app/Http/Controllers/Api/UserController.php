@@ -363,4 +363,49 @@ class UserController extends Controller
         
         return false;
     }
+
+    /**
+     * Partially update user fields
+     *
+     * @param \Illuminate\Http\Request $request
+     * @param int $id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function partialUpdate(Request $request, $id)
+    {
+        $user = User::findOrFail($id);
+        
+        $validated = $request->validate([
+            'name' => 'sometimes|string|max:255',
+            'email' => 'sometimes|email|unique:users,email,' . $id,
+            'phone' => 'sometimes|nullable|string|max:20',
+            'is_active' => 'sometimes|boolean',
+            'password' => 'sometimes|string|min:8|confirmed',
+        ]);
+
+        // Si se actualiza la contraseña, hashearla
+        if (isset($validated['password'])) {
+            $validated['password'] = Hash::make($validated['password']);
+        }
+
+        // Actualizar solo los campos enviados
+        $user->update($validated);
+
+        // Refrescar el modelo para obtener los datos actualizados
+        $user->refresh();
+
+        return response()->json([
+            'message' => 'User updated successfully',
+            'user' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'phone' => $user->phone,
+                'is_active' => $user->is_active,
+                'roles' => $user->roles->pluck('name'),
+
+
+            ]
+        ]);
+    }
 }
