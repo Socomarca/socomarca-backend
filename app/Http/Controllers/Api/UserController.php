@@ -363,4 +363,20 @@ class UserController extends Controller
         
         return false;
     }
+
+    public function customersList()
+    {
+        $clientes = User:: //::role('cliente') 
+            select('id', 'name')
+            ->orderBy('name')
+            ->get()
+            ->map(function($user) {
+                return [
+                    'id' => $user->id,
+                    'customer' => $user->name,
+                ];
+            });
+
+        return response()->json($clientes);
+    }
 }

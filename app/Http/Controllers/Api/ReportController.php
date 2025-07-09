@@ -540,19 +540,5 @@ class ReportController extends Controller
         ]);
     }
 
-    public function customersList()
-    {
-        $clientes = \App\Models\User:: //::role('cliente') 
-            select('id', 'name')
-            ->orderBy('name')
-            ->get()
-            ->map(function($user) {
-                return [
-                    'id' => $user->id,
-                    'customer' => $user->name,
-                ];
-            });
-
-        return response()->json($clientes);
-    }
+    
 }

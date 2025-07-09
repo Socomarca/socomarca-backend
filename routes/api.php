@@ -49,12 +49,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/profile', [UserController::class, 'profile']);
 
     Route::get('/users', [UserController::class, 'index'])->middleware('permission:manage-users');
+    Route::get('/users/customers', [UserController::class, 'customersList']);
     Route::post('/users', [UserController::class, 'store'])->middleware('permission:manage-users');
     Route::post('/users/search', [UserController::class, 'search'])->middleware('permission:manage-users');
     Route::get('/users/{id}', [UserController::class, 'show'])->middleware('permission:manage-users');
     Route::put('/users/{id}', [UserController::class, 'update'])->middleware('permission:manage-users');
     Route::delete('/users/{id}', [UserController::class, 'destroy'])->middleware('permission:manage-users');
-
 
     Route::middleware(['role:admin|superadmin'])->group(function () {
         Route::get('/roles', [RoleController::class, 'index']);
@@ -113,7 +113,6 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::middleware(['auth:sanctum', 'permission:see-all-reports'])->group(function () {
         Route::post('/orders/reports', [ReportController::class, 'report']);
-        Route::get('/orders/reports/customers', [ReportController::class, 'customersList']);
 
         Route::post('/orders/reports/top-product-list', [ReportController::class, 'productsSalesList']);
         Route::post('/orders/reports/transactions-list', [ReportController::class, 'transactionsList']);
