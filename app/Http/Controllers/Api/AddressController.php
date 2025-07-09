@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Addresses\PatchRequest;
 use App\Http\Requests\Addresses\StoreRequest;
 use App\Http\Requests\Addresses\UpdateRequest;
 use App\Http\Resources\Addresses\AddressCollection;
@@ -52,8 +51,8 @@ class AddressController extends Controller
         $address = new Address;
 
         $address->address_line1 = $data['address_line1'];
-        $address->address_line2 = $data['address_line2'];
-        $address->postal_code = $data['postal_code'];
+        $address->address_line2 = $data['address_line2'] ?? null;
+        $address->postal_code = $data['postal_code'] ?? null;
         $address->is_default = $data['is_default'];
         $address->type = $data['type'];
         $address->phone = $data['phone'];
@@ -88,21 +87,14 @@ class AddressController extends Controller
 
         $data = $updateRequest->validated();
 
-        $data['is_default'] === true &&
+        //$data['is_default'] === true &&
+        if (array_key_exists('is_default', $data) && $data['is_default'] === true) {
             DB::table('addresses')
                 ->where('user_id',$user->id)
                 ->update(['is_default' => false]);
-
-        $address->address_line1 = $data['address_line1'];
-        $address->address_line2 = $data['address_line2'];
-        $address->postal_code = $data['postal_code'];
-        $address->is_default = $data['is_default'];
-        $address->type = $data['type'];
-        $address->contact_name = $data['contact_name'];
-        $address->user_id = $user->id;
-        $address->municipality_id = $data['municipality_id'];
-        $address->alias = $data['alias'];
-        $address->save();
+        }
+        $data['user_id'] = $user->id;
+        $address->update($data);
 
         return response()->json(['message' => 'The selected address has been updated']);
 
@@ -119,7 +111,7 @@ class AddressController extends Controller
         return response()->json(['message' => 'The selected address has been deleted']);
     }
 
-    
+
     /**
      * Get all regions
      *
@@ -127,7 +119,7 @@ class AddressController extends Controller
      */
     public function regions()
     {
-        
+
         return Region::select('id', 'name')->orderBy('id','ASC')->get();
     }
 
@@ -156,34 +148,5 @@ class AddressController extends Controller
             $query->where('region_id', $regionId);
         }
         return $query->orderBy('name')->get();
-    }
-
-    /**
-     * Patch an existing address
-     *
-     * @param PatchRequest $request
-     * @param Address $address
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function patch(PatchRequest $request, Address $address)
-    {
-        $user = $request->user();
-
-        if (!Gate::authorize('update', $address)) {
-            return abort(403, 'Forbidden');
-        }
-
-        $data = $request->validated();
-
-        // Si se quiere marcar como default
-        if (array_key_exists('is_default', $data) && $data['is_default'] === true) {
-            $user->addresses()->update(['is_default' => false]);
-            $address->is_default = true;
-        }
-
-        $address->fill($data);
-        $address->save();
-
-        return response()->json(['message' => 'The address has been updated']);
     }
 }
