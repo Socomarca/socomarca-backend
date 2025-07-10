@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Order;
 use App\Models\Payment;
 use App\Models\PaymentMethod;
+use App\Models\Siteinfo;
 use Transbank\Webpay\WebpayPlus;
 use Transbank\Webpay\WebpayPlus\Transaction;
 use Transbank\Webpay\Options;
@@ -13,22 +14,32 @@ use Illuminate\Support\Facades\Log;
 class WebpayService
 {
     protected $transaction;
+    protected $webpayData;
 
     public function __construct()
     {
         Log::info('WebpayService: Inicializando servicio', ['environment' => app()->environment()]);
-        
-        if (app()->environment('production')) {
+        $siteinfo = Siteinfo::where('key', 'WEBPAY_INFO')->first();
+        $this->webpayData = $siteinfo ? $siteinfo->value : [];
+
+        if(!$this->webpayData){
+            return response()->json([
+                'message' => 'No se encontró la configuración de Webpay',
+                'data' => []
+            ],404);
+        }
+
+        if ($this->webpayData['WEBPAY_ENVIRONMENT'] === 'production') {
             $options = new Options(
-                config('webpay.api_key'),
-                config('webpay.commerce_code'),
+                $this->webpayData['WEBPAY_API_KEY'],
+                $this->webpayData['WEBPAY_COMMERCE_CODE'],
                 Options::ENVIRONMENT_PRODUCTION
             );
             Log::info('WebpayService: Configurando ambiente de producción');
         } else {
             $options = new Options(
-                WebpayPlus::INTEGRATION_API_KEY,
-                WebpayPlus::INTEGRATION_COMMERCE_CODE,
+                $this->webpayData['WEBPAY_API_KEY'],
+                $this->webpayData['WEBPAY_COMMERCE_CODE'],
                 Options::ENVIRONMENT_INTEGRATION
             );
             Log::info('WebpayService: Configurando ambiente de integración');
@@ -56,8 +67,9 @@ class WebpayService
                 $order->id,
                 $order->user_id,
                 $order->amount,
-                env('WEBPAY_RETURN_URL')
+                $this->webpayData['WEBPAY_RETURN_URL']
             );
+            
 
             Log::info('WebpayService: Transacción creada exitosamente', [
                 'order_id' => $order->id,

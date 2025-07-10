@@ -21,6 +21,7 @@ class DatabaseSeeder extends Seeder
                 ProductSeeder::class,
                 PaymentMethodSeeder::class,
                 RolesAndPermissionsSeeder::class,
+                SiteInfoSeeder::class,
                 OrderSeeder::class,
                 CartItemSeeder::class,
                 FavoriteSeeder::class,
@@ -32,6 +33,7 @@ class DatabaseSeeder extends Seeder
                 RegionSeeder::class,
                 PaymentMethodSeeder::class,
                 RolesAndPermissionsSeeder::class,
+                SiteInfoSeeder::class,
             ]);
         }
     }

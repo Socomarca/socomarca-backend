@@ -157,3 +157,72 @@ test('a superadmin can update customer message without images', function () {
 
     $this->assertDatabaseHas('siteinfo', ['key' => 'customer_message']);
 });
+
+// Webpay tests
+
+test('webpay config endpoint returns default structure when database is empty', function () {
+    $this->getJson('/api/webpay/config')
+        ->assertStatus(404)
+        ->assertJson([
+            'message' => 'No se encontró la configuración de Webpay',
+            'data' => [],
+        ]);
+});
+
+test('webpay config endpoint returns stored values', function () {
+    $stored = [
+        'WEBPAY_COMMERCE_CODE' => '123456',
+        'WEBPAY_API_KEY' => 'SOMEKEY',
+        'WEBPAY_ENVIRONMENT' => 'production',
+        'WEBPAY_RETURN_URL' => 'https://example.com/return',
+    ];
+    Siteinfo::create([
+        'key' => 'WEBPAY_INFO',
+        'value' => $stored,
+        'content' => 'Informacion de entorno webpay',
+    ]);
+
+    $this->getJson('/api/webpay/config')
+        ->assertOk()
+        ->assertJson($stored);
+});
+
+test('update webpay config requires authentication and superadmin role', function () {
+    $payload = [
+        'WEBPAY_COMMERCE_CODE' => '111',
+        'WEBPAY_API_KEY' => 'KEY',
+        'WEBPAY_ENVIRONMENT' => 'integration',
+        'WEBPAY_RETURN_URL' => 'https://abc.com',
+    ];
+
+    // Unauthenticated
+    $this->putJson('/api/webpay/config', $payload)->assertUnauthorized();
+
+    // Authenticated but not superadmin
+    $user = User::factory()->create()->assignRole('admin');
+    $this->actingAs($user, 'sanctum');
+    $this->putJson('/api/webpay/config', $payload)->assertForbidden();
+});
+
+test('a superadmin can update webpay config', function () {
+    $user = User::factory()->create()->assignRole('superadmin');
+
+    $payload = [
+        'WEBPAY_COMMERCE_CODE' => '7654321',
+        'WEBPAY_API_KEY' => 'NEWKEY',
+        'WEBPAY_ENVIRONMENT' => 'integration',
+        'WEBPAY_RETURN_URL' => 'https://mysite.com/webpay/return',
+    ];
+
+    $this->actingAs($user, 'sanctum')
+        ->putJson('/api/webpay/config', $payload)
+        ->assertOk()
+        ->assertJson(['message' => 'Configuración de Webpay actualizada exitosamente']);
+
+    $this->assertDatabaseHas('siteinfo', [
+        'key' => 'WEBPAY_INFO',
+    ]);
+
+    $record = Siteinfo::where('key', 'WEBPAY_INFO')->first();
+    expect($record->value)->toMatchArray($payload);
+});

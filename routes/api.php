@@ -145,6 +145,11 @@ Route::get('/webpay/return', [WebpayController::class, 'return'])->name('webpay.
 Route::get('/webpay/status', [WebpayController::class, 'status']);
 Route::post('/webpay/refund', [WebpayController::class, 'refund']);
 
+// Configuraciones de Webpay - Solo superadmin puede editarlas
+Route::get('/webpay/config', [SiteinfoController::class, 'webpayConfig']);
+Route::middleware(['auth:sanctum', 'role:superadmin'])->group(function () {
+    Route::put('/webpay/config', [SiteinfoController::class, 'updateWebpayConfig']);
+});
 
 Route::get('/siteinfo', [SiteinfoController::class, 'show']);
 Route::get('/terms', [SiteinfoController::class, 'terms']);
