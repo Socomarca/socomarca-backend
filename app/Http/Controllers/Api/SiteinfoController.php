@@ -222,4 +222,56 @@ class SiteinfoController extends Controller
 
         return response()->json(['message' => 'Mensaje de bienvenida actualizado correctamente.']);
     }
+
+    /**
+     * Get the webpay configuration.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function webpayConfig()
+    {
+        $record = Siteinfo::where('key', 'WEBPAY_INFO')->first();
+        $data = $record ? $record->value : [];
+
+        if(!$data){
+            return response()->json([
+                'message' => 'No se encontró la configuración de Webpay',
+                'data' => []
+            ],404);
+        }
+
+        return response()->json($data);
+    }
+
+    /**
+     * Update the webpay configuration.
+     * Solo puede ser actualizada por el superadmin.
+     *
+     * @param \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function updateWebpayConfig(Request $request)
+    {
+        $data = $request->validate([
+            'WEBPAY_COMMERCE_CODE' => 'required|string',
+            'WEBPAY_API_KEY' => 'required|string',
+            'WEBPAY_ENVIRONMENT' => 'required|string|in:integration,production',
+            'WEBPAY_RETURN_URL' => 'required|url',
+        ]);
+
+        Siteinfo::updateOrCreate(
+            ['key' => 'WEBPAY_INFO'],
+            [
+                'value' => $data,
+                'content' => 'Informacion de entorno webpay',
+            ]
+        );
+ 
+        return response()->json(
+            [
+                'message' => 'Configuración de Webpay actualizada exitosamente',
+                'data' => $data
+            ]
+        );
+    }
 }
