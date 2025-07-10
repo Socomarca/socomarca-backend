@@ -364,6 +364,22 @@ class UserController extends Controller
         return false;
     }
 
+    public function customersList()
+    {
+        $clientes = User:: //::role('cliente') 
+            select('id', 'name')
+            ->orderBy('name')
+            ->get()
+            ->map(function($user) {
+                return [
+                    'id' => $user->id,
+                    'customer' => $user->name,
+                ];
+            });
+
+        return response()->json($clientes);
+    }
+
     /**
      * Partially update user fields
      *
@@ -374,7 +390,7 @@ class UserController extends Controller
     public function partialUpdate(Request $request, $id)
     {
         $user = User::findOrFail($id);
-        
+
         $validated = $request->validate([
             'name' => 'sometimes|string|max:255',
             'email' => 'sometimes|email|unique:users,email,' . $id,
