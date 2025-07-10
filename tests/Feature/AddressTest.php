@@ -1,6 +1,8 @@
 <?php
 
 use App\Models\Address;
+use App\Models\Municipality;
+use App\Models\Region;
 use App\Models\User;
 
 uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
@@ -276,4 +278,100 @@ test('verify customer can partially update an address with PATCH', function () {
         'address_line1' => 'Solo Cambio Calle',
         'contact_name' => 'Nombre Original', // No cambia
     ]);
+});
+
+test('can update multiple municipalities status', function () {
+    $user = User::factory()->create();
+    $user->assignRole('admin');
+
+    $municipalities = Municipality::factory()->count(3)->create();
+    
+    $payload = [
+        'municipality_ids' => $municipalities->pluck('id')->toArray(),
+        'status' => true
+    ];
+
+    $response = $this->actingAs($user, 'sanctum')
+        ->patchJson('/api/municipalities/status', $payload);
+
+    $response->assertStatus(200)
+        ->assertJsonStructure([
+            'message',
+            'municipalities',
+            'updated_count'
+        ]);
+});
+
+test('can update region and all its municipalities status', function () {
+    $user = User::factory()->create();
+    $user->assignRole('admin');
+
+    $region = Region::factory()->create();
+    $municipalities = Municipality::factory()->count(3)->create([
+        'region_id' => $region->id
+    ]);
+
+    $payload = ['status' => true];
+
+    $response = $this->actingAs($user, 'sanctum')
+        ->patchJson("/api/regions/{$region->id}/municipalities/status", $payload);
+
+    $response->assertStatus(200)
+        ->assertJsonStructure([
+            'message',
+            'region' => ['id', 'name', 'status'],
+            'municipalities',
+            'updated_count'
+        ]);
+});
+
+test('municipalities bulk update requires valid data', function () {
+    $user = User::factory()->create();
+    $user->assignRole('admin');
+
+    $response = $this->actingAs($user, 'sanctum')
+        ->patchJson('/api/municipalities/status', []);
+
+    $response->assertStatus(422)
+        ->assertJsonValidationErrors(['municipality_ids', 'status']);
+});
+
+test('only admin can update municipalities status', function () {
+    $cliente = User::factory()->create();
+    $cliente->assignRole('cliente');
+
+    $municipalities = Municipality::factory()->count(2)->create();
+
+    $response = $this->actingAs($cliente, 'sanctum')
+        ->patchJson('/api/municipalities/status', [
+            'municipality_ids' => $municipalities->pluck('id')->toArray(),
+            'status' => true
+        ]);
+
+    $response->assertStatus(403);
+});
+
+test('bulk update fails with non-existent municipality ids', function () {
+    $user = User::factory()->create();
+    $user->assignRole('admin');
+
+    $response = $this->actingAs($user, 'sanctum')
+        ->patchJson('/api/municipalities/status', [
+            'municipality_ids' => [999, 1000],
+            'status' => true
+        ]);
+
+    $response->assertStatus(422);
+});
+
+test('region municipalities update fails with non-existent region', function () {
+    $user = User::factory()->create();
+    $user->assignRole('admin');
+
+    $response = $this->actingAs($user, 'sanctum')
+        ->patchJson('/api/regions/999/municipalities/status', [
+            'status' => true
+        ]);
+
+    $response->assertStatus(404);
 });

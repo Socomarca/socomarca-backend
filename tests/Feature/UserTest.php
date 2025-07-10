@@ -339,3 +339,25 @@ test('ordena usuarios por nombre ascendente y por id descendente', function () {
     $expectedDesc = collect([$juan, $ana, $carlos])->sortByDesc('id')->pluck('id')->values()->all();
     expect($idsDesc)->toBe($expectedDesc);
 });
+
+test('can partially update user with PATCH', function () {
+    $admin = User::factory()->create();
+    $admin->assignRole('admin');
+    
+    $user = User::factory()->create();
+
+    $payload = [
+        'name' => 'Nombre Parcialmente Actualizado'
+    ];
+
+    $response = $this->actingAs($admin, 'sanctum')
+        ->patchJson("/api/users/{$user->id}", $payload);
+
+    $response->assertStatus(200)
+        ->assertJsonFragment(['message' => 'User updated successfully']);
+
+    $this->assertDatabaseHas('users', [
+        'id' => $user->id,
+        'name' => 'Nombre Parcialmente Actualizado'
+    ]);
+});
