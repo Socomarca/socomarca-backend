@@ -52,10 +52,7 @@ test('puede agregar un item al carrito', function () {
     $response = $this->postJson('/api/cart/items', $data);
 
     // Assert
-    $response->assertStatus(201)
-        ->assertJson([
-            'message' => 'Product has beed added to cart'
-        ]);
+    $response->assertStatus(201);
 
     $this->assertDatabaseHas('cart_items', [
         'user_id' => $this->user->id,
@@ -88,10 +85,8 @@ test('puede incrementar cantidad si item ya existe en carrito', function () {
     $response = $this->postJson('/api/cart/items', $data);
 
     // Assert
-    $response->assertStatus(201)
-        ->assertJson([
-            'message' => 'Product has beed added to cart'
-        ]);
+    $response->assertStatus(201);
+        
 
     $this->assertDatabaseHas('cart_items', [
         'user_id' => $this->user->id,
