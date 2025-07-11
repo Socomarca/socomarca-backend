@@ -104,7 +104,35 @@ test('verify customer can add a new address', function () {
         ->postJson($route, $payload);
 
     $response->assertStatus(201)
-        ->assertJsonFragment(['message' => 'The address has been added']);
+        ->assertJsonFragment(['message' => 'The address has been added'])
+        ->assertJsonStructure([
+            'message',
+            'address' => [
+                'id',
+                'address_line1',
+                'address_line2',
+                'postal_code',
+                'is_default',
+                'type',
+                'phone',
+                'contact_name',
+                'alias',
+                'municipality' => [
+                    'id',
+                    'name',
+                    'region' => [
+                        'id',
+                        'name'
+                    ]
+                ],
+                'created_at',
+                'updated_at'
+            ]
+        ])
+        ->assertJsonPath('address.address_line1', 'Calle Falsa 123')
+        ->assertJsonPath('address.contact_name', 'Juan Pérez')
+        ->assertJsonPath('address.is_default', true)
+        ->assertJsonPath('address.type', 'shipping');
 
     $this->assertDatabaseHas('addresses', [
         'address_line1' => 'Calle Falsa 123',

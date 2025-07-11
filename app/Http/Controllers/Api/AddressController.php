@@ -63,7 +63,33 @@ class AddressController extends Controller
 
         $address->save();
 
-        return response()->json(['message' => 'The address has been added'], 201);
+       
+        $address->load('municipality.region');
+
+        return response()->json([
+        'message' => 'The address has been added',
+        'address' => [
+            'id' => $address->id,
+            'address_line1' => $address->address_line1,
+            'address_line2' => $address->address_line2,
+            'postal_code' => $address->postal_code,
+            'is_default' => $address->is_default,
+            'type' => $address->type,
+            'phone' => $address->phone,
+            'contact_name' => $address->contact_name,
+            'alias' => $address->alias,
+            'municipality' => [
+                'id' => $address->municipality->id,
+                'name' => $address->municipality->name,
+                'region' => [
+                    'id' => $address->municipality->region->id,
+                    'name' => $address->municipality->region->name,
+                ]
+            ],
+            'created_at' => $address->created_at,
+            'updated_at' => $address->updated_at,
+        ]
+    ], 201);
     }
 
     public function show(Address $address)
