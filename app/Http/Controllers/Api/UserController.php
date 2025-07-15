@@ -151,17 +151,6 @@ class UserController extends Controller
                 ], 404);
             }
 
-            // Guardar datos originales para comparar cambios
-            $originalData = $user->toArray();
-
-            // Actualizar datos básicos
-            //$user->name = $data['name'];
-            //$user->email = $data['email'];
-            //$user->phone = $data['phone'];
-            //$user->rut = $data['rut'];
-            //$user->business_name = $data['business_name'];
-            //$user->is_active = $data['is_active'];
-
             // Actualizar contraseña si se proporciona
             $passwordChanged = false;
             $newPassword = null;
@@ -171,24 +160,24 @@ class UserController extends Controller
                 $passwordChanged = true;
             }
 
-            $user->save();
+            // Solo guardar si se cambió la contraseña
+            if ($passwordChanged) {
+                $user->save();
+            }
 
             // Actualizar roles si se proporcionan
             if (isset($data['roles']) && is_array($data['roles'])) {
                 $user->syncRoles($data['roles']);
             }
 
-            // Verificar si hubo cambios significativos
-            $hasSignificantChanges = $this->hasSignificantChanges($originalData, $user->toArray());
-
-            // Enviar email de notificación solo si hay cambios significativos
-            if ($hasSignificantChanges || $passwordChanged) {
+            // Enviar email de notificación solo si se cambió la contraseña
+            if ($passwordChanged) {
                 try {
                     Mail::to($user->email)->send(
                         new UserNotificationMail(
                             $user, 
                             'updated', 
-                            $passwordChanged ? $newPassword : null
+                            $newPassword
                         )
                     );
                 } catch (\Exception $e) {
