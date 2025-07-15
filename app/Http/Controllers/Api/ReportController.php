@@ -36,16 +36,19 @@ class ReportController extends Controller
         if ($type === 'top-municipalities') {
             $topMunicipalities = \App\Models\Order::searchReport($start, $end, 'top-municipalities')->get();
 
-            // Calcula los totales sumando los meses consultados
-            $total_purchases = $topMunicipalities->sum(function($item) {
-                return (int) $item->total_purchases;
-            });
-            $quantity = $topMunicipalities->sum(function($item) {
-                return (int) $item->quantity;
-            });
+            // Filtro por monto
+            if ($totalMin !== null) {
+                $topMunicipalities = $topMunicipalities->filter(fn($item) => $item->total_purchases >= $totalMin);
+            }
+            if ($totalMax !== null) {
+                $topMunicipalities = $topMunicipalities->filter(fn($item) => $item->total_purchases <= $totalMax);
+            }
+
+            $total_purchases = $topMunicipalities->sum(fn($item) => (int) $item->total_purchases);
+            $quantity = $topMunicipalities->sum(fn($item) => (int) $item->quantity);
 
             return response()->json([
-                'top_municipalities' => $topMunicipalities,
+                'top_municipalities' => $topMunicipalities->values(),
                 'total_purchases' => $total_purchases,
                 'quantity' => $quantity,
             ]);
@@ -109,7 +112,17 @@ class ReportController extends Controller
 
         if ($type === 'transactions-failed') {
             $chart = [];
-            foreach ($orders as $order) {
+            $filteredOrders = $orders;
+
+            // Filtro por monto
+            if ($totalMin !== null) {
+                $filteredOrders = $filteredOrders->filter(fn($item) => $item->total >= $totalMin);
+            }
+            if ($totalMax !== null) {
+                $filteredOrders = $filteredOrders->filter(fn($item) => $item->total <= $totalMax);
+            }
+
+            foreach ($filteredOrders as $order) {
                 $chart[] = [
                     'month' => $order->month,
                     'failed_transactions' => (int)$order->transactions_failed,
@@ -124,13 +137,21 @@ class ReportController extends Controller
         if ($type === 'top-products') {
             $productIds = $orders->pluck('product_id')->unique()->all();
             $products = \App\Models\Product::whereIn('id', $productIds)->get()->keyBy('id');
-
             $months = $orders->pluck('month')->unique()->sort()->values()->all();
 
             $topProducts = [];
             $total_sales = 0;
             foreach ($months as $month) {
                 $productsMonth = $orders->where('month', $month);
+
+                // Filtro por monto
+                if ($totalMin !== null) {
+                    $productsMonth = $productsMonth->filter(fn($item) => $item->subtotal >= $totalMin);
+                }
+                if ($totalMax !== null) {
+                    $productsMonth = $productsMonth->filter(fn($item) => $item->subtotal <= $totalMax);
+                }
+
                 $top = $productsMonth->sortByDesc('total_sales')->first();
                 if ($top) {
                     $product = $products->get($top->product_id);
@@ -171,6 +192,15 @@ class ReportController extends Controller
             $topCategories = [];
             foreach ($months as $month) {
                 $categoriesMonth = $orders->where('month', $month);
+
+                // Filtro por monto
+                if ($totalMin !== null) {
+                    $categoriesMonth = $categoriesMonth->filter(fn($item) => $item->subtotal >= $totalMin);
+                }
+                if ($totalMax !== null) {
+                    $categoriesMonth = $categoriesMonth->filter(fn($item) => $item->subtotal <= $totalMax);
+                }
+
                 $top = $categoriesMonth->sortByDesc('total_sales')->first();
                 if ($top) {
                     $topCategories[] = [
