@@ -67,7 +67,7 @@ class CategoryController extends Controller
     {
         $sort = $request->input('sort', 'name');
         $sortDirection = $request->input('sort_direction', 'asc');
-        $fileName = 'Lista_categorias.xlsx';
+        $fileName = 'Lista_categorias' . now()->format('Ymd_His') . '.xlsx';
 
         return Excel::download(new CategoriesExport($sort, $sortDirection), $fileName);
     }
