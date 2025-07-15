@@ -67,7 +67,8 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
     Route::middleware(['role:admin|superadmin|supervisor'])->group(function () {
-    Route::get('/exports/users', [UserController::class, 'export']);
+        Route::get('/exports/users', [UserController::class, 'export']);
+        Route::get('/exports/categories', [CategoryController::class, 'export']);
     
     });
 
