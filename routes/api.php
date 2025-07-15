@@ -47,6 +47,8 @@ Route::prefix('auth')->group(function () {
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/profile', [UserController::class, 'profile']);
+    
+    
 
     Route::get('/users', [UserController::class, 'index'])->middleware('permission:manage-users');
     Route::get('/users/customers', [UserController::class, 'customersList']);
@@ -57,10 +59,16 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::patch('/users/{id}', [UserController::class, 'partialUpdate'])->middleware('permission:manage-users');
     Route::delete('/users/{id}', [UserController::class, 'destroy'])->middleware('permission:manage-users');
 
+
     Route::middleware(['role:admin|superadmin'])->group(function () {
         Route::get('/roles', [RoleController::class, 'index']);
         Route::get('/roles/users', [RoleController::class, 'rolesWithUsers']);
         Route::get('/roles/{user}', [RoleController::class, 'userRoles']);
+    });
+
+    Route::middleware(['role:admin|superadmin|supervisor'])->group(function () {
+    Route::get('/exports/users', [UserController::class, 'export']);
+    
     });
 
     Route::get('/addresses', [AddressController::class, 'index'])->name('addresses.index');
