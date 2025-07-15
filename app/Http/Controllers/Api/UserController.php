@@ -155,12 +155,12 @@ class UserController extends Controller
             $originalData = $user->toArray();
 
             // Actualizar datos básicos
-            $user->name = $data['name'];
-            $user->email = $data['email'];
-            $user->phone = $data['phone'];
-            $user->rut = $data['rut'];
-            $user->business_name = $data['business_name'];
-            $user->is_active = $data['is_active'];
+            //$user->name = $data['name'];
+            //$user->email = $data['email'];
+            //$user->phone = $data['phone'];
+            //$user->rut = $data['rut'];
+            //$user->business_name = $data['business_name'];
+            //$user->is_active = $data['is_active'];
 
             // Actualizar contraseña si se proporciona
             $passwordChanged = false;

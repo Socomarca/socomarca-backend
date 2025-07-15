@@ -176,6 +176,25 @@ class User extends Authenticatable
                 continue;
             }
 
+            // Filtro especial para buscar en name o email
+            if ($filter['field'] === 'name_or_email' && !empty($filter['value'])) {
+                $value = $filter['value'];
+                $operator = $filter['operator'] ?? 'ILIKE';
+                
+                // Si es un operador LIKE/ILIKE, añadir los wildcards
+                if (in_array($operator, ['LIKE', 'ILIKE'])) {
+                    $searchValue = "%{$value}%";
+                } else {
+                    $searchValue = $value;
+                }
+                
+                $query->where(function ($q) use ($operator, $searchValue) {
+                    $q->where('name', $operator, $searchValue)
+                      ->orWhere('email', $operator, $searchValue);
+                });
+                continue;
+            }
+
             $field = array_find($this->allowedFilters, function ($item) use ($filter) {
                 return $item['field'] === $filter['field'];
             });
