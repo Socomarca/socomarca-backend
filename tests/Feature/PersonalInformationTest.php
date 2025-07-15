@@ -124,28 +124,17 @@ test('failure when RUT is invalid', function () {
         ->assertJsonValidationErrors(['rut']);
 });
 
-test('user with manage-users permission can update another user', function () {
+test('user with manage-users permission can update another user password and roles', function () {
     $admin = User::factory()->create();
     $admin->givePermissionTo('manage-users');
 
-    $randomNumber = rand(1000000, 25000000);
-    $rut = new Rut($randomNumber);
-    $formattedRut = $rut->fix()->format();
+    $user = User::factory()->create();
+    $originalEmail = $user->email;
 
-    $user = User::factory()->create([
-        'email' => fake()->email,
-        'rut' => '12345678-9',
-    ]);
-
-    $updatedEmail = fake()->unique()->safeEmail;
-    $phone = fake()->unique()->numberBetween(912345678, 999999999);
     $data = [
-        'name' => fake()->name,
-        'email' => $updatedEmail,
-        'phone' => "$phone",
-        'rut' => $formattedRut,
-        'business_name' => fake()->company,
-        'is_active' => false,
+        'password' => 'newpassword123',
+        'password_confirmation' => 'newpassword123',
+        'roles' => ['cliente'],
     ];
 
     $this->actingAs($admin, 'sanctum')
@@ -153,32 +142,29 @@ test('user with manage-users permission can update another user', function () {
         ->assertStatus(200);
 
     $user->refresh();
-    expect($user->email)->toBe($updatedEmail);
-    expect($user->rut)->toBe($formattedRut);
+    // Email no debe cambiar ya que no está en los datos enviados
+    expect($user->email)->toBe($originalEmail);
+    // Verificar que tiene el rol asignado
+    expect($user->hasRole('cliente'))->toBeTrue();
 });
 
-test('failure when email is not valid', function () {
+test('success when only updating password without other fields', function () {
     $admin = User::factory()->create();
     $admin->givePermissionTo('manage-users');
 
     $user = User::factory()->create();
 
     $data = [
-        'name' => 'Nuevo Nombre',
-        'email' => 'correo-no-valido',
-        'phone' => 912345678,
-        'rut' => '12345678-9',
-        'business_name' => 'Empresa X',
-        'is_active' => true,
+        'password' => 'newpassword123',
+        'password_confirmation' => 'newpassword123',
     ];
 
     $this->actingAs($admin, 'sanctum')
         ->putJson("/api/users/{$user->id}", $data)
-        ->assertStatus(422)
-        ->assertJsonValidationErrors(['email']);
+        ->assertStatus(200);
 });
 
-test('failure when required fields are omitted when updating a user', function () {
+test('success when no fields are provided for updating', function () {
     $admin = User::factory()->create();
     $admin->givePermissionTo('manage-users');
 
@@ -186,34 +172,22 @@ test('failure when required fields are omitted when updating a user', function (
 
     $this->actingAs($admin, 'sanctum')
         ->putJson("/api/users/{$user->id}", [])
-        ->assertStatus(422)
-        ->assertJsonValidationErrors([
-            'name',
-            'email',
-            'phone',
-            'rut',
-            'business_name',
-            'is_active'
-        ]);
+        ->assertStatus(200);
 });
 
-test('failure when phone number is invalid when updating', function () {
+test('failure when password confirmation does not match', function () {
     $admin = User::factory()->create();
     $admin->givePermissionTo('manage-users');
     $user = User::factory()->create();
 
     $data = [
-        'name' => 'Nombre',
-        'email' => 'correo@example.com',
-        'phone' => 1234,
-        'rut' => '12345678-9',
-        'business_name' => 'Empresa',
-        'is_active' => true,
+        'password' => 'newpassword123',
+        'password_confirmation' => 'differentpassword',
     ];
 
     $response = $this->actingAs($admin, 'sanctum')
         ->putJson("/api/users/{$user->id}", $data);
 
     $response->assertStatus(422)
-        ->assertJsonValidationErrors(['phone']);
+        ->assertJsonValidationErrors(['password']);
 });
