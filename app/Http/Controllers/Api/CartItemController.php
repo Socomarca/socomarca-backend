@@ -39,8 +39,25 @@ class CartItemController extends Controller
             $item->save();
         }
 
-        return response([
-            'message' => 'Product has beed added to cart'
+        // Cargar la relación del producto
+        $item->load('product');
+
+        $price = null;
+        if ($item->product) {
+            $price = $item->product->prices()
+                ->where('unit', $item->unit)
+                ->value('price');
+        }
+        return response()->json([
+            'product' => [
+                'id' => $item->product->id,
+                'name' => $item->product->name,
+                'price' => (int)$price,
+
+            ],
+            'quantity' => $item->quantity,
+            'unit' => $item->unit,
+            'total' => (int)($price * $item->quantity),
         ], 201);
     }
 

@@ -52,9 +52,17 @@ test('puede agregar un item al carrito', function () {
     $response = $this->postJson('/api/cart/items', $data);
 
     // Assert
-    $response->assertStatus(201)
-        ->assertJson([
-            'message' => 'Product has beed added to cart'
+    $response
+        ->assertCreated()
+        ->assertJsonStructure([
+            'product' => [
+                'id',
+                'name',
+                'price',
+            ],
+            'quantity',
+            'unit',
+            'total',
         ]);
 
     $this->assertDatabaseHas('cart_items', [
@@ -88,10 +96,8 @@ test('puede incrementar cantidad si item ya existe en carrito', function () {
     $response = $this->postJson('/api/cart/items', $data);
 
     // Assert
-    $response->assertStatus(201)
-        ->assertJson([
-            'message' => 'Product has beed added to cart'
-        ]);
+    $response->assertStatus(201);
+
 
     $this->assertDatabaseHas('cart_items', [
         'user_id' => $this->user->id,
@@ -351,7 +357,7 @@ test('falla al eliminar item sin quantity', function () {
 test('usuarios diferentes no pueden ver items de otros carritos', function () {
     // Arrange
     $otherUser = User::factory()->create();
-    
+
     CartItem::create([
         'user_id' => $this->user->id,
         'product_id' => $this->product->id,
@@ -367,7 +373,7 @@ test('usuarios diferentes no pueden ver items de otros carritos', function () {
     ]);
 
     $this->actingAs($otherUser, 'sanctum');
-    
+
     $data = [
         'product_id' => $this->product->id,
         'quantity' => 1,
@@ -481,14 +487,14 @@ test('requiere autenticacion para eliminar items', function () {
 });
 
 test('vaciar su carrito', function () {
-    
+
     \App\Models\CartItem::truncate();
 
     $user = \App\Models\User::factory()->create();
-    
+
     $product = \App\Models\Product::factory()->create();
 
-    
+
     \App\Models\CartItem::factory()->create([
         'user_id' => $user->id,
         'product_id' => $product->id,
@@ -510,18 +516,18 @@ test('vaciar su carrito', function () {
     $response->assertStatus(200)
         ->assertJsonFragment(['message' => 'The cart has been emptied']);
 
-    
+
     $this->assertDatabaseMissing('cart_items', [
         'user_id' => $user->id,
     ]);
 });
 
 test('cliente no puede vaciar carros de otros', function () {
-    
+
     $userA = \App\Models\User::factory()->create();
-    
+
     $userB = \App\Models\User::factory()->create();
-    
+
 
     $product = \App\Models\Product::factory()->create();
 
@@ -551,7 +557,7 @@ test('cliente no puede vaciar carros de otros', function () {
 test('puede agregar productos de una orden al carrito vacío', function () {
     // Arrange
     CartItem::where('user_id', $this->user->id)->delete();
-    
+
     $order = Order::factory()->create([
         'user_id' => $this->user->id,
         'status' => 'completed'
@@ -617,7 +623,7 @@ test('puede agregar productos de una orden al carrito vacío', function () {
 test('puede sumar cantidades cuando el producto ya existe en el carrito', function () {
     // Arrange
     CartItem::where('user_id', $this->user->id)->delete();
-    
+
     CartItem::create([
         'user_id' => $this->user->id,
         'product_id' => $this->product->id,
@@ -667,7 +673,7 @@ test('puede sumar cantidades cuando el producto ya existe en el carrito', functi
 test('puede manejar productos existentes y nuevos en la misma operación', function () {
     // Arrange
     CartItem::where('user_id', $this->user->id)->delete();
-    
+
     CartItem::create([
         'user_id' => $this->user->id,
         'product_id' => $this->product->id,
@@ -777,7 +783,7 @@ test('falla al agregar orden que no pertenece al usuario', function () {
 test('requiere autenticación para agregar orden al carrito', function () {
     // Arrange
     $this->app['auth']->forgetUser();
-    
+
     $order = Order::factory()->create([
         'user_id' => $this->user->id,
         'status' => 'completed'
@@ -816,7 +822,7 @@ test('maneja orden sin items correctamente', function () {
 test('respeta diferentes unidades del mismo producto de la orden', function () {
     // Arrange
     CartItem::where('user_id', $this->user->id)->delete();
-    
+
     Price::factory()->create([
         'product_id' => $this->product->id,
         'unit' => 'g',
