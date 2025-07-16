@@ -11,7 +11,7 @@ beforeEach(function ()
 {
     $this->seed(\Database\Seeders\RolesAndPermissionsSeeder::class);
 
-   
+
 });
 
 test('verify authentication for addresses list', function ()
@@ -103,36 +103,32 @@ test('verify customer can add a new address', function () {
     $response = $this->actingAs($user, 'sanctum')
         ->postJson($route, $payload);
 
-    $response->assertStatus(201)
-        ->assertJsonFragment(['message' => 'The address has been added'])
+    $response->assertCreated()
         ->assertJsonStructure([
-            'message',
-            'address' => [
+            'id',
+            'address_line1',
+            'address_line2',
+            'postal_code',
+            'is_default',
+            'type',
+            'phone',
+            'contact_name',
+            'alias',
+            'municipality' => [
                 'id',
-                'address_line1',
-                'address_line2',
-                'postal_code',
-                'is_default',
-                'type',
-                'phone',
-                'contact_name',
-                'alias',
-                'municipality' => [
+                'name',
+                'region' => [
                     'id',
-                    'name',
-                    'region' => [
-                        'id',
-                        'name'
-                    ]
-                ],
-                'created_at',
-                'updated_at'
-            ]
+                    'name'
+                ]
+            ],
+            'created_at',
+            'updated_at'
         ])
-        ->assertJsonPath('address.address_line1', 'Calle Falsa 123')
-        ->assertJsonPath('address.contact_name', 'Juan Pérez')
-        ->assertJsonPath('address.is_default', true)
-        ->assertJsonPath('address.type', 'shipping');
+        ->assertJsonPath('address_line1', 'Calle Falsa 123')
+        ->assertJsonPath('contact_name', 'Juan Pérez')
+        ->assertJsonPath('is_default', true)
+        ->assertJsonPath('type', 'shipping');
 
     $this->assertDatabaseHas('addresses', [
         'address_line1' => 'Calle Falsa 123',
@@ -157,7 +153,7 @@ test('verify customer can update an address', function () {
         'address_line2' => 'Depto 8C',
         'postal_code' => '7654321',
         'is_default' => false,
-        'type' => 'billing', 
+        'type' => 'billing',
         'phone' => 123456789,
         'contact_name' => 'Ana Gómez',
         'municipality_id' => $municipality->id,
@@ -298,7 +294,7 @@ test('verify customer can partially update an address with PATCH', function () {
     $response = $this->actingAs($user, 'sanctum')
         ->patchJson($route, $payload);
 
-    $response->assertStatus(200)    
+    $response->assertStatus(200)
         ->assertJsonFragment(['message' => 'The selected address has been updated']);
 
     $this->assertDatabaseHas('addresses', [
@@ -313,7 +309,7 @@ test('can update multiple municipalities status', function () {
     $user->assignRole('admin');
 
     $municipalities = Municipality::factory()->count(3)->create();
-    
+
     $payload = [
         'municipality_ids' => $municipalities->pluck('id')->toArray(),
         'status' => true
