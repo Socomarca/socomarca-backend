@@ -49,12 +49,11 @@ class CartItemController extends Controller
                 ->value('price');
         }
         return response()->json([
-            'message' => 'Product has been added to cart',
             'product' => [
                 'id' => $item->product->id,
                 'name' => $item->product->name,
                 'price' => (int)$price,
-                
+
             ],
             'quantity' => $item->quantity,
             'unit' => $item->unit,
