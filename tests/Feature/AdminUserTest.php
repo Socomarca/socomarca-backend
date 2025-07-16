@@ -84,12 +84,8 @@ test('usuario con permisos puede actualizar usuarios', function () {
     $user->assignRole('cliente');
     
     $updateData = [
-        'name' => 'Updated Name',
-        'email' => $user->email,
-        'phone' => (string) $user->phone,
-        'rut' => $user->rut,
-        'business_name' => 'Updated Business',
-        'is_active' => false,
+        'password' => 'newpassword123',
+        'password_confirmation' => 'newpassword123',
         'roles' => ['admin']
     ];
 
@@ -105,16 +101,22 @@ test('usuario con permisos puede actualizar usuarios', function () {
             'password_changed'
         ]);
 
+    // Verificar que los datos básicos NO cambiaron (solo se pueden cambiar password y roles)
     $this->assertDatabaseHas('users', [
         'id' => $user->id,
-        'name' => 'Updated Name',
-        'business_name' => 'Updated Business',
-        'is_active' => false
+        'name' => 'Original Name',
+        'business_name' => 'Original Business',
     ]);
 
+    // Verificar que los roles sí cambiaron
     $user->refresh();
     expect($user->hasRole('admin'))->toBeTrue();
     expect($user->hasRole('cliente'))->toBeFalse();
+    
+    // Verificar que se reportó el cambio de contraseña
+    $response->assertJson([
+        'password_changed' => true
+    ]);
 });
 
 test('usuario con permisos puede eliminar usuarios', function () {
