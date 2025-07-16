@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Exports\UsersExport;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\SearchUsersRequest;
 use App\Http\Requests\Users\DestroyRequest;
@@ -20,6 +21,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
+use Maatwebsite\Excel\Facades\Excel;
 
 class UserController extends Controller
 {
@@ -423,5 +425,14 @@ class UserController extends Controller
 
             ]
         ]);
+    }
+
+    public function export(Request $request)
+    {
+        $sort = $request->input('sort', 'name');
+        $sortDirection = $request->input('sort_direction', 'asc');
+        $fileName = 'Lista_usuarios' . now()->format('Ymd_His') . '.xlsx';
+
+        return Excel::download(new UsersExport($sort, $sortDirection), $fileName);
     }
 }

@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Exports\CategoriesExport;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Categories\ShowRequest;
 use App\Http\Resources\Categories\CategoryCollection;
 use App\Models\Category;
 use Illuminate\Http\Request;
+use Maatwebsite\Excel\Facades\Excel;
 
 class CategoryController extends Controller
 {
@@ -59,5 +61,14 @@ class CategoryController extends Controller
             ->paginate($perPage);
 
         return new CategoryCollection($result);
+    }
+
+    public function export(Request $request)
+    {
+        $sort = $request->input('sort', 'name');
+        $sortDirection = $request->input('sort_direction', 'asc');
+        $fileName = 'Lista_categorias' . now()->format('Ymd_His') . '.xlsx';
+
+        return Excel::download(new CategoriesExport($sort, $sortDirection), $fileName);
     }
 }

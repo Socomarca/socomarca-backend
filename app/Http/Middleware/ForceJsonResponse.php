@@ -22,6 +22,11 @@ class ForceJsonResponse
             return $next($request);
         }
 
+        // Excluir rutas de exportación
+        if ($request->is('api/exports/*')) {
+            return $next($request);
+        }
+        
         if (!$request->wantsJson()) {
             Log::warning('ForceJsonResponse: Intento de acceso sin JSON', [
                 'url' => $request->fullUrl(),
