@@ -170,6 +170,7 @@ Route::middleware(['auth:sanctum', 'role:editor|admin|superadmin'])->group(funct
     Route::put('/terms', [SiteinfoController::class, 'updateTerms']);
     Route::put('/privacy-policy', [SiteinfoController::class, 'updatePrivacyPolicy']);
     Route::post('/customer-message', [SiteinfoController::class, 'updateCustomerMessage']);
+    Route::put('/customer-message/enabled', [SiteinfoController::class, 'toggleCustomerMessageEnabled']);
 });
 
 // Ruta catch-all al final

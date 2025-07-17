@@ -20,6 +20,7 @@ class SiteinfoController extends Controller
         $header = Siteinfo::where('key', 'header')->first();
         $footer = Siteinfo::where('key', 'footer')->first();
         $social = Siteinfo::where('key', 'social_media')->first();
+        $customerMessageEnabled = Siteinfo::where('key', 'customer_message_enabled')->first();
 
         return response()->json([
             'header' => $header ? $header->value : (object)[
@@ -36,6 +37,7 @@ class SiteinfoController extends Controller
                     'link' => ''
                 ]
             ],
+            'customer_message_enabled' => $customerMessageEnabled ? (bool)$customerMessageEnabled->value : false,
         ]);
     }   
     
@@ -273,5 +275,28 @@ class SiteinfoController extends Controller
                 'data' => $data
             ]
         );
+    }
+
+    /**
+     * Toggle the customer message enabled status.
+     *
+     * @param \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function toggleCustomerMessageEnabled(Request $request)
+    {
+        $data = $request->validate([
+            'enabled' => 'required|boolean',
+        ]);
+
+        Siteinfo::updateOrCreate(
+            ['key' => 'customer_message_enabled'],
+            ['value' => $data['enabled']]
+        );
+
+        return response()->json([
+            'enabled' => $data['enabled'],
+            'message' => 'Estado del mensaje de cliente actualizado exitosamente'
+        ]);
     }
 }
