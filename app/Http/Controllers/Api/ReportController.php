@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Exports\OrdersExport;
+use App\Exports\TopMunicipalitiesExport;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\Product;
@@ -623,9 +624,16 @@ class ReportController extends Controller
         $totalMax = $request->input('total_max');
         $status = $request->input('status', 'completed'); 
         $fileName = 'Lista_transacciones' . now()->format('Ymd_His') . '.xlsx';
-
+       
         return Excel::download(new OrdersExport($start, $end, $client, $totalMin, $totalMax, $status), $fileName);
     }
 
-    
+    public function exportTopMunicipalities(Request $request)
+    {
+        $start = $request->input('start');
+        $end = $request->input('end');
+        $fileName = 'Top_comunas_ventas_' . now()->format('Ymd_His') . '.xlsx';
+
+        return Excel::download(new TopMunicipalitiesExport($start, $end), $fileName);
+    }
 }

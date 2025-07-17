@@ -24,7 +24,8 @@ class ForceJsonResponse
 
         // Excluir rutas de exportación
         if (
-            $request->is('api/orders/exports/transactions') ||
+            $request->is('api/orders/reports/exports/transactions') ||
+            $request->is('api/orders/reports/exports/municipalities') ||
             $request->is('api/*/exports') ||
             $request->is('api/exports/*')
         ) {
