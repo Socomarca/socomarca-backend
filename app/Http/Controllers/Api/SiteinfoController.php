@@ -184,6 +184,7 @@ class SiteinfoController extends Controller
             'banner_enabled' => 'required|boolean',
             'modal_image' => 'nullable|image',
             'modal_enabled' => 'required|boolean',
+            'message_enabled' => 'required|boolean',
         ]);
 
         $customerMessage = Siteinfo::where('key', 'customer_message')->first();
@@ -220,6 +221,12 @@ class SiteinfoController extends Controller
         Siteinfo::updateOrCreate(
             ['key' => 'customer_message'],
             ['value' => $value]
+        );
+
+        // Guardar el estado enabled por separado
+        Siteinfo::updateOrCreate(
+            ['key' => 'customer_message_enabled'],
+            ['value' => $data['message_enabled']]
         );
 
         return response()->json(['message' => 'Mensaje de bienvenida actualizado correctamente.']);
@@ -277,26 +284,4 @@ class SiteinfoController extends Controller
         );
     }
 
-    /**
-     * Toggle the customer message enabled status.
-     *
-     * @param \Illuminate\Http\Request $request
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function toggleCustomerMessageEnabled(Request $request)
-    {
-        $data = $request->validate([
-            'enabled' => 'required|boolean',
-        ]);
-
-        Siteinfo::updateOrCreate(
-            ['key' => 'customer_message_enabled'],
-            ['value' => $data['enabled']]
-        );
-
-        return response()->json([
-            'enabled' => $data['enabled'],
-            'message' => 'Estado del mensaje de cliente actualizado exitosamente'
-        ]);
-    }
 }
