@@ -66,7 +66,7 @@ test('puede exportar transacciones exitosas a excel', function () {
     Order::factory()->count(1)->create(['status' => 'failed']);
 
     $response = $this->actingAs($admin, 'sanctum')
-        ->get('/api/orders/reports/exports/transactions?status=completed');
+        ->get('/api/orders/reports/transactions/export?status=completed');
 
     $response->assertStatus(200);
 });
@@ -81,7 +81,7 @@ test('puede exportar transacciones fallidas a excel', function () {
     Order::factory()->count(1)->create(['status' => 'completed']);
 
     $response = $this->actingAs($admin, 'sanctum')
-        ->get('/api/orders/reports/exports/transactions?status=failed');
+        ->get('/api/orders/reports/transactions/export?status=failed');
 
     $response->assertStatus(200);
 
@@ -118,7 +118,8 @@ test('puede exportar top comunas por ventas a excel', function () {
     ]);
 
     $response = $this->actingAs($admin, 'sanctum')
-        ->get('/api/orders/reports/exports/municipalities');
+        ->get('api/orders/reports/municipalities/export');
+        
 
     $response->assertStatus(200);
 
