@@ -4,6 +4,8 @@ use App\Models\User;
 use App\Models\Category;
 use App\Models\Municipality;
 use App\Models\Order;
+use App\Models\OrderItem;
+use App\Models\Product;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Maatwebsite\Excel\Facades\Excel;
 
@@ -123,4 +125,31 @@ test('puede exportar top comunas por ventas a excel', function () {
 
     $response->assertStatus(200);
 
+});
+
+test('puede exportar el producto más vendido por mes a excel', function () {
+    Excel::fake();
+
+    $admin = User::factory()->create();
+    $admin->assignRole('admin');
+
+    $productA = Product::factory()->create(['name' => 'Producto A']);
+    $productB = Product::factory()->create(['name' => 'Producto B']);
+
+    // Mes actual: Producto A vende más
+    $order1 = Order::factory()->create(['status' => 'completed', 'created_at' => now()->startOfMonth()]);
+    OrderItem::factory()->create(['order_id' => $order1->id, 'product_id' => $productA->id, 'quantity' => 10, 'price' => 1000]);
+    OrderItem::factory()->create(['order_id' => $order1->id, 'product_id' => $productB->id, 'quantity' => 5, 'price' => 1000]);
+
+    // Mes anterior: Producto B vende más
+    $order2 = Order::factory()->create(['status' => 'completed', 'created_at' => now()->subMonth()->startOfMonth()]);
+    OrderItem::factory()->create(['order_id' => $order2->id, 'product_id' => $productA->id, 'quantity' => 3, 'price' => 1000]);
+    OrderItem::factory()->create(['order_id' => $order2->id, 'product_id' => $productB->id, 'quantity' => 8, 'price' => 1000]);
+
+    $response = $this->actingAs($admin, 'sanctum')
+        ->get('/api/orders/reports/products/export');
+
+    $response->assertStatus(200);
+
+    // No se verifica el nombre exacto del archivo porque es dinámico
 });
