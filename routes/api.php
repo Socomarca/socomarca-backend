@@ -49,7 +49,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/profile', [UserController::class, 'profile']);
     
     
-    Route::get('/users/exports', [UserController::class, 'export'])->middleware('role:admin|superadmin|supervisor');;
+    Route::get('/users/exports', [UserController::class, 'export'])->middleware('role:admin|superadmin|supervisor');
     Route::get('/users', [UserController::class, 'index'])->middleware('permission:manage-users');
     Route::get('/users/customers', [UserController::class, 'customersList']);
     Route::post('/users', [UserController::class, 'store'])->middleware('permission:manage-users');
