@@ -82,7 +82,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::patch('/municipalities/status', [AddressController::class, 'updateMunicipalitiesStatus'])->name('addresses.municipalities.bulk-status');
     });
     
-    Route::get('/exports/categories', [CategoryController::class, 'export'])->middleware('role:admin|superadmin|supervisor');
+    Route::get('/categories/exports', [CategoryController::class, 'export'])->middleware('role:admin|superadmin|supervisor');
     Route::get('/categories', [CategoryController::class,'index'])->name('categories.index');
     Route::post('/categories/search', [CategoryController::class, 'search'])->name('categories.search');
     Route::get('/categories/{id}', [CategoryController::class,'show'])->name('categories.show');
