@@ -2,6 +2,7 @@
 
 use App\Models\User;
 use App\Models\Category;
+use App\Models\Order;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Maatwebsite\Excel\Facades\Excel;
 
@@ -17,7 +18,7 @@ test('puede exportar categorías a excel', function () {
     Category::factory()->count(3)->create();
 
     $response = $this->actingAs($admin, 'sanctum')
-        ->get('/api/exports/categories');
+        ->get('/api/categories/exports');
 
     $response->assertStatus(200);
 
@@ -36,7 +37,7 @@ test('puede exportar clientes a excel', function () {
     }
 
     $response = $this->actingAs($admin, 'sanctum')
-        ->get('/api/exports/users');
+        ->get('/api/users/exports');
 
     $response->assertStatus(200);
 
@@ -49,7 +50,43 @@ test('no puede exportar categorías si no tiene rol permitido', function () {
     $user = User::factory()->create(); // Sin rol admin/superadmin/supervisor
 
     $response = $this->actingAs($user, 'sanctum')
-        ->get('/api/exports/categories');
+        ->get('/api/categories/exports');
 
     $response->assertStatus(403);
+});
+
+test('puede exportar transacciones exitosas a excel', function () {
+    Excel::fake();
+
+    $admin = User::factory()->create();
+    $admin->assignRole('admin');
+
+    // Crea órdenes exitosas
+    Order::factory()->count(2)->create(['status' => 'completed']);
+    Order::factory()->count(1)->create(['status' => 'failed']);
+
+    $response = $this->actingAs($admin, 'sanctum')
+        ->get('/api/orders/exports/transactions?status=completed');
+
+    $response->assertStatus(200);
+
+
+});
+
+test('puede exportar transacciones fallidas a excel', function () {
+    Excel::fake();
+
+    $admin = User::factory()->create();
+    $admin->assignRole('admin');
+
+    // Crea órdenes fallidas
+    Order::factory()->count(2)->create(['status' => 'failed']);
+    Order::factory()->count(1)->create(['status' => 'completed']);
+
+    $response = $this->actingAs($admin, 'sanctum')
+        ->get('/api/orders/exports/transactions?status=failed');
+
+    $response->assertStatus(200);
+
+    
 });
