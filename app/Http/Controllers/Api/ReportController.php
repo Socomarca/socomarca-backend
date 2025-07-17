@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Exports\OrdersExport;
 use App\Exports\TopMunicipalitiesExport;
+use App\Exports\TopProductsExport;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\Product;
@@ -635,5 +636,14 @@ class ReportController extends Controller
         $fileName = 'Top_comunas_ventas_' . now()->format('Ymd_His') . '.xlsx';
 
         return Excel::download(new TopMunicipalitiesExport($start, $end), $fileName);
+    }
+
+    public function exportTopProducts(Request $request)
+    {
+        $start = $request->input('start');
+        $end = $request->input('end');
+        $fileName = 'Top_productos_ventas_' . now()->format('Ymd_His') . '.xlsx';
+
+        return Excel::download(new TopProductsExport($start, $end), $fileName);
     }
 }
