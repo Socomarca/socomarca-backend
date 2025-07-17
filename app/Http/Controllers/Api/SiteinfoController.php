@@ -20,6 +20,7 @@ class SiteinfoController extends Controller
         $header = Siteinfo::where('key', 'header')->first();
         $footer = Siteinfo::where('key', 'footer')->first();
         $social = Siteinfo::where('key', 'social_media')->first();
+        $customerMessageEnabled = Siteinfo::where('key', 'customer_message_enabled')->first();
 
         return response()->json([
             'header' => $header ? $header->value : (object)[
@@ -36,6 +37,7 @@ class SiteinfoController extends Controller
                     'link' => ''
                 ]
             ],
+            'customer_message_enabled' => $customerMessageEnabled ? (bool)$customerMessageEnabled->value : false,
         ]);
     }   
     
@@ -182,6 +184,7 @@ class SiteinfoController extends Controller
             'banner_enabled' => 'required|boolean',
             'modal_image' => 'nullable|image',
             'modal_enabled' => 'required|boolean',
+            'message_enabled' => 'required|boolean',
         ]);
 
         $customerMessage = Siteinfo::where('key', 'customer_message')->first();
@@ -218,6 +221,12 @@ class SiteinfoController extends Controller
         Siteinfo::updateOrCreate(
             ['key' => 'customer_message'],
             ['value' => $value]
+        );
+
+        // Guardar el estado enabled por separado
+        Siteinfo::updateOrCreate(
+            ['key' => 'customer_message_enabled'],
+            ['value' => $data['message_enabled']]
         );
 
         return response()->json(['message' => 'Mensaje de bienvenida actualizado correctamente.']);
@@ -274,4 +283,5 @@ class SiteinfoController extends Controller
             ]
         );
     }
+
 }
