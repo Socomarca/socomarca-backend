@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Exports\OrdersExport;
+use App\Exports\OrdersReportExport;
 use App\Exports\TopMunicipalitiesExport;
 use App\Exports\TopProductsExport;
 use App\Http\Controllers\Controller;
@@ -645,5 +646,35 @@ class ReportController extends Controller
         $fileName = 'Top_productos_ventas_' . now()->format('Ymd_His') . '.xlsx';
 
         return Excel::download(new TopProductsExport($start, $end), $fileName);
+    }
+
+    public function ordersReportExport(Request $request)
+    {
+        $validated = $request->validate([
+            'start' => 'nullable|date',
+            'end' => 'nullable|date|after_or_equal:start',
+            'client' => 'nullable|string|exists:users,name',
+            'type' => 'nullable|string',
+            'total_min' => 'nullable|numeric|min:0',
+            'total_max' => 'nullable|numeric|gte:total_min',
+        ], [
+            'end.after_or_equal' => 'La fecha final no puede ser menor que la inicial.',
+            'client.exists' => 'El cliente no existe en los registros.',
+            'total_max.gte' => 'El monto máximo no puede ser menor que el mínimo.',
+        ]);
+
+        $start = $validated['start'] ?? now()->subMonths(12)->startOfMonth()->toDateString();
+        $end = $validated['end'] ?? now()->endOfMonth()->toDateString();
+        $client = $validated['client'] ?? null;
+        $totalMin = $validated['total_min'] ?? null;
+        $totalMax = $validated['total_max'] ?? null;
+        $type = $validated['type'] ?? 'sales';
+
+        $fileName = 'reporte_ordenes_' . date('Y-m-d_H-i-s') . '.xlsx';
+
+        return Excel::download(
+            new OrdersReportExport($start, $end, $client, $totalMin, $totalMax, $type),
+            $fileName
+        );
     }
 }
