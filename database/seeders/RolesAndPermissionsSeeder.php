@@ -39,6 +39,9 @@ class RolesAndPermissionsSeeder extends Seeder
             "store-faq",
             "update-faq",
             "delete-faq",
+
+            // List permissions names
+            "see-all-permissions",
         ];
 
         // Crear permisos si no existen
@@ -72,6 +75,9 @@ class RolesAndPermissionsSeeder extends Seeder
                 "store-faq",
                 "update-faq",
                 "delete-faq",
+
+                // List permissions names
+                "see-all-permissions",
             ],
             'admin' => [
                 "see-own-purchases",
@@ -96,6 +102,9 @@ class RolesAndPermissionsSeeder extends Seeder
                 "store-faq",
                 "update-faq",
                 "delete-faq",
+
+                // List permissions names
+                "see-all-permissions",
             ],
             'supervisor' => [
                 "see-own-purchases",
@@ -144,7 +153,7 @@ class RolesAndPermissionsSeeder extends Seeder
             $supervisor->assignRole('supervisor');
             $supervisor->givePermissionTo([
                 "see-all-addresses",
-                
+
             ]);
         }
 

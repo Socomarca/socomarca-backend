@@ -47,8 +47,8 @@ Route::prefix('auth')->group(function () {
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/profile', [UserController::class, 'profile']);
-    
-    
+
+
     Route::get('/users/exports', [UserController::class, 'export'])->middleware('role:admin|superadmin|supervisor');
     Route::get('/users', [UserController::class, 'index'])->middleware('permission:manage-users');
     Route::get('/users/customers', [UserController::class, 'customersList']);
@@ -59,6 +59,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::patch('/users/{id}', [UserController::class, 'partialUpdate'])->middleware('permission:manage-users');
     Route::delete('/users/{id}', [UserController::class, 'destroy'])->middleware('permission:manage-users');
 
+    Route::resource('permissions', \App\Http\Controllers\Api\PermissionController::class, ['only' => 'index'])
+        ->middleware('permission:see-all-permissions');;
 
     Route::middleware(['role:admin|superadmin'])->group(function () {
         Route::get('/roles', [RoleController::class, 'index']);
@@ -66,7 +68,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/roles/{user}', [RoleController::class, 'userRoles']);
     });
 
-    
+
 
     Route::get('/addresses', [AddressController::class, 'index'])->name('addresses.index');
     Route::post('/addresses', [AddressController::class, 'store'])->name('addresses.store');
@@ -81,7 +83,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::patch('/regions/{region}/municipalities/status', [AddressController::class, 'updateRegionMunicipalitiesStatus'])->name('addresses.regions.municipalities.status');
         Route::patch('/municipalities/status', [AddressController::class, 'updateMunicipalitiesStatus'])->name('addresses.municipalities.bulk-status');
     });
-    
+
     Route::get('/categories/exports', [CategoryController::class, 'export'])->middleware('role:admin|superadmin|supervisor');
     Route::get('/categories', [CategoryController::class,'index'])->name('categories.index');
     Route::post('/categories/search', [CategoryController::class, 'search'])->name('categories.search');
@@ -123,11 +125,11 @@ Route::middleware('auth:sanctum')->group(function () {
 
 
     Route::middleware(['auth:sanctum', 'permission:see-all-reports'])->group(function () {
-       
+
         Route::get('/orders/reports/transactions/export', [ReportController::class, 'export'])->middleware('role:admin|superadmin|supervisor');
         Route::get('/orders/reports/municipalities/export', [ReportController::class, 'exportTopMunicipalities'])->middleware(['role:admin|superadmin|supervisor']);
         Route::get('/orders/reports/products/export', [ReportController::class, 'exportTopProducts'])->middleware(['role:admin|superadmin|supervisor']);
-        
+
         Route::post('/orders/reports', [ReportController::class, 'report']);
         Route::post('/orders/reports/top-product-list', [ReportController::class, 'productsSalesList']);
         Route::post('/orders/reports/transactions-list', [ReportController::class, 'transactionsList']);
