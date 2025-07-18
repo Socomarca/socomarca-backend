@@ -39,7 +39,7 @@ class FavoriteListController extends Controller
 
         $favoriteList->save();
 
-        return response()->json(['message' => 'The favorites list has been added'], 201);
+        return response()->json($favoriteList, 201);
     }
 
     public function show(FavoriteList $favoriteList)

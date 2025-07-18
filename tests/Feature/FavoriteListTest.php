@@ -3,14 +3,12 @@
 use App\Models\FavoriteList;
 use App\Models\User;
 
-test('query of user favorites lists failed authentication with no user', function ()
-{
+test('query of user favorites lists failed authentication with no user', function () {
     $route = route('favorites-list.index');
     $this->getJson($route)->assertStatus(401);
 });
 
-test('successful query of user favorites lists', function ()
-{
+test('successful query of user favorites lists', function () {
     $user = User::factory()->has(FavoriteList::factory(), 'favoritesList')
         ->create();
     $route = route('favorites-list.index');
@@ -37,8 +35,7 @@ test('successful query of user favorites lists', function ()
         ]);
 });
 
-test('favorites list not found', function ()
-{
+test('favorites list not found', function () {
     $user = User::factory()->create();
     $route = route('favorites-list.show', ['favoriteList' => 4304993]);
     $this->actingAs($user, 'sanctum')
@@ -60,6 +57,13 @@ test('new favorite list succesfully stored', function () {
     $route = route('favorites-list.store');
     $this->actingAs($user, 'sanctum')
         ->postJson($route, ['name' => 'Nueva lista favorita'])
+        ->assertJsonStructure([
+            "name",
+            "user_id",
+            "updated_at",
+            "created_at",
+            "id",
+        ])
         ->assertCreated();
 
     $route = route('favorites-list.index');
