@@ -5,8 +5,10 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\Product;
+use App\Exports\ClientsReportExport;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Maatwebsite\Excel\Facades\Excel;
 
 class ReportController extends Controller
 {
@@ -586,6 +588,37 @@ class ReportController extends Controller
                 }),
             ]
         ]);
+    }
+
+    public function clientsExport(Request $request)
+    {
+        $validated = $request->validate([
+            'start' => 'nullable|date',
+            'end' => 'nullable|date|after_or_equal:start',
+            'client' => 'nullable|string|exists:users,name',
+            'total_min' => 'nullable|numeric|min:0',
+            'total_max' => 'nullable|numeric|gte:total_min',
+            'region' => 'nullable|string|exists:regions,code'
+        ], [
+            'end.after_or_equal' => 'La fecha final no puede ser menor que la inicial.',
+            'client.exists' => 'El cliente no existe en los registros.',
+            'total_max.gte' => 'El monto máximo no puede ser menor que el mínimo.',
+            'region.exists' => 'El código de región no existe en los registros.',
+        ]);
+
+        $start = $validated['start'] ?? now()->subMonths(12)->startOfMonth()->toDateString();
+        $end = $validated['end'] ?? now()->endOfMonth()->toDateString();
+        $client = $validated['client'] ?? null;
+        $totalMin = $validated['total_min'] ?? null;
+        $totalMax = $validated['total_max'] ?? null;
+        $regionCode = $validated['region'] ?? null;
+
+        $fileName = 'reporte_clientes_' . date('Y-m-d_H-i-s') . '.xlsx';
+
+        return Excel::download(
+            new ClientsReportExport($start, $end, $client, $totalMin, $totalMax, $regionCode),
+            $fileName
+        );
     }
 
     
