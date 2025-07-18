@@ -127,6 +127,7 @@ test('a superadmin can update customer message with images', function () {
         'header_content' => '<h1>Hola</h1>',
         'banner_enabled' => true,
         'modal_enabled' => true,
+        'message_enabled' => true,
         'banner_desktop_image' => new UploadedFile($imagePath, 'desktop.png', 'image/png', null, true),
         'banner_mobile_image' => new UploadedFile($imagePath, 'mobile.png', 'image/png', null, true),
         'modal_image' => new UploadedFile($imagePath, 'modal.png', 'image/png', null, true),
@@ -148,6 +149,7 @@ test('a superadmin can update customer message without images', function () {
         'header_content' => '<h1>Hola</h1>',
         'banner_enabled' => true,
         'modal_enabled' => true,
+        'message_enabled' => true, 
     ];
 
     $this->actingAs($user, 'sanctum')
