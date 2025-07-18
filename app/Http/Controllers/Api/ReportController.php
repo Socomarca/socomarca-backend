@@ -428,22 +428,16 @@ class ReportController extends Controller
         $regionCode = $validated['region'] ?? null;
 
         $query = \App\Models\Order::with('user')
+            ->select('user_id', DB::raw('SUM(amount) as monto_total'))
             ->where('status', 'completed')
-            ->whereBetween('created_at', [$start, $end]);
+            ->whereBetween('created_at', [$start, $end])
+            ->groupBy('user_id');
 
         // Filtro por cliente
         if ($client) {
             $query->whereHas('user', function($q) use ($client) {
                 $q->where('name', $client);
             });
-        }
-
-        // Filtros por monto
-        if ($totalMin !== null) {
-            $query->where('amount', '>=', $totalMin);
-        }
-        if ($totalMax !== null) {
-            $query->where('amount', '<=', $totalMax);
         }
 
         // Filtro por código de región
@@ -461,51 +455,33 @@ class ReportController extends Controller
             }
         }
 
-        $query->orderByDesc('created_at');
-        $ordersPaginated = $query->paginate($perPage);
-
-        // Obtener todos los municipality_id de las órdenes
-        $municipalityIds = [];
-        foreach ($ordersPaginated as $order) {
-            $orderMeta = $order->order_meta;
-            if (isset($orderMeta['address']['municipality_id'])) {
-                $municipalityIds[] = $orderMeta['address']['municipality_id'];
-            }
+        // Filtros por monto total (después del GROUP BY)
+        if ($totalMin !== null) {
+            $query->havingRaw('SUM(amount) >= ?', [$totalMin]);
+        }
+        if ($totalMax !== null) {
+            $query->havingRaw('SUM(amount) <= ?', [$totalMax]);
         }
 
-        // Obtener municipios y regiones de una sola vez
-        $municipalities = [];
-        if (!empty($municipalityIds)) {
-            $municipalities = \App\Models\Municipality::with('region')
-                ->whereIn('id', array_unique($municipalityIds))
-                ->get()
-                ->keyBy('id');
-        }
+        $query->orderByDesc('monto_total');
+        $clientsPaginated = $query->paginate($perPage);
 
         $detalleTabla = [];
-        foreach ($ordersPaginated as $order) {
-            $orderMeta = $order->order_meta;
-            $municipalityId = $orderMeta['address']['municipality_id'] ?? null;
-            $municipality = $municipalities->get($municipalityId);
-            
+        foreach ($clientsPaginated as $clientData) {
             $detalleTabla[] = [
-                'id' => $order->id,
-                'customer' => $order->user ? $order->user->name : null,
-                'amount' => $order->amount,
-                'date' => $order->created_at->toDateString(),
-                'status' => $order->status,
-                'municipality_name' => $municipality ? $municipality->name : null,
-                'region_name' => $municipality && $municipality->region ? $municipality->region->name : null,
+                'id' => $clientData->user_id,
+                'cliente' => $clientData->user ? $clientData->user->name : null,
+                'monto_total' => (float)$clientData->monto_total,
             ];
         }
 
         return response()->json([
             'table_detail' => $detalleTabla,
             'pagination' => [
-                'current_page' => $ordersPaginated->currentPage(),
-                'last_page' => $ordersPaginated->lastPage(),
-                'per_page' => $ordersPaginated->perPage(),
-                'total' => $ordersPaginated->total(),
+                'current_page' => $clientsPaginated->currentPage(),
+                'last_page' => $clientsPaginated->lastPage(),
+                'per_page' => $clientsPaginated->perPage(),
+                'total' => $clientsPaginated->total(),
             ]
         ]);
     }
