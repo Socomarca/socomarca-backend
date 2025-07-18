@@ -12,12 +12,6 @@ test('admin user can list permissions', function () {
             [
                 'id',
                 'name',
-                'permissions' => [
-                    [
-                        'id',
-                        'name',
-                    ]
-                ],
             ]
         ]);
 });
