@@ -20,10 +20,18 @@ test('un admin puede ver la configuración de precios por cantidad', function ()
     $response = $this->actingAs($this->admin, 'sanctum')
         ->getJson('/api/settings/prices');
 
-    $response->assertStatus(200);
+    $response->assertStatus(200)
+        ->assertJson([
+            'min_max_quantity_enabled' => true,
+        ]);
 });
 
 test('un admin puede actualizar la configuración de precios por cantidad', function () {
+    Siteinfo::updateOrCreate(
+        ['key' => 'prices_settings'],
+        ['value' => ['min_max_quantity_enabled' => true]]
+    );
+
     $response = $this->actingAs($this->admin, 'sanctum')
         ->putJson('/api/settings/prices', [
             'min_max_quantity_enabled' => false,

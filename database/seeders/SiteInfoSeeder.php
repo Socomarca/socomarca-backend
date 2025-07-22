@@ -36,7 +36,7 @@ class SiteInfoSeeder extends Seeder
 
         Siteinfo::updateOrCreate(
             ['key' => 'prices_settings'],
-            ['value' => ['min_max_quantity_enabled' => true]]
+            ['value' => ['min_max_quantity_enabled' => false]]
         );
     }
 } 
