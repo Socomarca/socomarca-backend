@@ -49,7 +49,6 @@ test('puede filtrar ventas por cliente', function () {
 });
 
 test('puede obtener top municipalidades con filtro de monto', function () {
-    // Este test depende de tu lógica de Order::searchReport('top-municipalities')
     $response = $this->actingAs($this->admin, 'sanctum')->postJson('/api/orders/reports', [
         'type' => 'top-municipalities',
         'total_min' => 1000,
@@ -58,6 +57,43 @@ test('puede obtener top municipalidades con filtro de monto', function () {
     $response->assertStatus(200);
     $data = $response->json('top_municipalities');
     expect($data)->toBeArray();
+    foreach ($data as $item) {
+        expect($item)->toHaveKeys(['month', 'municipality', 'total', 'orders_count']);
+        expect($item['total'])->toBeGreaterThanOrEqual(1000)
+            ->toBeLessThanOrEqual(100000);
+    }
+});
+
+test('puede obtener top productos con filtro de monto', function () {
+    $response = $this->actingAs($this->admin, 'sanctum')->postJson('/api/orders/reports', [
+        'type' => 'top-products',
+        'total_min' => 1000,
+        'total_max' => 100000,
+    ]);
+    $response->assertStatus(200);
+    $data = $response->json('top_products');
+    expect($data)->toBeArray();
+    foreach ($data as $item) {
+        expect($item)->toHaveKeys(['month', 'product', 'total']);
+        expect($item['total'])->toBeGreaterThanOrEqual(1000)
+            ->toBeLessThanOrEqual(100000);
+    }
+});
+
+test('puede obtener top categorías con filtro de monto', function () {
+    $response = $this->actingAs($this->admin, 'sanctum')->postJson('/api/orders/reports', [
+        'type' => 'top-categories',
+        'total_min' => 1000,
+        'total_max' => 100000,
+    ]);
+    $response->assertStatus(200);
+    $data = $response->json('top_categories');
+    expect($data)->toBeArray();
+    foreach ($data as $item) {
+        expect($item)->toHaveKeys(['month', 'category', 'total']);
+        expect($item['total'])->toBeGreaterThanOrEqual(1000)
+            ->toBeLessThanOrEqual(100000);
+    }
 });
 
 test('puede obtener top clientes', function () {
@@ -67,24 +103,9 @@ test('puede obtener top clientes', function () {
     $response->assertStatus(200);
     $data = $response->json('top_customers');
     expect($data)->toBeArray();
-});
-
-test('puede obtener top productos', function () {
-    $response = $this->actingAs($this->admin, 'sanctum')->postJson('/api/orders/reports', [
-        'type' => 'top-products',
-    ]);
-    $response->assertStatus(200);
-    $data = $response->json('top_products');
-    expect($data)->toBeArray();
-});
-
-test('puede obtener top categorías', function () {
-    $response = $this->actingAs($this->admin, 'sanctum')->postJson('/api/orders/reports', [
-        'type' => 'top-categories',
-    ]);
-    $response->assertStatus(200);
-    $data = $response->json('top_categories');
-    expect($data)->toBeArray();
+    foreach ($data as $item) {
+        expect($item)->toHaveKeys(['customer', 'total', 'last_purchase']);
+    }
 });
 
 test('puede obtener revenue', function () {
@@ -94,6 +115,9 @@ test('puede obtener revenue', function () {
     $response->assertStatus(200);
     $data = $response->json('revenues');
     expect($data)->toBeArray();
+    foreach ($data as $item) {
+        expect($item)->toHaveKeys(['month', 'revenue']);
+    }
 });
 
 test('puede obtener transacciones', function () {

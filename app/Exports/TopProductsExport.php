@@ -11,11 +11,15 @@ class TopProductsExport implements FromCollection, WithHeadings
 {
     protected $start;
     protected $end;
+    protected $totalMin;
+    protected $totalMax;
 
-    public function __construct($start = null, $end = null)
+    public function __construct($start = null, $end = null, $totalMin = null, $totalMax = null)
     {
         $this->start = $start ?? now()->subMonths(12)->startOfMonth()->toDateString();
         $this->end = $end ?? now()->endOfMonth()->toDateString();
+        $this->totalMin = $totalMin;
+        $this->totalMax = $totalMax;
     }
 
     /**
@@ -59,6 +63,18 @@ class TopProductsExport implements FromCollection, WithHeadings
             // Devuelve solo el producto más vendido de ese mes
             return $productSales->sortByDesc('Cantidad vendida')->first();
         })->filter();
+
+        // Aplica filtros total_min y total_max si están definidos
+        $topProducts = $topProducts->filter(function ($item) {
+            $pass = true;
+            if ($this->totalMin !== null) {
+                $pass = $pass && $item['Total ventas'] >= $this->totalMin;
+            }
+            if ($this->totalMax !== null) {
+                $pass = $pass && $item['Total ventas'] <= $this->totalMax;
+            }
+            return $pass;
+        });
 
         return $topProducts->values();
     }

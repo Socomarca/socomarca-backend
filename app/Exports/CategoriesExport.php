@@ -3,47 +3,71 @@
 namespace App\Exports;
 
 use App\Models\Category;
+use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 
 class CategoriesExport implements FromCollection, WithHeadings
 {
-    protected $sort;
-    protected $sortDirection;
+    protected $start;
+    protected $end;
+    protected $totalMin;
+    protected $totalMax;
 
-    public function __construct($sort = 'name', $sortDirection = 'asc')
+    public function __construct($start = null, $end = null, $totalMin = null, $totalMax = null)
     {
-        $this->sort = $sort;
-        $this->sortDirection = $sortDirection;
+        $this->start = $start ?? now()->subMonths(12)->startOfMonth()->toDateString();
+        $this->end = $end ?? now()->endOfMonth()->toDateString();
+        $this->totalMin = $totalMin;
+        $this->totalMax = $totalMax;
     }
 
-    /**
-    * @return \Illuminate\Support\Collection
-    */
     public function collection()
     {
-        return Category::withCount('products')
-            ->orderBy($this->sort, $this->sortDirection)
-            ->get()
-            ->map(function ($category) {
-                return [
-                    'ID' => $category->id,
-                    'Nombre' => $category->name,
-                    'Código' => $category->code,
-                    'Productos' => $category->products_count,
-                    'Fecha creación' => $category->created_at ? $category->created_at->format('Y-m-d H:i') : '',
-                ];
-            });
+        $categories = Category::select('categories.id', 'categories.name')
+            ->leftJoin('products', 'products.category_id', '=', 'categories.id')
+            ->leftJoin('order_items', function ($join) {
+                $join->on('order_items.product_id', '=', 'products.id');
+            })
+            ->leftJoin('orders', function ($join) {
+                $join->on('orders.id', '=', 'order_items.order_id')
+                     ->where('orders.status', 'completed')
+                     ->whereBetween('orders.created_at', [$this->start, $this->end]);
+            })
+            ->groupBy('categories.id', 'categories.name')
+            ->selectRaw('COALESCE(SUM(order_items.price * order_items.quantity), 0) as total_ventas')
+            ->orderByDesc('total_ventas')
+            ->get();
+
+        // Aplica filtros total_min y total_max si están definidos
+        $categories = $categories->filter(function ($cat) {
+            $pass = true;
+            if ($this->totalMin !== null) {
+                $pass = $pass && $cat->total_ventas >= $this->totalMin;
+            }
+            if ($this->totalMax !== null) {
+                $pass = $pass && $cat->total_ventas <= $this->totalMax;
+            }
+            return $pass;
+        })->values();
+
+        // Agrega ranking
+        $ranking = 1;
+        return $categories->map(function ($category) use (&$ranking) {
+            return [
+                'Ranking' => $ranking++,
+                'Categoría' => $category->name,
+                'Total Ventas' => (int) $category->total_ventas,
+            ];
+        });
     }
 
     public function headings(): array
     {
         return [
-            'ID',
-            'Nombre',
-            'Código',
-            'Productos',
-            'Fecha creación'
+            'Ranking',
+            'Categoría',
+            'Total Ventas',
         ];
     }
 }

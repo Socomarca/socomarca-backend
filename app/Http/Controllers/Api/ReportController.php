@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Exports\CategoriesExport;
 use App\Exports\OrdersExport;
 use App\Exports\OrdersReportExport;
 use App\Exports\TopMunicipalitiesExport;
@@ -602,12 +603,10 @@ class ReportController extends Controller
             'client' => 'nullable|string|exists:users,name',
             'total_min' => 'nullable|numeric|min:0',
             'total_max' => 'nullable|numeric|gte:total_min',
-            'region' => 'nullable|string|exists:regions,code'
         ], [
             'end.after_or_equal' => 'La fecha final no puede ser menor que la inicial.',
             'client.exists' => 'El cliente no existe en los registros.',
             'total_max.gte' => 'El monto máximo no puede ser menor que el mínimo.',
-            'region.exists' => 'El código de región no existe en los registros.',
         ]);
 
         $start = $validated['start'] ?? now()->subMonths(12)->startOfMonth()->toDateString();
@@ -615,12 +614,11 @@ class ReportController extends Controller
         $client = $validated['client'] ?? null;
         $totalMin = $validated['total_min'] ?? null;
         $totalMax = $validated['total_max'] ?? null;
-        $regionCode = $validated['region'] ?? null;
 
         $fileName = 'reporte_clientes_' . date('Y-m-d_H-i-s') . '.xlsx';
 
         return Excel::download(
-            new ClientsReportExport($start, $end, $client, $totalMin, $totalMax, $regionCode),
+            new ClientsReportExport($start, $end, $client, $totalMin, $totalMax),
             $fileName
         );
     }
@@ -643,20 +641,35 @@ class ReportController extends Controller
     {
         $start = $request->input('start');
         $end = $request->input('end');
+        $totalMin = $request->input('total_min');
+        $totalMax = $request->input('total_max');
         $fileName = 'Top_comunas_ventas_' . now()->format('Ymd_His') . '.xlsx';
 
-        return Excel::download(new TopMunicipalitiesExport($start, $end), $fileName);
+        return Excel::download(new TopMunicipalitiesExport($start, $end, $totalMin, $totalMax), $fileName);
     }
 
     public function exportTopProducts(Request $request)
     {
         $start = $request->input('start');
         $end = $request->input('end');
+        $totalMin = $request->input('total_min');
+        $totalMax = $request->input('total_max');
         $fileName = 'Top_productos_ventas_' . now()->format('Ymd_His') . '.xlsx';
 
-        return Excel::download(new TopProductsExport($start, $end), $fileName);
+        return Excel::download(new TopProductsExport($start, $end, $totalMin, $totalMax), $fileName);
     }
 
+    public function exportTopCategories(Request $request)
+    {
+        $start = $request->input('start');
+        $end = $request->input('end');
+        $totalMin = $request->input('total_min');
+        $totalMax = $request->input('total_max');
+        $fileName = 'Top_categorias_ventas_' . now()->format('Ymd_His') . '.xlsx';
+
+        return Excel::download(new CategoriesExport($start, $end, $totalMin, $totalMax), $fileName);
+    }
+    
     public function ordersReportExport(Request $request)
     {
         $validated = $request->validate([
