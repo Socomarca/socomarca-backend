@@ -126,9 +126,9 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::middleware(['auth:sanctum', 'permission:see-all-reports','role:admin|superadmin|supervisor'])->group(function () {
 
-        Route::get('/orders/reports/transactions/export', [ReportController::class, 'export']);
-        Route::get('/orders/reports/municipalities/export', [ReportController::class, 'exportTopMunicipalities']);
-        Route::get('/orders/reports/products/export', [ReportController::class, 'exportTopProducts']);
+        Route::post('/orders/reports/transactions/export', [ReportController::class, 'export']);
+        Route::post('/orders/reports/municipalities/export', [ReportController::class, 'exportTopMunicipalities']);
+        Route::post('/orders/reports/products/export', [ReportController::class, 'exportTopProducts']);
         Route::post('/orders/reports/export', [ReportController::class, 'ordersReportExport']);
 
         Route::post('/orders/reports', [ReportController::class, 'report']);
