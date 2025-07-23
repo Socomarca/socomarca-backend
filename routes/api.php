@@ -23,10 +23,7 @@ use App\Http\Controllers\Api\RoleController;
 use App\Http\Controllers\Api\SiteinfoController;
 use App\Http\Controllers\Api\WebpayController;
 use App\Http\Controllers\Api\FaqController;
-
-
-
-
+use App\Http\Controllers\SettingsController;
 
 Route::prefix('auth')->group(function () {
     Route::post('/token', [AuthController::class, 'login'])->name('auth.token.store');
@@ -176,6 +173,11 @@ Route::middleware(['auth:sanctum', 'role:editor|admin|superadmin'])->group(funct
     Route::put('/terms', [SiteinfoController::class, 'updateTerms']);
     Route::put('/privacy-policy', [SiteinfoController::class, 'updatePrivacyPolicy']);
     Route::post('/customer-message', [SiteinfoController::class, 'updateCustomerMessage']);
+});
+
+Route::middleware(['auth:sanctum', 'role:admin|superadmin'])->group(function () {
+    Route::get('/settings/prices', [SettingsController::class, 'index']);
+    Route::put('/settings/prices', [SettingsController::class, 'update']);
 });
 
 // Ruta catch-all al final
