@@ -17,9 +17,6 @@ test('admin puede subir y listar archivos en S3 localstack con carpeta', functio
     $response->assertStatus(200);
     $response->assertJsonStructure(['message', 'path', 'url']);
 
-    // DEBUG: Ver qué path se generó
-    $uploadedPath = $response->json('path');
-    dump('Archivo subido en path:', $uploadedPath);
 
     // Listar archivos de esa carpeta específica
     $listResponse = $this->getJson('/api/s3-test-list?folder=test-folder');
