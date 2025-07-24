@@ -17,6 +17,25 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class ReportController extends Controller
 {
+    /**
+     * Retorna el nombre del archivo de descarga al exportar los reportes
+     * Útil para testing
+     *
+     * @param string $baseFileName
+     * @param ?string $extension
+     * @return string
+     */
+    public function getDownloadFileName(string $baseFileName, ?string $extension = null): string
+    {
+        $fileName = $baseFileName . now()->format('Ymd_His');
+
+        if (!empty($extension)) {
+            $fileName .= '.xlsx';
+        }
+
+        return $fileName;
+    }
+
     public function report(Request $request)
     {
         // Validación de filtros
@@ -91,7 +110,7 @@ class ReportController extends Controller
                         'month' => $month,
                         'customer' => $user ? $user->name : null,
                         'total_purchases' => (int)$top->total_purchases,
-                        'quantity_purchases' => (int)$top->quantity_purchases, 
+                        'quantity_purchases' => (int)$top->quantity_purchases,
                     ];
                     $totalSales += $top->total_purchases;
                 }
@@ -165,7 +184,7 @@ class ReportController extends Controller
                     $topProducts[] = [
                         'month' => $month,
                         'product' => $product ? $product->name : null,
-                        'total' => (int)$top->subtotal, 
+                        'total' => (int)$top->subtotal,
                     ];
                     $total_sales += (int)$top->subtotal;
                 }
@@ -244,7 +263,7 @@ class ReportController extends Controller
                 $total = $orders->where('month', $month)
                     ->where('user.name', $client)
                     ->sum('total');
-                
+
                 // Aplica el filtro de totales por cliente
                 $clientPassesFilter = true;
                 if ($totalMin !== null) {
@@ -263,7 +282,7 @@ class ReportController extends Controller
                     $totalMonth += $total;
                 }
             }
-            
+
             // Solo incluye el mes si tiene clientes que pasaron el filtro
             if (count($salesByClient) > 0) {
                 $totals[] = [
@@ -280,7 +299,7 @@ class ReportController extends Controller
 
         // Actualiza los meses para que coincidan con los totales filtrados
         $months = collect($totals)->pluck('month')->all();
-        
+
         // Actualiza los clientes para que solo incluya los que pasaron el filtro
         $clients = collect($totals)
             ->pluck('sales_by_customer')
@@ -300,11 +319,11 @@ class ReportController extends Controller
 
     public function productsSalesList(Request $request)
     {
-        $start = $request->input('start') 
+        $start = $request->input('start')
             ? date('Y-m-d', strtotime($request->input('start')))
             : now()->subMonths(12)->startOfMonth()->toDateString();
 
-        $end = $request->input('end') 
+        $end = $request->input('end')
             ? date('Y-m-d', strtotime($request->input('end')))
             : now()->endOfMonth()->toDateString();
 
@@ -566,7 +585,7 @@ class ReportController extends Controller
         if (!$order) {
             return response()->json(['message' => 'Transacción no encontrada.'], 404);
         }
-        
+
         return response()->json([
             'order' => [
                 'id' => $order->id,
@@ -623,7 +642,7 @@ class ReportController extends Controller
         );
     }
 
-    
+
     public function export(Request $request)
     {
         $start = $request->input('start');
@@ -631,9 +650,9 @@ class ReportController extends Controller
         $client = $request->input('client');
         $totalMin = $request->input('total_min');
         $totalMax = $request->input('total_max');
-        $status = $request->input('status', 'completed'); 
-        $fileName = 'Lista_transacciones' . now()->format('Ymd_His') . '.xlsx';
-       
+        $status = $request->input('status', 'completed');
+        $fileName = $this->getDownloadFileName('Lista_transacciones', 'xlsx');
+
         return Excel::download(new OrdersExport($start, $end, $client, $totalMin, $totalMax, $status), $fileName);
     }
 
@@ -669,7 +688,7 @@ class ReportController extends Controller
 
         return Excel::download(new CategoriesExport($start, $end, $totalMin, $totalMax), $fileName);
     }
-    
+
     public function ordersReportExport(Request $request)
     {
         $validated = $request->validate([

@@ -1,5 +1,6 @@
 <?php
 
+use App\Exports\OrdersExport;
 use App\Models\User;
 use App\Models\Category;
 use App\Models\Municipality;
@@ -67,10 +68,29 @@ test('puede exportar transacciones exitosas a excel', function () {
     Order::factory()->count(2)->create(['status' => 'completed']);
     Order::factory()->count(1)->create(['status' => 'failed']);
 
-    $response = $this->actingAs($admin, 'sanctum')
-        ->get('/api/orders/reports/transactions/export?status=completed');
+    $mock = Mockery::mock(\App\Http\Controllers\Api\ReportController::class)
+        ->makePartial()
+        ->shouldReceive('getDownloadFileName')
+        ->andReturn('export.xlsx')
+        ->getMock();
 
-    $response->assertStatus(200);
+    $this->app->instance(\App\Http\Controllers\Api\ReportController::class, $mock);
+    $this
+        ->actingAs($admin, 'sanctum')
+        ->post('/api/orders/reports/transactions/export?status=completed')
+        ->assertStatus(200);
+
+    Excel::assertDownloaded('export.xlsx', function (OrdersExport $export) {
+        $collection = $export->collection();
+
+        // Verifica la estructura general
+        expect($collection)->toHaveCount(2);
+
+        // Verifica el primer registro
+        expect($collection[0])->toHaveKeys(['ID', 'Cliente', 'Monto', 'Fecha', 'Estado']);
+
+        // TODO Completar las aserciones en base a los datos sembrados
+    });
 });
 
 test('puede exportar transacciones fallidas a excel', function () {
@@ -87,7 +107,7 @@ test('puede exportar transacciones fallidas a excel', function () {
 
     $response->assertStatus(200);
 
-    
+
 });
 
 test('puede exportar top comunas por ventas a excel', function () {
@@ -121,7 +141,7 @@ test('puede exportar top comunas por ventas a excel', function () {
 
     $response = $this->actingAs($admin, 'sanctum')
         ->get('api/orders/reports/municipalities/export');
-        
+
 
     $response->assertStatus(200);
 
