@@ -662,7 +662,7 @@ class ReportController extends Controller
         $end = $request->input('end');
         $totalMin = $request->input('total_min');
         $totalMax = $request->input('total_max');
-        $fileName = 'Top_comunas_ventas_' . now()->format('Ymd') . '.xlsx';
+        $fileName = $request->input('filename') ?? 'Top_comunas_ventas_' . now()->format('Ymd') . '.xlsx';
 
         return Excel::download(new TopMunicipalitiesExport($start, $end, $totalMin, $totalMax), $fileName);
     }
@@ -673,8 +673,7 @@ class ReportController extends Controller
         $end = $request->input('end');
         $totalMin = $request->input('total_min');
         $totalMax = $request->input('total_max');
-        $fileName = 'Top_productos_ventas_' . now()->format('Ymd') . '.xlsx';
-
+        $fileName = $request->input('filename') ?? 'Top_productos_ventas_' . now()->format('Ymd') . '.xlsx';
         return Excel::download(new TopProductsExport($start, $end, $totalMin, $totalMax), $fileName);
     }
 
