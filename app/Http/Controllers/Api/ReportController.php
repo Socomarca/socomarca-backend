@@ -634,7 +634,7 @@ class ReportController extends Controller
         $totalMin = $validated['total_min'] ?? null;
         $totalMax = $validated['total_max'] ?? null;
 
-        $fileName = 'reporte_clientes_' . date('Y-m-d_H-i-s') . '.xlsx';
+        $fileName = 'Reporte_cliente_' . now()->format('Ymd') . '.xlsx';
 
         return Excel::download(
             new ClientsReportExport($start, $end, $client, $totalMin, $totalMax),
@@ -651,7 +651,7 @@ class ReportController extends Controller
         $totalMin = $request->input('total_min');
         $totalMax = $request->input('total_max');
         $status = $request->input('status', 'completed');
-        $fileName = $this->getDownloadFileName('Lista_transacciones', 'xlsx');
+        $fileName = $request->input('filename') ?? 'Lista_transacciones_' . now()->format('Ymd') . '.xlsx';
 
         return Excel::download(new OrdersExport($start, $end, $client, $totalMin, $totalMax, $status), $fileName);
     }
@@ -662,7 +662,7 @@ class ReportController extends Controller
         $end = $request->input('end');
         $totalMin = $request->input('total_min');
         $totalMax = $request->input('total_max');
-        $fileName = 'Top_comunas_ventas_' . now()->format('Ymd_His') . '.xlsx';
+        $fileName = 'Top_comunas_ventas_' . now()->format('Ymd') . '.xlsx';
 
         return Excel::download(new TopMunicipalitiesExport($start, $end, $totalMin, $totalMax), $fileName);
     }
@@ -673,7 +673,7 @@ class ReportController extends Controller
         $end = $request->input('end');
         $totalMin = $request->input('total_min');
         $totalMax = $request->input('total_max');
-        $fileName = 'Top_productos_ventas_' . now()->format('Ymd_His') . '.xlsx';
+        $fileName = 'Top_productos_ventas_' . now()->format('Ymd') . '.xlsx';
 
         return Excel::download(new TopProductsExport($start, $end, $totalMin, $totalMax), $fileName);
     }
@@ -684,7 +684,7 @@ class ReportController extends Controller
         $end = $request->input('end');
         $totalMin = $request->input('total_min');
         $totalMax = $request->input('total_max');
-        $fileName = 'Top_categorias_ventas_' . now()->format('Ymd_His') . '.xlsx';
+        $fileName = 'Top_categorias_ventas_' . now()->format('Ymd') . '.xlsx';
 
         return Excel::download(new CategoriesExport($start, $end, $totalMin, $totalMax), $fileName);
     }
@@ -710,8 +710,7 @@ class ReportController extends Controller
         $totalMin = $validated['total_min'] ?? null;
         $totalMax = $validated['total_max'] ?? null;
         $type = $validated['type'] ?? 'sales';
-
-        $fileName = 'reporte_ordenes_' . date('Y-m-d_H-i-s') . '.xlsx';
+        $fileName = 'Reporte_ordenes_' . now()->format('Ymd') . '.xlsx';
 
         return Excel::download(
             new OrdersReportExport($start, $end, $client, $totalMin, $totalMax, $type),

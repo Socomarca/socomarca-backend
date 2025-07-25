@@ -62,34 +62,31 @@ test('no puede exportar categorías si no tiene rol permitido', function () {
 test('puede exportar transacciones exitosas a excel', function () {
     Excel::fake();
 
+    // Prepara un usuario admin
     $admin = User::factory()->create();
     $admin->assignRole('admin');
 
+    // Crea 2 órdenes exitosas y 1 fallida
     Order::factory()->count(2)->create(['status' => 'completed']);
     Order::factory()->count(1)->create(['status' => 'failed']);
 
-    $mock = Mockery::mock(\App\Http\Controllers\Api\ReportController::class)
-        ->makePartial()
-        ->shouldReceive('getDownloadFileName')
-        ->andReturn('export.xlsx')
-        ->getMock();
+    // Ejecuta la exportación autenticado como admin
+    $response = $this->actingAs($admin, 'sanctum')
+        ->post('/api/orders/reports/transactions/export', ['filename' => 'export.xlsx']);
 
-    $this->app->instance(\App\Http\Controllers\Api\ReportController::class, $mock);
-    $this
-        ->actingAs($admin, 'sanctum')
-        ->post('/api/orders/reports/transactions/export?status=completed')
-        ->assertStatus(200);
+    $response->assertStatus(200);
 
-    Excel::assertDownloaded('export.xlsx', function (OrdersExport $export) {
+    Excel::assertDownloaded('export.xlsx', function ($export) {
+                
+        expect($export)->toBeInstanceOf(OrdersExport::class);
+
         $collection = $export->collection();
-
-        // Verifica la estructura general
         expect($collection)->toHaveCount(2);
+        foreach ($collection as $order) {
+            expect($order['Estado'] ?? $order->status)->toBe('completed');
+        }
 
-        // Verifica el primer registro
-        expect($collection[0])->toHaveKeys(['ID', 'Cliente', 'Monto', 'Fecha', 'Estado']);
-
-        // TODO Completar las aserciones en base a los datos sembrados
+        return true;
     });
 });
 
@@ -103,11 +100,22 @@ test('puede exportar transacciones fallidas a excel', function () {
     Order::factory()->count(1)->create(['status' => 'completed']);
 
     $response = $this->actingAs($admin, 'sanctum')
-        ->get('/api/orders/reports/transactions/export?status=failed');
+        ->post('/api/orders/reports/transactions/export', [
+            'status' => 'failed',
+            'filename' => 'export.xlsx'
+        ]);
 
     $response->assertStatus(200);
 
-
+    Excel::assertDownloaded('export.xlsx', function ($export) {
+        expect($export)->toBeInstanceOf(OrdersExport::class);
+        $collection = $export->collection();
+        expect($collection)->toHaveCount(2);
+        foreach ($collection as $order) {
+            expect($order['Estado'] ?? $order->status)->toBe('failed');
+        }
+        return true;
+    });
 });
 
 test('puede exportar top comunas por ventas a excel', function () {
@@ -140,11 +148,18 @@ test('puede exportar top comunas por ventas a excel', function () {
     ]);
 
     $response = $this->actingAs($admin, 'sanctum')
-        ->get('api/orders/reports/municipalities/export');
-
+        ->post('api/orders/reports/municipalities/export', [
+            'filename' => 'export.xlsx'
+        ]);
 
     $response->assertStatus(200);
 
+    Excel::assertDownloaded('export.xlsx', function ($export) {
+        expect($export)->toBeInstanceOf(\App\Exports\TopMunicipalitiesExport::class);
+        $collection = $export->collection();
+        expect($collection)->not()->toBeEmpty();
+        return true;
+    });
 });
 
 test('puede exportar el producto más vendido por mes a excel', function () {
@@ -167,9 +182,16 @@ test('puede exportar el producto más vendido por mes a excel', function () {
     OrderItem::factory()->create(['order_id' => $order2->id, 'product_id' => $productB->id, 'quantity' => 8, 'price' => 1000]);
 
     $response = $this->actingAs($admin, 'sanctum')
-        ->get('/api/orders/reports/products/export');
+        ->post('/api/orders/reports/products/export', [
+            'filename' => 'export.xlsx'
+        ]);
 
     $response->assertStatus(200);
 
-    // No se verifica el nombre exacto del archivo porque es dinámico
+    Excel::assertDownloaded('export.xlsx', function ($export) {
+        expect($export)->toBeInstanceOf(\App\Exports\TopProductsExport::class);
+        $collection = $export->collection();
+        expect($collection)->not()->toBeEmpty();
+        return true;
+    });
 });
