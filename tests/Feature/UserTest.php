@@ -3,24 +3,25 @@
 use App\Models\User;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
+use Laragear\Rut\Facades\Generator;
 
 beforeEach(function () {
     $this->user = createUser();
-    
+
     // Crear permiso directamente
     $manageUsersPermission = Permission::firstOrCreate(['name' => 'manage-users']);
-    
+
     // Crear roles y asignar permisos
     $adminRole = Role::firstOrCreate(['name' => 'admin']);
     $adminRole->givePermissionTo($manageUsersPermission);
-    
+
     $clientRole = Role::firstOrCreate(['name' => 'cliente']);
-    
+
     // Usuario admin con permisos
     $this->adminUser = User::factory()->create();
     $this->adminUser->assignRole('admin');
-    
-    // Usuario cliente sin permisos  
+
+    // Usuario cliente sin permisos
     $this->clientUser = User::factory()->create();
     $this->clientUser->assignRole('cliente');
 
@@ -111,7 +112,7 @@ test('permite busqueda con permiso manage-users', function () {
 
 test('filtra usuarios por nombre exacto', function () {
     User::truncate();
-    
+
     User::factory()->create(['name' => 'Juan Pérez']);
     User::factory()->create(['name' => 'María González']);
     User::factory()->create(['name' => 'Carlos López']);
@@ -134,7 +135,7 @@ test('filtra usuarios por nombre exacto', function () {
 
 test('filtra usuarios por nombre parcial', function () {
     User::truncate();
-    
+
     User::factory()->create(['name' => 'Juan Pérez']);
     User::factory()->create(['name' => 'Juana Martínez']);
     User::factory()->create(['name' => 'María González']);
@@ -159,7 +160,7 @@ test('filtra usuarios por nombre parcial', function () {
 
 test('filtra usuarios por email', function () {
     User::truncate();
-    
+
     User::factory()->create(['email' => 'juan@empresa.com']);
     User::factory()->create(['email' => 'maria@empresa.com']);
     User::factory()->create(['email' => 'carlos@otrodominio.com']);
@@ -184,7 +185,7 @@ test('filtra usuarios por email', function () {
 
 test('filtra usuarios por estado activo', function () {
     User::truncate();
-    
+
     User::factory()->create(['is_active' => true]);
     User::factory()->create(['is_active' => false]);
     User::factory()->create(['is_active' => true]);
@@ -209,7 +210,7 @@ test('filtra usuarios por estado activo', function () {
 
 test('ordena usuarios por nombre', function () {
     User::truncate();
-    
+
     User::factory()->create(['name' => 'Zebra García']);
     User::factory()->create(['name' => 'Ana López']);
     User::factory()->create(['name' => 'Beta Martínez']);
@@ -236,7 +237,7 @@ test('ordena usuarios por nombre', function () {
 
 test('filtra usuarios por rut', function () {
     User::truncate();
-    
+
     User::factory()->create(['rut' => '12345678-9']);
     User::factory()->create(['rut' => '98765432-1']);
     User::factory()->create(['rut' => '12000000-0']);
@@ -261,7 +262,7 @@ test('filtra usuarios por rut', function () {
 
 test('combina múltiples filtros', function () {
     User::truncate();
-    
+
     User::factory()->create(['name' => 'Juan Pérez', 'is_active' => true]);
     User::factory()->create(['name' => 'Juan García', 'is_active' => false]);
     User::factory()->create(['name' => 'María López', 'is_active' => true]);
@@ -286,7 +287,7 @@ test('combina múltiples filtros', function () {
     expect($response->json('data')[0]['name'])->toBe('Juan Pérez');
     expect($response->json('data')[0]['is_active'])->toBeTrue();
     $response->assertStatus(200);
-}); 
+});
 
 test('filtra usuarios por roles', function () {
     \App\Models\User::truncate();
@@ -309,7 +310,7 @@ test('filtra usuarios por roles', function () {
     expect($data)->toHaveCount(2);
     expect(collect($data)->pluck('name'))->toContain('Ana Admin');
     expect(collect($data)->pluck('name'))->toContain('Carlos Cliente');
-    
+
     $response->assertStatus(200);
 });
 
@@ -340,24 +341,112 @@ test('ordena usuarios por nombre ascendente y por id descendente', function () {
     expect($idsDesc)->toBe($expectedDesc);
 });
 
-test('can partially update user with PATCH', function () {
+test('admin can register', function () {
+    \Illuminate\Support\Facades\Mail::fake();
     $admin = User::factory()->create();
     $admin->assignRole('admin');
-    
-    $user = User::factory()->create();
+    $password = fake()->password(10, 12);
+    $this->actingAs($admin, 'sanctum')
+        ->postJson(route('users.store'), [
+            "name" => fake()->firstName,
+            "email" => fake()->email,
+            "password" => $password,
+            "password_confirmation" => $password,
+            "phone" => "" . fake()->numberBetween(10000000, 99999999),
+            "rut" => Generator::makeOne()->formatBasic(),
+            "business_name" => fake()->company,
+            "is_active" => true,
+            "roles" => ['admin'],
+        ]);
+    \Illuminate\Support\Facades\Mail::assertQueued(\App\Mail\UserNotificationMail::class);
+});
 
-    $payload = [
-        'name' => 'Nombre Parcialmente Actualizado'
-    ];
+describe('admin can update user', function () {
+    it('should perform a partial update', function() {
+        \Illuminate\Support\Facades\Notification::fake();
+        $admin = User::factory()->create();
+        $admin->assignRole('admin');
 
-    $response = $this->actingAs($admin, 'sanctum')
-        ->patchJson("/api/users/{$user->id}", $payload);
+        $user = User::factory()->create();
+        $user->assignRole('cliente');
 
-    $response->assertStatus(200)
-        ->assertJsonFragment(['message' => 'User updated successfully']);
+        $payload = [
+            'name' => fake()->name,
+            "email" => fake()->email,
+            "phone" => "" . fake()->numberBetween(10000000, 99999999),
+            "is_active" => fake()->boolean(),
+        ];
 
-    $this->assertDatabaseHas('users', [
-        'id' => $user->id,
-        'name' => 'Nombre Parcialmente Actualizado'
-    ]);
+        $response = $this->actingAs($admin, 'sanctum')
+            ->patchJson("/api/users/{$user->id}", $payload);
+
+        $response->assertStatus(200)
+            ->assertJsonFragment(['message' => 'User updated successfully'])
+            ->assertJsonFragment(['name' => $payload['name']])
+            ->assertJsonFragment(['email' => $payload['email']])
+            ->assertJsonFragment(['phone' => $payload['phone']]);
+
+        $this->assertDatabaseHas('users', [
+            'id' => $user->id,
+            'name' => $payload['name'],
+            'email' => $payload['email'],
+            'phone' => $payload['phone'],
+            'is_active' => $payload['is_active'],
+        ]);
+
+        \Illuminate\Support\Facades\Notification::assertSentTo($user, \App\Notifications\UserInfoUpdateNotification::class);
+        \Illuminate\Support\Facades\Notification::assertNotSentTo($user, \App\Notifications\UserPasswordUpdateNotification::class);
+    });
+
+    it('should send the temporary password email after password update', function() {
+        $this->freezeTime(function(\Illuminate\Support\Carbon $time) {
+            \Illuminate\Support\Facades\Notification::fake();
+            $admin = User::factory()->create();
+            $admin->assignRole('admin');
+
+            $user = User::factory()->create();
+            $user->assignRole('cliente');
+            $password = fake()->password(10, 12);
+            $payload = [
+                'password' => $password,
+                'password_confirmation' => $password,
+            ];
+
+            $response = $this->actingAs($admin, 'sanctum')
+                ->patchJson("/api/users/{$user->id}", $payload);
+
+            $response
+                ->assertJson(fn(\Illuminate\Testing\Fluent\AssertableJson $json) =>
+                    $json->has('user.password_changed_at')
+                        ->where('password_changed', true)
+                        ->etc()
+                );
+
+            \Illuminate\Support\Facades\Notification::assertSentTo(
+                $user,
+                function(\App\Notifications\UserPasswordUpdateNotification $notification) use ($password) {
+                    return $notification->temporaryPassword === $password;
+                }
+            );
+
+            $user->refresh();
+            expect($user->password_changed_at)->toBe($time->toDateTimeString());
+        });
+    });
+
+    it('should fail when payload is incomplete during a full update', function() {
+        $admin = User::factory()->create();
+        $admin->assignRole('admin');
+
+        $user = User::factory()->create();
+        $user->assignRole('cliente');
+
+        $payload = [
+            'name' => fake()->name,
+        ];
+
+        $this->actingAs($admin, 'sanctum')
+            ->putJson("/api/users/{$user->id}", $payload)
+            ->assertInvalid(['email', 'phone', 'is_active', 'password', 'roles']);
+    });
 });

@@ -49,11 +49,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/users/exports', [UserController::class, 'export'])->middleware('role:admin|superadmin|supervisor');
     Route::get('/users', [UserController::class, 'index'])->middleware('permission:manage-users');
     Route::get('/users/customers', [UserController::class, 'customersList']);
-    Route::post('/users', [UserController::class, 'store'])->middleware('permission:manage-users');
+    Route::post('/users', [UserController::class, 'store'])
+        ->middleware('permission:manage-users')
+        ->name('users.store');
     Route::post('/users/search', [UserController::class, 'search'])->middleware('permission:manage-users');
     Route::get('/users/{id}', [UserController::class, 'show'])->middleware('permission:manage-users');
-    Route::put('/users/{id}', [UserController::class, 'update'])->middleware('permission:manage-users');
-    Route::patch('/users/{id}', [UserController::class, 'partialUpdate'])->middleware('permission:manage-users');
+    Route::match(['put', 'patch'], '/users/{user}', [UserController::class, 'update'])
+        ->middleware('permission:manage-users')->name('users.update');
     Route::delete('/users/{id}', [UserController::class, 'destroy'])->middleware('permission:manage-users');
 
     Route::resource('permissions', \App\Http\Controllers\Api\PermissionController::class, ['only' => 'index'])
