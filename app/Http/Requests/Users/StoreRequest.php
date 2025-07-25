@@ -36,29 +36,4 @@ class StoreRequest extends FormRequest
             'roles.*' => 'bail|string|exists:roles,name',
         ];
     }
-
-    /**
-     * Get custom messages for validator errors.
-     *
-     * @return array
-     */
-    public function messages(): array
-    {
-        return [
-            'name.required' => 'El nombre es requerido.',
-            'email.required' => 'El email es requerido.',
-            'email.email' => 'El email debe tener un formato válido.',
-            'email.unique' => 'Este email ya está registrado.',
-            'password.required' => 'La contraseña es requerida.',
-            'password.confirmed' => 'La confirmación de contraseña no coincide.',
-            'phone.required' => 'El teléfono es requerido.',
-            'rut.required' => 'El RUT es requerido.',
-            'rut.unique' => 'Este RUT ya está registrado.',
-            'business_name.required' => 'El nombre de la empresa es requerido.',
-            'is_active.required' => 'El estado es requerido.',
-            'is_active.boolean' => 'El estado debe ser verdadero o falso.',
-            'roles.array' => 'Los roles deben ser un arreglo.',
-            'roles.*.exists' => 'Uno o más roles no existen.',
-        ];
-    }
 }

@@ -31,21 +31,4 @@ class SearchRequest extends FormRequest
             'filters.*.sort' => 'nullable|string|in:ASC,DESC',
         ];
     }
-
-    /**
-     * Get custom error messages for validation rules.
-     *
-     * @return array<string, string>
-     */
-    public function messages(): array
-    {
-        return [
-            'search.min' => 'El término de búsqueda debe tener al menos 2 caracteres.',
-            'search.max' => 'El término de búsqueda no puede tener más de 255 caracteres.',
-            'per_page.integer' => 'Los elementos por página debe ser un número entero.',
-            'per_page.min' => 'Debe mostrar al menos 1 elemento por página.',
-            'per_page.max' => 'No se pueden mostrar más de 100 elementos por página.',
-            'filters.array' => 'Los filtros deben ser un array.',
-        ];
-    }
 }

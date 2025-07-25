@@ -25,15 +25,7 @@ class UpdateRequest extends FormRequest
         [
             'id' => 'bail|integer|exists:favorites_list,id',
             'name' => 'bail|required|string',
-            
-        ];
-    }
 
-    public function messages()
-    {
-        return
-        [
-            'id.integer' => 'The id field in params must be an integer.',
         ];
     }
 

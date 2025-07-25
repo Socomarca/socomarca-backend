@@ -39,20 +39,6 @@ class UpdateRequest extends FormRequest
         ];
     }
 
-    /**
-     * Get custom messages for validator errors.
-     *
-     * @return array
-     */
-    public function messages(): array
-    {
-        return [
-            'password.confirmed' => 'La confirmación de contraseña no coincide.',
-            'roles.array' => 'Los roles deben ser un arreglo.',
-            'roles.*.exists' => 'Uno o más roles no existen.',
-        ];
-    }
-
     protected function prepareForValidation()
     {
     }
