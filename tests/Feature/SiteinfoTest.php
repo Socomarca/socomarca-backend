@@ -112,16 +112,15 @@ test('customer message endpoint returns default structure', function () {
 test('a superadmin can update customer message with images', function () {
     Storage::fake('public');
     $user = User::factory()->create()->assignRole('superadmin');
-     $imagePath = public_path('images/test-image.png');
-
+    $imagePath = public_path('images/test-image.png');
 
     if (!file_exists($imagePath)) {
         if (!is_dir(dirname($imagePath))) {
             mkdir(dirname($imagePath), 0755, true);
         }
-        // Crea una imagen PNG válida de 1x1 pixel
         file_put_contents($imagePath, base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII='));
     }
+
     $payload = [
         'header_color' => '#fff',
         'header_content' => '<h1>Hola</h1>',
@@ -131,7 +130,6 @@ test('a superadmin can update customer message with images', function () {
         'banner_desktop_image' => new UploadedFile($imagePath, 'desktop.png', 'image/png', null, true),
         'banner_mobile_image' => new UploadedFile($imagePath, 'mobile.png', 'image/png', null, true),
         'modal_image' => new UploadedFile($imagePath, 'modal.png', 'image/png', null, true),
-        'message_enabled' => fake()->boolean,
     ];
 
     $this->actingAs($user, 'sanctum')
@@ -139,7 +137,16 @@ test('a superadmin can update customer message with images', function () {
         ->assertOk()
         ->assertJson(['message' => 'Mensaje de bienvenida actualizado correctamente.']);
 
-    $this->assertDatabaseHas('siteinfo', ['key' => 'customer_message']);
+    $record = Siteinfo::where('key', 'customer_message')->first();
+    expect($record)->not->toBeNull();
+
+    expect($record->value['banner']['enabled'])->toBeBool();
+    expect($record->value['modal']['enabled'])->toBeBool();
+    expect($record->value['message']['enabled'])->toBeBool();
+    
+    expect($record->value['banner']['desktop_image'])->toStartWith('http');
+    expect($record->value['banner']['mobile_image'])->toStartWith('http');
+    expect($record->value['modal']['image'])->toStartWith('http');
 });
 
 test('a superadmin can update customer message without images', function () {
@@ -158,7 +165,18 @@ test('a superadmin can update customer message without images', function () {
         ->assertOk()
         ->assertJson(['message' => 'Mensaje de bienvenida actualizado correctamente.']);
 
-    $this->assertDatabaseHas('siteinfo', ['key' => 'customer_message']);
+    $record = Siteinfo::where('key', 'customer_message')->first();
+    expect($record)->not->toBeNull();
+
+    // Verifica que los campos booleanos sean booleanos
+    expect($record->value['banner']['enabled'])->toBeBool();
+    expect($record->value['modal']['enabled'])->toBeBool();
+    expect($record->value['message']['enabled'])->toBeBool();
+
+    // Verifica que las imágenes sean string vacíos (no concatenados)
+    expect($record->value['banner']['desktop_image'])->toBe('');
+    expect($record->value['banner']['mobile_image'])->toBe('');
+    expect($record->value['modal']['image'])->toBe('');
 });
 
 // Webpay tests
