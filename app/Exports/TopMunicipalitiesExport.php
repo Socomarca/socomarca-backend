@@ -11,11 +11,15 @@ class TopMunicipalitiesExport implements FromCollection, WithHeadings
 {
     protected $start;
     protected $end;
+    protected $totalMin;
+    protected $totalMax;
 
-    public function __construct($start = null, $end = null)
+    public function __construct($start = null, $end = null, $totalMin = null, $totalMax = null)
     {
         $this->start = $start ?? now()->subMonths(12)->startOfMonth()->toDateString();
         $this->end = $end ?? now()->endOfMonth()->toDateString();
+        $this->totalMin = $totalMin;
+        $this->totalMax = $totalMax;
     }
 
     /**
@@ -51,6 +55,18 @@ class TopMunicipalitiesExport implements FromCollection, WithHeadings
             // Devuelve solo la comuna con más ventas de ese mes
             return $municipalitySales->sortByDesc('total_sales')->first();
         })->filter();
+
+        // Aplica filtros de total_min y total_max
+        $topMunicipalities = $topMunicipalities->filter(function ($item) {
+            $pass = true;
+            if ($this->totalMin !== null) {
+                $pass = $pass && $item['total_sales'] >= $this->totalMin;
+            }
+            if ($this->totalMax !== null) {
+                $pass = $pass && $item['total_sales'] <= $this->totalMax;
+            }
+            return $pass;
+        });
 
         // Obtiene nombres de comunas
         $municipalityIds = $topMunicipalities->pluck('municipality_id')->filter()->unique()->all();

@@ -50,7 +50,7 @@ class OrdersReportExport implements FromCollection, WithHeadings
             return [
                 'ID' => $order->id,
                 'Cliente' => $order->user ? $order->user->name : 'N/A',
-                'Monto' => number_format($order->amount, 0, ',', '.'),
+                'Monto' => $order->amount,
                 'Fecha' => $order->created_at ? $order->created_at->format('Y-m-d H:i') : '',
             ];
         });
