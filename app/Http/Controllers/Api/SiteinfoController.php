@@ -175,7 +175,6 @@ class SiteinfoController extends Controller
      */
     public function updateCustomerMessage(Request $request)
     {
-        
         $data = $request->validate([
             'header_color' => 'required|string',
             'header_content' => 'required|string',
@@ -191,30 +190,34 @@ class SiteinfoController extends Controller
         $oldValue = $customerMessage ? $customerMessage->value : [];
 
         $bannerDesktopImage = $request->file('banner_desktop_image')
-            ? $request->file('banner_desktop_image')->store('customer-message', 'public')
+            ? asset('storage/' . $request->file('banner_desktop_image')->store('customer-message', 'public'))
             : ($oldValue['banner']['desktop_image'] ?? '');
 
         $bannerMobileImage = $request->file('banner_mobile_image')
-            ? $request->file('banner_mobile_image')->store('customer-message', 'public')
+            ? asset('storage/' . $request->file('banner_mobile_image')->store('customer-message', 'public'))
             : ($oldValue['banner']['mobile_image'] ?? '');
 
         $modalImage = $request->file('modal_image')
-            ? $request->file('modal_image')->store('customer-message', 'public')
-            : ($oldValue['modal']['image'] ?? '');        
-        
+            ? asset('storage/' . $request->file('modal_image')->store('customer-message', 'public'))
+            : ($oldValue['modal']['image'] ?? '');
+
         $value = [
             'header' => [
                 'color' => $data['header_color'],
                 'content' => $data['header_content'],
             ],
             'banner' => [
-                'desktop_image' => $bannerDesktopImage ? asset('storage/' . $bannerDesktopImage) : '',
-                'mobile_image' => $bannerMobileImage ? asset('storage/' . $bannerMobileImage) : '',
+                'desktop_image' => $bannerDesktopImage,
+                'mobile_image' => $bannerMobileImage,
                 'enabled' => (bool)$data['banner_enabled'],
             ],
             'modal' => [
-                'image' => $modalImage ? asset('storage/' . $modalImage) : '',
+                'image' => $modalImage,
                 'enabled' => (bool)$data['modal_enabled'],
+            ],
+            'message' => [
+                
+                'enabled' => (bool)$data['message_enabled'],
             ],
         ];
 
@@ -223,7 +226,6 @@ class SiteinfoController extends Controller
             ['value' => $value]
         );
 
-        // Guardar el estado enabled por separado
         Siteinfo::updateOrCreate(
             ['key' => 'customer_message_enabled'],
             ['value' => $data['message_enabled']]
