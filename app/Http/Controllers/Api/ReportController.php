@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Exports\CategoriesExport;
 use App\Exports\OrdersExport;
 use App\Exports\OrdersReportExport;
 use App\Exports\TopMunicipalitiesExport;
@@ -16,6 +17,25 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class ReportController extends Controller
 {
+    /**
+     * Retorna el nombre del archivo de descarga al exportar los reportes
+     * Útil para testing
+     *
+     * @param string $baseFileName
+     * @param ?string $extension
+     * @return string
+     */
+    public function getDownloadFileName(string $baseFileName, ?string $extension = null): string
+    {
+        $fileName = $baseFileName . now()->format('Ymd_His');
+
+        if (!empty($extension)) {
+            $fileName .= '.xlsx';
+        }
+
+        return $fileName;
+    }
+
     public function report(Request $request)
     {
         // Validación de filtros
@@ -90,7 +110,7 @@ class ReportController extends Controller
                         'month' => $month,
                         'customer' => $user ? $user->name : null,
                         'total_purchases' => (int)$top->total_purchases,
-                        'quantity_purchases' => (int)$top->quantity_purchases, 
+                        'quantity_purchases' => (int)$top->quantity_purchases,
                     ];
                     $totalSales += $top->total_purchases;
                 }
@@ -164,7 +184,7 @@ class ReportController extends Controller
                     $topProducts[] = [
                         'month' => $month,
                         'product' => $product ? $product->name : null,
-                        'total' => (int)$top->subtotal, 
+                        'total' => (int)$top->subtotal,
                     ];
                     $total_sales += (int)$top->subtotal;
                 }
@@ -243,7 +263,7 @@ class ReportController extends Controller
                 $total = $orders->where('month', $month)
                     ->where('user.name', $client)
                     ->sum('total');
-                
+
                 // Aplica el filtro de totales por cliente
                 $clientPassesFilter = true;
                 if ($totalMin !== null) {
@@ -262,7 +282,7 @@ class ReportController extends Controller
                     $totalMonth += $total;
                 }
             }
-            
+
             // Solo incluye el mes si tiene clientes que pasaron el filtro
             if (count($salesByClient) > 0) {
                 $totals[] = [
@@ -279,7 +299,7 @@ class ReportController extends Controller
 
         // Actualiza los meses para que coincidan con los totales filtrados
         $months = collect($totals)->pluck('month')->all();
-        
+
         // Actualiza los clientes para que solo incluya los que pasaron el filtro
         $clients = collect($totals)
             ->pluck('sales_by_customer')
@@ -299,11 +319,11 @@ class ReportController extends Controller
 
     public function productsSalesList(Request $request)
     {
-        $start = $request->input('start') 
+        $start = $request->input('start')
             ? date('Y-m-d', strtotime($request->input('start')))
             : now()->subMonths(12)->startOfMonth()->toDateString();
 
-        $end = $request->input('end') 
+        $end = $request->input('end')
             ? date('Y-m-d', strtotime($request->input('end')))
             : now()->endOfMonth()->toDateString();
 
@@ -565,7 +585,7 @@ class ReportController extends Controller
         if (!$order) {
             return response()->json(['message' => 'Transacción no encontrada.'], 404);
         }
-        
+
         return response()->json([
             'order' => [
                 'id' => $order->id,
@@ -602,12 +622,10 @@ class ReportController extends Controller
             'client' => 'nullable|string|exists:users,name',
             'total_min' => 'nullable|numeric|min:0',
             'total_max' => 'nullable|numeric|gte:total_min',
-            'region' => 'nullable|string|exists:regions,code'
         ], [
             'end.after_or_equal' => 'La fecha final no puede ser menor que la inicial.',
             'client.exists' => 'El cliente no existe en los registros.',
             'total_max.gte' => 'El monto máximo no puede ser menor que el mínimo.',
-            'region.exists' => 'El código de región no existe en los registros.',
         ]);
 
         $start = $validated['start'] ?? now()->subMonths(12)->startOfMonth()->toDateString();
@@ -615,17 +633,16 @@ class ReportController extends Controller
         $client = $validated['client'] ?? null;
         $totalMin = $validated['total_min'] ?? null;
         $totalMax = $validated['total_max'] ?? null;
-        $regionCode = $validated['region'] ?? null;
 
-        $fileName = 'reporte_clientes_' . date('Y-m-d_H-i-s') . '.xlsx';
+        $fileName = 'Reporte_cliente_' . now()->format('Ymd') . '.xlsx';
 
         return Excel::download(
-            new ClientsReportExport($start, $end, $client, $totalMin, $totalMax, $regionCode),
+            new ClientsReportExport($start, $end, $client, $totalMin, $totalMax),
             $fileName
         );
     }
 
-    
+
     public function export(Request $request)
     {
         $start = $request->input('start');
@@ -633,9 +650,9 @@ class ReportController extends Controller
         $client = $request->input('client');
         $totalMin = $request->input('total_min');
         $totalMax = $request->input('total_max');
-        $status = $request->input('status', 'completed'); 
-        $fileName = 'Lista_transacciones' . now()->format('Ymd_His') . '.xlsx';
-       
+        $status = $request->input('status', 'completed');
+        $fileName = $request->input('filename') ?? 'Lista_transacciones_' . now()->format('Ymd') . '.xlsx';
+
         return Excel::download(new OrdersExport($start, $end, $client, $totalMin, $totalMax, $status), $fileName);
     }
 
@@ -643,18 +660,33 @@ class ReportController extends Controller
     {
         $start = $request->input('start');
         $end = $request->input('end');
-        $fileName = 'Top_comunas_ventas_' . now()->format('Ymd_His') . '.xlsx';
+        $totalMin = $request->input('total_min');
+        $totalMax = $request->input('total_max');
+        $fileName = 'Top_comunas_ventas_' . now()->format('Ymd') . '.xlsx';
 
-        return Excel::download(new TopMunicipalitiesExport($start, $end), $fileName);
+        return Excel::download(new TopMunicipalitiesExport($start, $end, $totalMin, $totalMax), $fileName);
     }
 
     public function exportTopProducts(Request $request)
     {
         $start = $request->input('start');
         $end = $request->input('end');
-        $fileName = 'Top_productos_ventas_' . now()->format('Ymd_His') . '.xlsx';
+        $totalMin = $request->input('total_min');
+        $totalMax = $request->input('total_max');
+        $fileName = 'Top_productos_ventas_' . now()->format('Ymd') . '.xlsx';
 
-        return Excel::download(new TopProductsExport($start, $end), $fileName);
+        return Excel::download(new TopProductsExport($start, $end, $totalMin, $totalMax), $fileName);
+    }
+
+    public function exportTopCategories(Request $request)
+    {
+        $start = $request->input('start');
+        $end = $request->input('end');
+        $totalMin = $request->input('total_min');
+        $totalMax = $request->input('total_max');
+        $fileName = 'Top_categorias_ventas_' . now()->format('Ymd') . '.xlsx';
+
+        return Excel::download(new CategoriesExport($start, $end, $totalMin, $totalMax), $fileName);
     }
 
     public function ordersReportExport(Request $request)
@@ -678,8 +710,7 @@ class ReportController extends Controller
         $totalMin = $validated['total_min'] ?? null;
         $totalMax = $validated['total_max'] ?? null;
         $type = $validated['type'] ?? 'sales';
-
-        $fileName = 'reporte_ordenes_' . date('Y-m-d_H-i-s') . '.xlsx';
+        $fileName = 'Reporte_ordenes_' . now()->format('Ymd') . '.xlsx';
 
         return Excel::download(
             new OrdersReportExport($start, $end, $client, $totalMin, $totalMax, $type),
