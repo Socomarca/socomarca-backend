@@ -149,7 +149,7 @@ test('a superadmin can update customer message without images', function () {
         'header_content' => '<h1>Hola</h1>',
         'banner_enabled' => true,
         'modal_enabled' => true,
-        'message_enabled' => fake()->boolean,
+        'message_enabled' => true,
     ];
 
     $this->actingAs($user, 'sanctum')
