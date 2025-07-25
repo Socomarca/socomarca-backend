@@ -138,7 +138,7 @@ test('user with manage-users permission can update another user password and rol
     ];
 
     $this->actingAs($admin, 'sanctum')
-        ->putJson("/api/users/{$user->id}", $data)
+        ->patchJson("/api/users/{$user->id}", $data)
         ->assertStatus(200);
 
     $user->refresh();
@@ -160,7 +160,7 @@ test('success when only updating password without other fields', function () {
     ];
 
     $this->actingAs($admin, 'sanctum')
-        ->putJson("/api/users/{$user->id}", $data)
+        ->patchJson("/api/users/{$user->id}", $data)
         ->assertStatus(200);
 });
 
@@ -171,7 +171,7 @@ test('success when no fields are provided for updating', function () {
     $user = User::factory()->create();
 
     $this->actingAs($admin, 'sanctum')
-        ->putJson("/api/users/{$user->id}", [])
+        ->patchJson("/api/users/{$user->id}", [])
         ->assertStatus(200);
 });
 

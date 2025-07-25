@@ -112,9 +112,9 @@ test('customer message endpoint returns default structure', function () {
 test('a superadmin can update customer message with images', function () {
     Storage::fake('public');
     $user = User::factory()->create()->assignRole('superadmin');
-     $imagePath = public_path('images/test-image.png'); 
+     $imagePath = public_path('images/test-image.png');
 
-    
+
     if (!file_exists($imagePath)) {
         if (!is_dir(dirname($imagePath))) {
             mkdir(dirname($imagePath), 0755, true);
@@ -131,6 +131,7 @@ test('a superadmin can update customer message with images', function () {
         'banner_desktop_image' => new UploadedFile($imagePath, 'desktop.png', 'image/png', null, true),
         'banner_mobile_image' => new UploadedFile($imagePath, 'mobile.png', 'image/png', null, true),
         'modal_image' => new UploadedFile($imagePath, 'modal.png', 'image/png', null, true),
+        'message_enabled' => fake()->boolean,
     ];
 
     $this->actingAs($user, 'sanctum')
@@ -149,7 +150,7 @@ test('a superadmin can update customer message without images', function () {
         'header_content' => '<h1>Hola</h1>',
         'banner_enabled' => true,
         'modal_enabled' => true,
-        'message_enabled' => true, 
+        'message_enabled' => true,
     ];
 
     $this->actingAs($user, 'sanctum')
