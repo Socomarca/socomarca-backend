@@ -45,8 +45,6 @@ class UserPasswordUpdateNotification extends Notification
         } else {
             throw new \Exception('Notifiable must be an instance of User');
         }
-
-        dd('toMail');
     }
 
     /**
