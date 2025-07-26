@@ -8,14 +8,15 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Notifications\Notification;
 
-class UserInfoUpdateNotification extends Notification
+class UserSavedNotification extends Notification
 {
     use Queueable;
 
     /**
      * Create a new notification instance.
+     * @param string $action 'created'|'updated'
      */
-    public function __construct()
+    public function __construct(public string $action = 'created')
     {
         //
     }
@@ -39,7 +40,7 @@ class UserInfoUpdateNotification extends Notification
         if ($notifiable instanceof User) {
             return (new UserNotificationMail(
                 $notifiable,
-                'updated',
+                $this->action,
             ))->to($notifiable->email);
         } else {
             throw new \Exception('Notifiable must be an instance of User');
