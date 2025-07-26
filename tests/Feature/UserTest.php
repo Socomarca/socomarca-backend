@@ -342,11 +342,11 @@ test('ordena usuarios por nombre ascendente y por id descendente', function () {
 });
 
 test('admin can register', function () {
-    \Illuminate\Support\Facades\Mail::fake();
+    \Illuminate\Support\Facades\Notification::fake();
     $admin = User::factory()->create();
     $admin->assignRole('admin');
     $password = fake()->password(10, 12);
-    $this->actingAs($admin, 'sanctum')
+    $response = $this->actingAs($admin, 'sanctum')
         ->postJson(route('users.store'), [
             "name" => fake()->firstName,
             "email" => fake()->email,
@@ -358,7 +358,10 @@ test('admin can register', function () {
             "is_active" => true,
             "roles" => ['admin'],
         ]);
-    \Illuminate\Support\Facades\Mail::assertQueued(\App\Mail\UserNotificationMail::class);
+    $userId = $response->json('user.id');
+    $user = User::findOrFail($userId);
+    \Illuminate\Support\Facades\Notification::assertSentTo($user, \App\Notifications\UserSavedNotification::class);
+    \Illuminate\Support\Facades\Notification::assertSentTo($user, \App\Notifications\UserPasswordUpdateNotification::class);
 });
 
 describe('admin can update user', function () {
@@ -394,7 +397,7 @@ describe('admin can update user', function () {
             'is_active' => $payload['is_active'],
         ]);
 
-        \Illuminate\Support\Facades\Notification::assertSentTo($user, \App\Notifications\UserInfoUpdateNotification::class);
+        \Illuminate\Support\Facades\Notification::assertSentTo($user, \App\Notifications\UserSavedNotification::class);
         \Illuminate\Support\Facades\Notification::assertNotSentTo($user, \App\Notifications\UserPasswordUpdateNotification::class);
     });
 
