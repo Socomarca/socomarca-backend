@@ -15,22 +15,22 @@ class ClientsReportExport implements FromCollection, WithHeadings
     protected $client;
     protected $totalMin;
     protected $totalMax;
-    protected $regionCode;
 
-    public function __construct($start, $end, $client = null, $totalMin = null, $totalMax = null, $regionCode = null)
+
+    public function __construct($start, $end, $client = null, $totalMin = null, $totalMax = null)
     {
         $this->start = $start;
         $this->end = $end;
         $this->client = $client;
         $this->totalMin = $totalMin;
         $this->totalMax = $totalMax;
-        $this->regionCode = $regionCode;
+
     }
 
     public function collection()
     {
         $query = Order::with('user')
-            ->select('user_id', DB::raw('SUM(amount) as monto_total'))
+            ->select('user_id', DB::raw('SUM(amount) as monto_total'), DB::raw('MAX(created_at) as ultima_compra'))
             ->where('status', 'completed')
             ->whereBetween('created_at', [$this->start, $this->end])
             ->groupBy('user_id');
@@ -40,21 +40,6 @@ class ClientsReportExport implements FromCollection, WithHeadings
             $query->whereHas('user', function($q) {
                 $q->where('name', $this->client);
             });
-        }
-
-        // Filtro por código de región
-        if ($this->regionCode) {
-            // Obtener IDs de municipios que pertenecen a la región especificada
-            $municipalityIds = Municipality::whereHas('region', function($q) {
-                $q->where('code', $this->regionCode);
-            })->pluck('id')->toArray();
-
-            if (!empty($municipalityIds)) {
-                $query->whereIn('order_meta->address->municipality_id', $municipalityIds);
-            } else {
-                // Si no hay municipios para esta región, no devolver ningún resultado
-                $query->whereRaw('1 = 0');
-            }
         }
 
         // Filtros por monto total (después del GROUP BY)
@@ -71,7 +56,8 @@ class ClientsReportExport implements FromCollection, WithHeadings
             return [
                 'ID' => $clientData->user_id,
                 'Cliente' => $clientData->user ? $clientData->user->name : 'N/A',
-                'Monto Total' => number_format($clientData->monto_total, 0, ',', '.'),
+                'Monto Total' => $clientData->monto_total,
+                'Fecha última compra' => $clientData->ultima_compra ? date('Y-m-d H:i', strtotime($clientData->ultima_compra)) : '',
             ];
         });
     }
@@ -82,6 +68,7 @@ class ClientsReportExport implements FromCollection, WithHeadings
             'ID',
             'Cliente',
             'Monto Total',
+            'Fecha',
         ];
     }
 }

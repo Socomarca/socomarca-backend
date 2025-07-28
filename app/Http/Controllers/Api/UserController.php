@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Events\UserUpdated;
 use App\Exports\UsersExport;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\SearchUsersRequest;
@@ -78,8 +79,8 @@ class UserController extends Controller
             try {
                 Mail::to($user->email)->send(
                     new UserNotificationMail(
-                        $user, 
-                        'created', 
+                        $user,
+                        'created',
                         $isPasswordGenerated ? $password : null
                     )
                 );
@@ -102,7 +103,7 @@ class UserController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Error creando usuario: ' . $e->getMessage());
-            
+
             return response()->json([
                 'message' => 'Error interno del servidor',
                 'error' => config('app.debug') ? $e->getMessage() : 'No se pudo crear el usuario'
@@ -135,71 +136,45 @@ class UserController extends Controller
      * Update the specified user in storage.
      * Requires manage-users permission.
      *
-     * @param UpdateRequest $updateRequest
+     * @param UpdateRequest $request
      * @param int $id
      * @return JsonResponse
      */
-    public function update(UpdateRequest $updateRequest, $id): JsonResponse
+    public function update(User $user, UpdateRequest $request): JsonResponse
     {
         try {
             DB::beginTransaction();
-
-            $data = $updateRequest->validated();
-
-            $user = User::find($id);
-            if (!$user) {
-                return response()->json([
-                    'message' => 'Usuario no encontrado.',
-                ], 404);
-            }
-
-            // Actualizar contraseña si se proporciona
-            $passwordChanged = false;
+            $data = $request->validated();
             $newPassword = null;
-            if (isset($data['password']) && !empty($data['password'])) {
+
+            if ($request->has('password')) {
                 $newPassword = $data['password'];
-                $user->password = Hash::make($newPassword);
-                $passwordChanged = true;
+                $data['password'] = Hash::make($data['password']);
+                $data['password_changed_at'] = now();
             }
 
-            // Solo guardar si se cambió la contraseña
-            if ($passwordChanged) {
-                $user->save();
-            }
+            $roles = $data['roles'] ?? [];
+            unset($data['roles']);
+            $user->update($data);
 
-            // Actualizar roles si se proporcionan
-            if (isset($data['roles']) && is_array($data['roles'])) {
-                $user->syncRoles($data['roles']);
-            }
-
-            // Enviar email de notificación solo si se cambió la contraseña
-            if ($passwordChanged) {
-                try {
-                    Mail::to($user->email)->send(
-                        new UserNotificationMail(
-                            $user, 
-                            'updated', 
-                            $newPassword
-                        )
-                    );
-                } catch (\Exception $e) {
-                    Log::error('Error enviando email de actualización de usuario: ' . $e->getMessage());
-                    // Continuar sin fallar si hay error en el email
-                }
+            if (!empty($roles)) {
+                $user->syncRoles($roles);
             }
 
             DB::commit();
+            $event = new UserUpdated($user, $newPassword);
+            event($event);
 
             return response()->json([
-                'message' => 'Usuario actualizado exitosamente',
+                'message' => 'User updated successfully',
                 'user' => new UserResource($user->load('roles')),
-                'password_changed' => $passwordChanged
+                'password_changed' => $newPassword !== null,
             ]);
 
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Error actualizando usuario: ' . $e->getMessage());
-            
+
             return response()->json([
                 'message' => 'Error interno del servidor',
                 'error' => config('app.debug') ? $e->getMessage() : 'No se pudo actualizar el usuario'
@@ -252,7 +227,7 @@ class UserController extends Controller
 
         } catch (\Exception $e) {
             Log::error('Error eliminando usuario: ' . $e->getMessage());
-            
+
             return response()->json([
                 'message' => 'Error interno del servidor',
                 'error' => config('app.debug') ? $e->getMessage() : 'No se pudo eliminar el usuario'
@@ -280,7 +255,7 @@ class UserController extends Controller
         $perPage = $request->input('per_page', 20);
         $filters = $request->input('filters', []);
 
-        
+
         $roles = $request->input('roles', []);
         if (!empty($roles)) {
             if (count($roles) === 1) {
@@ -345,19 +320,19 @@ class UserController extends Controller
     private function hasSignificantChanges(array $originalData, array $newData): bool
     {
         $fieldsToCheck = ['name', 'email', 'phone', 'rut', 'business_name', 'is_active'];
-        
+
         foreach ($fieldsToCheck as $field) {
             if (($originalData[$field] ?? '') !== ($newData[$field] ?? '')) {
                 return true;
             }
         }
-        
+
         return false;
     }
 
     public function customersList()
     {
-        $clientes = User:: //::role('cliente') 
+        $clientes = User:: //::role('cliente')
             select('id', 'name')
             ->orderBy('name')
             ->get()
@@ -369,51 +344,6 @@ class UserController extends Controller
             });
 
         return response()->json($clientes);
-    }
-
-    /**
-     * Partially update user fields
-     *
-     * @param \Illuminate\Http\Request $request
-     * @param int $id
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function partialUpdate(Request $request, $id)
-    {
-        $user = User::findOrFail($id);
-
-        $validated = $request->validate([
-            'name' => 'sometimes|string|max:255',
-            'email' => 'sometimes|email|unique:users,email,' . $id,
-            'phone' => 'sometimes|nullable|string|max:20',
-            'is_active' => 'sometimes|boolean',
-            'password' => 'sometimes|string|min:8|confirmed',
-        ]);
-
-        // Si se actualiza la contraseña, hashearla
-        if (isset($validated['password'])) {
-            $validated['password'] = Hash::make($validated['password']);
-        }
-
-        // Actualizar solo los campos enviados
-        $user->update($validated);
-
-        // Refrescar el modelo para obtener los datos actualizados
-        $user->refresh();
-
-        return response()->json([
-            'message' => 'User updated successfully',
-            'user' => [
-                'id' => $user->id,
-                'name' => $user->name,
-                'email' => $user->email,
-                'phone' => $user->phone,
-                'is_active' => $user->is_active,
-                'roles' => $user->roles->pluck('name'),
-
-
-            ]
-        ]);
     }
 
     public function export(Request $request)

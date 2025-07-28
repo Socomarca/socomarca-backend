@@ -28,14 +28,6 @@ class UpdateRequest extends FormRequest
         ];
     }
 
-    public function messages()
-    {
-        return
-        [
-            'id.integer' => 'The id field in params must be an integer.',
-        ];
-    }
-
     protected function prepareForValidation()
     {
         $this->merge(

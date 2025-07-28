@@ -25,14 +25,6 @@ class SubcategoryIdRequest extends FormRequest
             'id' => ['required', 'integer', 'exists:subcategories,id'],
         ];
     }
-    public function messages(): array
-    {
-        return [
-            'id.required' => 'El ID de la subcategoría es obligatorio.',
-            'id.integer'  => 'El ID debe ser un número entero.',
-            'id.exists'   => 'La subcategoría no existe.',
-        ];
-    }
 
     public function validationData()
     {

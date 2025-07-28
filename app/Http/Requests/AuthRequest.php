@@ -16,9 +16,9 @@ class AuthRequest extends FormRequest
      */
     public function authorize(): bool
     {
-            
+
         return true;
-        
+
     }
 
     /**
@@ -28,26 +28,13 @@ class AuthRequest extends FormRequest
      */
     public function rules(): array
     {
-        
+
         return [
             'rut' => ['required', new ValidateRut()],
             'password' => [
                 'required',
                 'string',
             ],
-        ];
-    }
-
-    /**
-     * Get custom messages for validator errors.
-     *
-     * @return array
-     */
-    public function messages(): array
-    {
-        return [
-            'rut.required' => 'El RUT es obligatorio',
-            'password.required' => 'La contraseña es obligatoria',
         ];
     }
 
@@ -70,11 +57,11 @@ class AuthRequest extends FormRequest
     protected function passedValidation()
     {
         $user = User::where('rut', $this->input('rut'))->first();
-        
+
         if (!$user) {
             abort(401, 'Usuario no encontrado');
         }
-        
+
         $isPasswordValid = Hash::check(
             $this->input('password'),
             $user->password

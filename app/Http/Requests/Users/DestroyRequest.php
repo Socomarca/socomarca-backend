@@ -27,15 +27,6 @@ class DestroyRequest extends FormRequest
         ];
     }
 
-    public function messages()
-    {
-        return
-        [
-            'id.integer' => 'El id en los parámetros debe ser un entero.',
-            'id.exists' => 'El usuario no existe.',
-        ];
-    }
-
     protected function prepareForValidation()
     {
         $this->merge(

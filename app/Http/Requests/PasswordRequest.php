@@ -40,18 +40,9 @@ class PasswordRequest extends FormRequest
             },
             ],
         ];
-        
+
     }
-      /**
-     * Mensajes personalizados para errores de validación.
-     */
-    public function messages(): array
-    {
-        return [
-            'rut.required' => 'El RUT es obligatorio.',
-        ];
-    }
-  
+
 
     /**
      * Manejar un intento fallido de validación.

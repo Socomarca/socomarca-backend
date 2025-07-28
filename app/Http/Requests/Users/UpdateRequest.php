@@ -24,36 +24,22 @@ class UpdateRequest extends FormRequest
      */
     public function rules(): array
     {
-        $userId = $this->route('id');
-        
-        return
-        [
-            'id' => 'bail|integer|exists:users,id',
-            'password' => ['bail', 'sometimes', 'confirmed', Password::min(8)->letters()],
-            'roles' => 'bail|sometimes|array',
-            'roles.*' => 'bail|string|exists:roles,name',
-        ];
-    }
+        $userId = $this->segment(3);
+        $method = strtolower($this->method());
+        $required = $method === 'put' ? 'required' : 'sometimes';
 
-    /**
-     * Get custom messages for validator errors.
-     *
-     * @return array
-     */
-    public function messages(): array
-    {
         return [
-            'password.confirmed' => 'La confirmación de contraseña no coincide.',
-            'roles.array' => 'Los roles deben ser un arreglo.',
-            'roles.*.exists' => 'Uno o más roles no existen.',
+            'name' => $required . '|string|max:255',
+            'email' => $required . '|email|unique:users,email,' . $userId,
+            'phone' => $required . '|nullable|string|max:20',
+            'is_active' => $required . '|boolean',
+            'password' => [$required, 'bail', 'confirmed', Password::min(8)->letters()],
+            'roles' => "bail|$required|array",
+            'roles.*' => 'bail|string|exists:roles,name',
         ];
     }
 
     protected function prepareForValidation()
     {
-        $this->merge(
-        [
-            'id' => $this->route('id'),
-        ]);
     }
 }

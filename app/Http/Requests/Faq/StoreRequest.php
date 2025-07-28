@@ -26,23 +26,4 @@ class StoreRequest extends FormRequest
             'answer' => 'required|string|min:10|max:5000',
         ];
     }
-
-    /**
-     * Get custom error messages for validation rules.
-     *
-     * @return array<string, string>
-     */
-    public function messages(): array
-    {
-        return [
-            'question.required' => 'La pregunta es obligatoria.',
-            'question.string' => 'La pregunta debe ser texto.',
-            'question.min' => 'La pregunta debe tener al menos 10 caracteres.',
-            'question.max' => 'La pregunta no puede tener más de 1000 caracteres.',
-            'answer.required' => 'La respuesta es obligatoria.',
-            'answer.string' => 'La respuesta debe ser texto.',
-            'answer.min' => 'La respuesta debe tener al menos 10 caracteres.',
-            'answer.max' => 'La respuesta no puede tener más de 5000 caracteres.',
-        ];
-    }
 }

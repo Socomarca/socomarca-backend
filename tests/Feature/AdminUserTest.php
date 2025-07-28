@@ -9,7 +9,7 @@ use Spatie\Permission\Models\Permission;
 test('usuario sin permisos no puede crear usuarios', function () {
     // Arrange
     $user = User::factory()->create();
-    
+
     $userData = [
         'name' => 'Test User',
         'email' => 'test@example.com',
@@ -32,10 +32,10 @@ test('usuario sin permisos no puede crear usuarios', function () {
 test('usuario con permisos puede crear usuarios', function () {
     // Arrange
     Mail::fake();
-    
+
     $admin = User::factory()->create();
     $admin->givePermissionTo('manage-users');
-    
+
     $userData = [
         'name' => 'Test User',
         'email' => 'test@example.com',
@@ -53,7 +53,7 @@ test('usuario con permisos puede crear usuarios', function () {
 
     // Assert
     expect($response->getStatusCode())->toBeIn([201, 422]);
-    
+
     if ($response->getStatusCode() === 422) {
         $response->assertJsonValidationErrors(['rut']);
     } else {
@@ -73,16 +73,16 @@ test('usuario con permisos puede crear usuarios', function () {
 test('usuario con permisos puede actualizar usuarios', function () {
     // Arrange
     Mail::fake();
-    
+
     $admin = User::factory()->create();
     $admin->givePermissionTo('manage-users');
-    
+
     $user = User::factory()->create([
         'name' => 'Original Name',
         'business_name' => 'Original Business'
     ]);
     $user->assignRole('cliente');
-    
+
     $updateData = [
         'password' => 'newpassword123',
         'password_confirmation' => 'newpassword123',
@@ -91,7 +91,7 @@ test('usuario con permisos puede actualizar usuarios', function () {
 
     // Act
     $response = $this->actingAs($admin, 'sanctum')
-        ->putJson("/api/users/{$user->id}", $updateData);
+        ->patchJson("/api/users/{$user->id}", $updateData);
 
     // Assert
     $response->assertStatus(200)
@@ -112,7 +112,7 @@ test('usuario con permisos puede actualizar usuarios', function () {
     $user->refresh();
     expect($user->hasRole('admin'))->toBeTrue();
     expect($user->hasRole('cliente'))->toBeFalse();
-    
+
     // Verificar que se reportó el cambio de contraseña
     $response->assertJson([
         'password_changed' => true
@@ -123,7 +123,7 @@ test('usuario con permisos puede eliminar usuarios', function () {
     // Arrange
     $admin = User::factory()->create();
     $admin->givePermissionTo('manage-users');
-    
+
     $user = User::factory()->create();
 
     // Act
@@ -165,7 +165,7 @@ test('validacion de email unico al crear usuario', function () {
     // Arrange
     $admin = User::factory()->create();
     $admin->givePermissionTo('manage-users');
-    
+
     $existingUser = User::factory()->create();
 
     $userData = [
@@ -192,7 +192,7 @@ test('validacion de rut unico al crear usuario', function () {
     // Arrange
     $admin = User::factory()->create();
     $admin->givePermissionTo('manage-users');
-    
+
     $existingUser = User::factory()->create();
 
     $userData = [
@@ -219,7 +219,7 @@ test('puede obtener lista de usuarios', function () {
     // Arrange
     $admin = User::factory()->create();
     $admin->givePermissionTo('manage-users');
-    
+
     User::factory()->count(3)->create();
 
     // Act
@@ -250,7 +250,7 @@ test('puede obtener usuario especifico', function () {
     // Arrange
     $admin = User::factory()->create();
     $admin->givePermissionTo('manage-users');
-    
+
     $user = User::factory()->create();
 
     // Act
@@ -291,7 +291,7 @@ test('puede buscar usuarios con filtros', function () {
     // Arrange
     $admin = User::factory()->create();
     $admin->givePermissionTo('manage-users');
-    
+
     User::factory()->create(['name' => 'Juan Pérez']);
     User::factory()->create(['name' => 'María García']);
     User::factory()->create(['name' => 'Carlos López']);
@@ -322,4 +322,4 @@ test('puede buscar usuarios con filtros', function () {
             'links',
             'meta'
         ]);
-}); 
+});

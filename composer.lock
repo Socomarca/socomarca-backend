@@ -4,7 +4,11 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
+<<<<<<< HEAD
     "content-hash": "5a71a886690fb9d14c803e057bafee4c",
+=======
+    "content-hash": "35340e11c1b1d0b59d17dcba59e55c40",
+>>>>>>> main
     "packages": [
         {
             "name": "aws/aws-crt-php",
@@ -1545,6 +1549,82 @@
                 "source": "https://github.com/http-interop/http-factory-guzzle/tree/1.2.0"
             },
             "time": "2021-07-21T13:50:14+00:00"
+        },
+        {
+            "name": "laragear/rut",
+            "version": "v4.3.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/Laragear/Rut.git",
+                "reference": "0ffd882f6eea298b43f3552bbd86dc864f8bc27c"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/Laragear/Rut/zipball/0ffd882f6eea298b43f3552bbd86dc864f8bc27c",
+                "reference": "0ffd882f6eea298b43f3552bbd86dc864f8bc27c",
+                "shasum": ""
+            },
+            "require": {
+                "illuminate/database": "11.*|12.*",
+                "illuminate/support": "11.*|12.*",
+                "illuminate/validation": "11.*|12.*",
+                "php": "^8.2"
+            },
+            "require-dev": {
+                "filament/forms": "^3.3",
+                "filament/tables": "^3.3",
+                "livewire/livewire": "3.*",
+                "orchestra/testbench": "9.*|10.*"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "aliases": {
+                        "Generator": "Laragear\\Rut\\Facades\\Generator"
+                    },
+                    "providers": [
+                        "Laragear\\Rut\\RutServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Laragear\\Rut\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Italo Israel Baeza Cabrera",
+                    "email": "DarkGhostHunter@Gmail.com",
+                    "homepage": "https://github.com/sponsors/DarkGhostHunter",
+                    "role": "Developer"
+                }
+            ],
+            "description": "Tools to parse, validate and generate Chilean RUT in Laravel.",
+            "keywords": [
+                "chile",
+                "laravel",
+                "rut"
+            ],
+            "support": {
+                "issues": "https://github.com/Laragear/Rut/issues",
+                "source": "https://github.com/Laragear/Rut"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/sponsors/DarkGhostHunter",
+                    "type": "Github Sponsorship"
+                },
+                {
+                    "url": "https://paypal.me/darkghosthunter",
+                    "type": "Paypal"
+                }
+            ],
+            "time": "2025-06-19T01:52:47+00:00"
         },
         {
             "name": "laravel/framework",

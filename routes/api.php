@@ -50,11 +50,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/users/exports', [UserController::class, 'export'])->middleware('role:admin|superadmin|supervisor');
     Route::get('/users', [UserController::class, 'index'])->middleware('permission:manage-users');
     Route::get('/users/customers', [UserController::class, 'customersList']);
-    Route::post('/users', [UserController::class, 'store'])->middleware('permission:manage-users');
+    Route::post('/users', [UserController::class, 'store'])
+        ->middleware('permission:manage-users')
+        ->name('users.store');
     Route::post('/users/search', [UserController::class, 'search'])->middleware('permission:manage-users');
     Route::get('/users/{id}', [UserController::class, 'show'])->middleware('permission:manage-users');
-    Route::put('/users/{id}', [UserController::class, 'update'])->middleware('permission:manage-users');
-    Route::patch('/users/{id}', [UserController::class, 'partialUpdate'])->middleware('permission:manage-users');
+    Route::match(['put', 'patch'], '/users/{user}', [UserController::class, 'update'])
+        ->middleware('permission:manage-users')->name('users.update');
     Route::delete('/users/{id}', [UserController::class, 'destroy'])->middleware('permission:manage-users');
 
     Route::resource('permissions', \App\Http\Controllers\Api\PermissionController::class, ['only' => 'index'])
@@ -122,12 +124,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/orders/pay', [OrderController::class, 'payOrder']);
 
 
-    Route::middleware(['auth:sanctum', 'permission:see-all-reports'])->group(function () {
+    Route::middleware(['auth:sanctum', 'permission:see-all-reports','role:admin|superadmin|supervisor'])->group(function () {
 
-        Route::get('/orders/reports/transactions/export', [ReportController::class, 'export'])->middleware('role:admin|superadmin|supervisor');
-        Route::get('/orders/reports/municipalities/export', [ReportController::class, 'exportTopMunicipalities'])->middleware(['role:admin|superadmin|supervisor']);
-        Route::get('/orders/reports/products/export', [ReportController::class, 'exportTopProducts'])->middleware(['role:admin|superadmin|supervisor']);
-        Route::post('/orders/reports/export', [ReportController::class, 'ordersReportExport'])->middleware('role:admin|superadmin|supervisor');
+        Route::post('/orders/reports/transactions/export', [ReportController::class, 'export']);
+        Route::post('/orders/reports/municipalities/export', [ReportController::class, 'exportTopMunicipalities']);
+        Route::post('/orders/reports/products/export', [ReportController::class, 'exportTopProducts']);
+        Route::post('/orders/reports/categories/export', [ReportController::class, 'exportTopCategories']);
+        Route::post('/orders/reports/export', [ReportController::class, 'ordersReportExport']);
 
         Route::post('/orders/reports', [ReportController::class, 'report']);
         Route::post('/orders/reports/top-product-list', [ReportController::class, 'productsSalesList']);
