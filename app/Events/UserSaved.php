@@ -3,15 +3,12 @@
 namespace App\Events;
 
 use App\Models\User;
-use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
-use Illuminate\Broadcasting\PresenceChannel;
 use Illuminate\Broadcasting\PrivateChannel;
-use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class UserUpdated
+class UserSaved
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
@@ -19,9 +16,10 @@ class UserUpdated
      * Create a new event instance.
      */
     public function __construct(
-        public User $user,
-        public ?string $temporaryPassword = null,
-        public bool $notifyPasswordUpdateOnly = false
+        public User    $user,
+        public ?string $password = null,
+        public bool    $notifyPasswordUpdateOnly = false,
+        public string  $action = 'created',
     )
     {
         //
