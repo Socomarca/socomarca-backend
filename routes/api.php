@@ -23,7 +23,6 @@ use App\Http\Controllers\Api\RoleController;
 use App\Http\Controllers\Api\SiteinfoController;
 use App\Http\Controllers\Api\WebpayController;
 use App\Http\Controllers\Api\FaqController;
-use App\Http\Controllers\Api\ProductImageSyncController;
 use App\Http\Controllers\SettingsController;
 
 Route::prefix('auth')->group(function () {
@@ -142,6 +141,12 @@ Route::middleware('auth:sanctum')->group(function () {
 
     });
 
+    Route::middleware(['auth:sanctum', 'role:admin|superadmin'])->group(function () {
+
+        Route::post('/s3-test-upload', [S3Controller::class, 'upload']);    
+        Route::get('/s3-test-list', [S3Controller::class, 'list']);
+       
+    });
 });
 
 Route::get('/faq', [FaqController::class, 'index'])->name('faq.index');

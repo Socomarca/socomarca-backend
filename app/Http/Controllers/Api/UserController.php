@@ -2,25 +2,21 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Events\UserUpdated;
+use App\Events\UserSaved;
 use App\Exports\UsersExport;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\SearchUsersRequest;
 use App\Http\Requests\Users\DestroyRequest;
-use App\Http\Requests\Users\ShowRequest;
 use App\Http\Requests\Users\StoreRequest;
 use App\Http\Requests\Users\UpdateRequest;
 use App\Http\Resources\Users\ProfileResource;
 use App\Http\Resources\Users\UserCollection;
 use App\Http\Resources\Users\UserResource;
-use App\Mail\UserNotificationMail;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Maatwebsite\Excel\Facades\Excel;
 
@@ -75,24 +71,9 @@ class UserController extends Controller
                 $user->assignRole('cliente');
             }
 
-            // Enviar email de notificación
-            try {
-                Mail::to($user->email)->send(
-                    new UserNotificationMail(
-                        $user,
-                        'created',
-                        $isPasswordGenerated ? $password : null
-                    )
-                );
-            } catch (\Exception $e) {
-                Log::error('Error enviando email de creación de usuario: ' . $e->getMessage());
-                return response()->json([
-                    'message' => 'Error: No se pudo enviar el email de creación de usuario',
-                    'error' => config('app.debug') ? $e->getMessage() : 'No se pudo crear el usuario'
-                ], 500);
-            }
-
             DB::commit();
+            $event = new UserSaved(user: $user, password: $password, action: 'created');
+            event($event);
 
             return response()->json([
                 'message' => 'Usuario creado exitosamente',
@@ -162,7 +143,7 @@ class UserController extends Controller
             }
 
             DB::commit();
-            $event = new UserUpdated($user, $newPassword);
+            $event = new UserSaved(user: $user, password: $newPassword, action: 'updated');
             event($event);
 
             return response()->json([
