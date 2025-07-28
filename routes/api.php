@@ -23,6 +23,7 @@ use App\Http\Controllers\Api\RoleController;
 use App\Http\Controllers\Api\SiteinfoController;
 use App\Http\Controllers\Api\WebpayController;
 use App\Http\Controllers\Api\FaqController;
+use App\Http\Controllers\Api\ProductImageSyncController;
 use App\Http\Controllers\SettingsController;
 
 Route::prefix('auth')->group(function () {
@@ -182,6 +183,10 @@ Route::middleware(['auth:sanctum', 'role:admin|superadmin'])->group(function () 
     Route::get('/settings/prices', [SettingsController::class, 'index']);
     Route::put('/settings/prices', [SettingsController::class, 'update']);
 });
+
+
+Route::post('/products/images/sync', [ProductImageSyncController::class, 'store'])->name('products.image.sync');
+
 
 // Ruta catch-all al final
 Route::any('{url}', function() {
