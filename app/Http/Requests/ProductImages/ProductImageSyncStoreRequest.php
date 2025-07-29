@@ -8,13 +8,13 @@ class ProductImageSyncStoreRequest extends FormRequest
 {
     public function authorize()
     {
-        return true; // Ajusta según tu lógica de permisos
+        return true; 
     }
 
     public function rules()
     {
         return [
-            'sync_file' => 'required|file|mimes:zip|max:10240', // 10MB máx
+            'sync_file' => 'required|file|mimes:zip|max:50240', // 50MB máx
         ];
     }
 }
