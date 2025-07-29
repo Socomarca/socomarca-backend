@@ -9,12 +9,16 @@ services:
     working_dir: /var/www/html
     volumes:
       - .:/var/www/html:cached
+      - ./phpcustom.ini:/usr/local/etc/php/conf.d/custom.ini
     networks:
       - socomarca
     depends_on:
       - db
     expose:
       - 9000
+    environment:
+      - PHP_UPLOAD_MAX_FILESIZE=100M
+      - PHP_POST_MAX_SIZE=100M
 
   web:
     image: nginx:alpine

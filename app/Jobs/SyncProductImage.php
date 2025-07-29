@@ -23,22 +23,36 @@ class SyncProductImage implements ShouldQueue
 
     public function handle()
     {
+        Log::info('SyncProductImage job iniciado', ['zipPath' => $this->zipPath]);
+        
         $zipFullPath = storage_path('app/' . $this->zipPath);
         $extractPath = storage_path('app/product-sync/extracted_' . uniqid());
         $zip = new \ZipArchive;
         if ($zip->open($zipFullPath) === true) {
             $zip->extractTo($extractPath);
             $zip->close();
+            Log::info('ZIP extraído correctamente', ['extractPath' => $extractPath]);
         } else {
+            Log::error('No se pudo abrir el ZIP', ['zipFullPath' => $zipFullPath]);
             return;
         }
 
         $excelPath = $extractPath . '/sync_map.xlsx';
         $imagesPath = $extractPath . '/images';
 
-        // Leer el Excel y obtener el mapeo (ejemplo básico)
-        // Debes instalar phpoffice/phpspreadsheet para esto
-        $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($excelPath);
+        if (!file_exists($excelPath)) {
+            Log::error('sync_map.xlsx no encontrado', ['excelPath' => $excelPath]);
+            return;
+        }
+
+        try {
+            $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($excelPath);
+            Log::info('sync_map.xlsx cargado correctamente');
+        } catch (\Throwable $e) {
+            Log::error('Error al cargar sync_map.xlsx', ['error' => $e->getMessage()]);
+            return;
+        }
+
         $sheet = $spreadsheet->getActiveSheet();
         foreach ($sheet->getRowIterator(2) as $row) { // Asumiendo encabezado en la fila 1
             $cellIterator = $row->getCellIterator();
