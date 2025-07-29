@@ -109,6 +109,26 @@ test('customer message endpoint returns default structure', function () {
         ]);
 });
 
+test('a superadmin can update customer message without header_content', function () {
+    $user = User::factory()->create()->assignRole('superadmin');
+
+    $payload = [
+        'header_color' => '#fff',
+        'banner_enabled' => true,
+        'modal_enabled' => true,
+        'message_enabled' => true,
+    ];
+
+    $this->actingAs($user, 'sanctum')
+        ->postJson('/api/customer-message', $payload)
+        ->assertOk()
+        ->assertJson(['message' => 'Mensaje de bienvenida actualizado correctamente.']);
+
+    $record = Siteinfo::where('key', 'customer_message')->first();
+    expect($record)->not->toBeNull();
+    expect($record->value['header']['content'])->toBe(''); // Debe ser string vacío
+});
+
 test('a superadmin can update customer message with images', function () {
     Storage::fake('public');
     $user = User::factory()->create()->assignRole('superadmin');
