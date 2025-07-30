@@ -28,9 +28,9 @@ class RolesAndPermissionsSeeder extends Seeder
             "manage-admins",
 
             // Address related permissions
-            "see-all-addresses",
+            "read-all-addresses",
             "see-own-addresses",
-            "store-address",
+            "create-address",
             "update-address",
             "delete-address",
 
@@ -64,9 +64,9 @@ class RolesAndPermissionsSeeder extends Seeder
                 "manage-admins",
 
                 // Address related permissions
-                "see-all-addresses",
+                "read-all-addresses",
                 "see-own-addresses",
-                "store-address",
+                "create-address",
                 "update-address",
                 "delete-address",
 
@@ -91,9 +91,9 @@ class RolesAndPermissionsSeeder extends Seeder
                 "manage-categories",
 
                 // Address related permissions
-                "see-all-addresses",
+                "read-all-addresses",
                 "see-own-addresses",
-                "store-address",
+                "create-address",
                 "update-address",
                 "delete-address",
 
@@ -121,7 +121,7 @@ class RolesAndPermissionsSeeder extends Seeder
             'cliente' => [
                 "see-own-purchases",
                 "see-own-addresses",
-                "store-address",
+                "create-address",
                 "update-address",
                 "delete-address",
             ],
