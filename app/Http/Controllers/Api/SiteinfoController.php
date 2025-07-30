@@ -177,7 +177,7 @@ class SiteinfoController extends Controller
     {
         $data = $request->validate([
             'header_color' => 'required|string',
-            'header_content' => 'required|string',
+            'header_content' => 'nullable|string',
             'banner_desktop_image' => 'nullable|image',
             'banner_mobile_image' => 'nullable|image',
             'banner_enabled' => 'required|boolean',
@@ -204,7 +204,7 @@ class SiteinfoController extends Controller
         $value = [
             'header' => [
                 'color' => $data['header_color'],
-                'content' => $data['header_content'],
+                'content' => $data['header_content'] ?? '',
             ],
             'banner' => [
                 'desktop_image' => $bannerDesktopImage,
