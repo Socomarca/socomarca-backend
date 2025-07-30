@@ -25,17 +25,33 @@ class SyncProductImage implements ShouldQueue
     {
         Log::info('SyncProductImage job iniciado', ['zipPath' => $this->zipPath]);
         
+        // Descargar ZIP desde S3 a memoria temporal
+        if (!Storage::disk('s3')->exists($this->zipPath)) {
+            Log::error('ZIP no encontrado en S3', ['zipPath' => $this->zipPath]);
+            return;
+        }
+
+        $zipContent = Storage::disk('s3')->get($this->zipPath);
         
-        $zipFullPath = storage_path('app/private/' . $this->zipPath);
-        Log::info('Ruta completa del ZIP', ['zipFullPath' => $zipFullPath]);
-        $extractPath = storage_path('app/private/product-sync/extracted_' . uniqid());
+        // Crear archivo temporal local para procesar
+        $tempZipPath = tempnam(sys_get_temp_dir(), 'sync_zip_');
+        file_put_contents($tempZipPath, $zipContent);
+        
+        Log::info('ZIP descargado desde S3', ['tempPath' => $tempZipPath]);
+        
+        // Crear directorio temporal para extraer
+        $extractPath = sys_get_temp_dir() . '/sync_extract_' . uniqid();
+        mkdir($extractPath, 0755, true);
+        
+        // Extraer ZIP
         $zip = new \ZipArchive;
-        if ($zip->open($zipFullPath) === true) {
+        if ($zip->open($tempZipPath) === true) {
             $zip->extractTo($extractPath);
             $zip->close();
             Log::info('ZIP extraído correctamente', ['extractPath' => $extractPath]);
         } else {
-            Log::error('No se pudo abrir el ZIP', ['zipFullPath' => $zipFullPath]);
+            Log::error('No se pudo abrir el ZIP', ['tempPath' => $tempZipPath]);
+            unlink($tempZipPath);
             return;
         }
 
@@ -49,6 +65,7 @@ class SyncProductImage implements ShouldQueue
 
         if (!$excelPath || !file_exists($excelPath)) {
             Log::error('Archivo Excel no encontrado', ['extractPath' => $extractPath]);
+            $this->cleanup($tempZipPath, $extractPath);
             return;
         }
 
@@ -57,18 +74,21 @@ class SyncProductImage implements ShouldQueue
             Log::info('Archivo Excel cargado correctamente', ['excelPath' => $excelPath]);
         } catch (\Throwable $e) {
             Log::error('Error al cargar archivo Excel', ['error' => $e->getMessage()]);
+            $this->cleanup($tempZipPath, $extractPath);
             return;
         }
 
+        $processedCount = 0;
         $sheet = $spreadsheet->getActiveSheet();
-        foreach ($sheet->getRowIterator(2) as $row) { // Asumiendo encabezado en la fila 1
+        
+        foreach ($sheet->getRowIterator(2) as $row) {
             $cellIterator = $row->getCellIterator();
             $cellIterator->setIterateOnlyExistingCells(false);
             $cells = [];
             foreach ($cellIterator as $cell) {
                 $cells[] = $cell->getValue();
             }
-            // $cells[0] = SKU, $cells[4] = nombre de la imagen
+            
             $sku = $cells[0] ?? null;
             $imageName = $cells[4] ?? null;
 
@@ -83,22 +103,59 @@ class SyncProductImage implements ShouldQueue
                 continue;
             }
 
-            $s3Path = 'products/' . $imageName;
-            Storage::disk('s3')->put($s3Path, file_get_contents($localImagePath));
+            // Subir imagen directamente a S3
+            $s3ImagePath = 'products/' . $imageName;
+            $imageContent = file_get_contents($localImagePath);
             
-            $url = Storage::disk('s3')->url($s3Path);
+            Storage::disk('s3')->put($s3ImagePath, $imageContent);
+            
+            $url = Storage::disk('s3')->url($s3ImagePath);
             if (app()->environment('local')) {
                 $url = str_replace('localstack:4566', 'localhost:4566', $url);
             }
 
-            // Busca el producto por SKU
+            // Buscar y actualizar producto
             $product = \App\Models\Product::where('sku', $sku)->first();
             if ($product) {
-                $product->image = $url; 
+                $product->image = $url;
                 $product->save();
+                $processedCount++;
+                Log::info("Imagen actualizada para SKU: $sku", ['url' => $url]);
             } else {
                 Log::warning("Producto no encontrado para SKU: $sku");
             }
         }
+
+        // Limpiar archivos temporales
+        $this->cleanup($tempZipPath, $extractPath);
+        
+        // Opcional: eliminar ZIP procesado de S3
+        Storage::disk('s3')->delete($this->zipPath);
+        
+        Log::info('SyncProductImage job finalizado', [
+            'processedImages' => $processedCount,
+            'zipPath' => $this->zipPath
+        ]);
+    }
+
+    /**
+     * Limpiar archivos temporales
+     */
+    private function cleanup($tempZipPath, $extractPath)
+    {
+        // Eliminar archivo ZIP temporal
+        if (file_exists($tempZipPath)) {
+            unlink($tempZipPath);
+        }
+        
+        // Eliminar directorio de extracción
+        if (is_dir($extractPath)) {
+            exec("rm -rf " . escapeshellarg($extractPath));
+        }
+        
+        Log::info('Archivos temporales eliminados', [
+            'tempZip' => $tempZipPath,
+            'extractPath' => $extractPath
+        ]);
     }
 }

@@ -143,12 +143,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     });
 
-    Route::middleware(['auth:sanctum', 'role:admin|superadmin'])->group(function () {
 
-        Route::post('/s3-test-upload', [S3Controller::class, 'upload']);    
-        Route::get('/s3-test-list', [S3Controller::class, 'list']);
-       
-    });
 });
 
 Route::get('/faq', [FaqController::class, 'index'])->name('faq.index');
@@ -184,16 +179,20 @@ Route::middleware(['auth:sanctum', 'role:editor|admin|superadmin'])->group(funct
     Route::put('/terms', [SiteinfoController::class, 'updateTerms']);
     Route::put('/privacy-policy', [SiteinfoController::class, 'updatePrivacyPolicy']);
     Route::post('/customer-message', [SiteinfoController::class, 'updateCustomerMessage']);
+    Route::get('/upload-settings', [SiteinfoController::class, 'getUploadSettings'])->name('upload.settings.get');
+    Route::put('/upload-settings', [SiteinfoController::class, 'updateUploadSettings'])->name('upload.settings.update');
+});
+
+Route::prefix('settings')->middleware(['auth:sanctum', 'role:admin|superadmin'])->group(function () {
+    Route::get('/prices', [SettingsController::class, 'index']);
+    Route::put('/prices', [SettingsController::class, 'update']);
+    Route::get('/upload-files', [SiteinfoController::class, 'getUploadSettings'])->name('upload.settings.get');
+    Route::put('/upload-files', [SiteinfoController::class, 'updateUploadSettings'])->name('upload.settings.update');
 });
 
 Route::middleware(['auth:sanctum', 'role:admin|superadmin'])->group(function () {
-    Route::get('/settings/prices', [SettingsController::class, 'index']);
-    Route::put('/settings/prices', [SettingsController::class, 'update']);
+    Route::post('/products/images/sync', [ProductImageSyncController::class, 'store'])->name('products.image.sync');
 });
-
-
-Route::post('/products/images/sync', [ProductImageSyncController::class, 'store'])->name('products.image.sync');
-
 
 // Ruta catch-all al final
 Route::any('{url}', function() {
