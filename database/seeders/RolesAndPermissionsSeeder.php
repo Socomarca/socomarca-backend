@@ -138,8 +138,8 @@ class RolesAndPermissionsSeeder extends Seeder
         if ($superadmin) {
             $superadmin->assignRole('superadmin');
             $superadmin->givePermissionTo([
-                "see-all-addresses",
-                "store-address",
+                "read-all-addresses",
+                "create-address",
             ]);
         }
 
@@ -152,7 +152,7 @@ class RolesAndPermissionsSeeder extends Seeder
         if ($supervisor) {
             $supervisor->assignRole('supervisor');
             $supervisor->givePermissionTo([
-                "see-all-addresses",
+                "read-all-addresses",
 
             ]);
         }
@@ -166,7 +166,7 @@ class RolesAndPermissionsSeeder extends Seeder
         if ($cliente) {
             $cliente->assignRole('cliente');
             $cliente->givePermissionTo([
-                "store-address",
+                "create-address",
                 "update-address",
                 "delete-address",
                 "see-own-addresses",
