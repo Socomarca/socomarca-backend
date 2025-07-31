@@ -92,6 +92,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/subcategories', [SubcategoryController::class,'index'])->name('subcategories.index');
     Route::get('/subcategories/{id}', [SubcategoryController::class,'show'])->name('subcategories.show');
 
+    Route::middleware(['auth:sanctum', 'role:admin|superadmin'])->group(function () {
+        Route::post('/products/images/sync', [ProductImageSyncController::class, 'store'])->name('products.image.sync');
+    });
     Route::get('/products/price-extremes', [ProductController::class, 'getPriceExtremes'])->name('products.price-extremes');
     Route::get('products', [ProductController::class, 'index']);
     Route::get('products/{id}', [ProductController::class, 'show']);
@@ -190,9 +193,6 @@ Route::prefix('settings')->middleware(['auth:sanctum', 'role:admin|superadmin'])
     Route::put('/upload-files', [SiteinfoController::class, 'updateUploadSettings'])->name('upload.settings.update');
 });
 
-Route::middleware(['auth:sanctum', 'role:admin|superadmin'])->group(function () {
-    Route::post('/products/images/sync', [ProductImageSyncController::class, 'store'])->name('products.image.sync');
-});
 
 // Ruta catch-all al final
 Route::any('{url}', function() {
