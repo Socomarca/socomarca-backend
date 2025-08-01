@@ -16,11 +16,9 @@ class RolesAndPermissionsSeeder extends Seeder
     {
         // Lista de permisos
         $permissions = [
-            "see-own-purchases",
             "see-all-reports",
             "see-all-products",
             "see-all-clients",
-            "see-all-purchases",
             "edit-content",
             "edit-products",
             "manage-users",
@@ -40,6 +38,17 @@ class RolesAndPermissionsSeeder extends Seeder
             "update-faq",
             "delete-faq",
 
+            // Cart related permissions
+            "read-own-cart",
+            "delete-cart",
+            "create-cart-items",
+            "delete-cart-items",
+
+            // Order related permissions
+            "read-own-orders",
+            "create-orders",
+            "update-orders",
+
             // List permissions names
             "see-all-permissions",
         ];
@@ -52,11 +61,9 @@ class RolesAndPermissionsSeeder extends Seeder
         // Roles y sus permisos
         $roles = [
             'superadmin' => [
-                "see-own-purchases",
                 "see-all-reports",
                 "see-all-products",
                 "see-all-clients",
-                "see-all-purchases",
                 "edit-content",
                 "edit-products",
                 "manage-users",
@@ -76,15 +83,24 @@ class RolesAndPermissionsSeeder extends Seeder
                 "update-faq",
                 "delete-faq",
 
+                // Cart related permissions
+                "read-own-cart",
+                "delete-cart",
+                "create-cart-items",
+                "delete-cart-items",
+
+                // Order related permissions
+                "read-own-orders",
+                "create-orders",
+                "update-orders",
+
                 // List permissions names
                 "see-all-permissions",
             ],
             'admin' => [
-                "see-own-purchases",
                 "see-all-reports",
                 "see-all-products",
                 "see-all-clients",
-                "see-all-purchases",
                 "edit-content",
                 "edit-products",
                 "manage-users",
@@ -103,27 +119,45 @@ class RolesAndPermissionsSeeder extends Seeder
                 "update-faq",
                 "delete-faq",
 
+                // Cart related permissions
+                "read-own-cart",
+                "delete-cart",
+                "create-cart-items",
+                "delete-cart-items",
+
+                // Order related permissions
+                "read-own-orders",
+                "create-orders",
+                "update-orders",
+
                 // List permissions names
                 "see-all-permissions",
             ],
             'supervisor' => [
-                "see-own-purchases",
                 "see-all-reports",
                 "see-all-products",
-                "see-all-clients",
-                "see-all-purchases"
+                "see-all-clients"
             ],
             'editor' => [
-                "see-own-purchases",
                 "see-all-products",
                 "edit-content"
             ],
             'cliente' => [
-                "see-own-purchases",
                 "see-own-addresses",
                 "store-address",
                 "update-address",
                 "delete-address",
+
+                // Cart related permissions
+                "read-own-cart",
+                "delete-cart", 
+                "create-cart-items",
+                "delete-cart-items",
+
+                // Order related permissions
+                "read-own-orders",
+                "create-orders",
+                "update-orders",
             ],
         ];
 
@@ -170,8 +204,14 @@ class RolesAndPermissionsSeeder extends Seeder
                 "update-address",
                 "delete-address",
                 "see-own-addresses",
-                "see-own-purchases",
                 "see-all-products",
+                "read-own-cart",
+                "delete-cart",
+                "create-cart-items", 
+                "delete-cart-items",
+                "read-own-orders",
+                "create-orders",
+                "update-orders",
             ]);
         }
     }
