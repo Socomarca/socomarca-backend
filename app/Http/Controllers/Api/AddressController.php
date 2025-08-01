@@ -17,15 +17,15 @@ class AddressController extends Controller
 {
     public function index(Request $request)
     {
+        Gate::authorize('viewAny', Address::class);
+
         $user = $request->user();
         $addresses = null;
 
-        if ($user->can('see-all-addresses')) {
+        if ($user->can('read-all-addresses')) {
             $addresses = Address::all();
-        } elseif ($user->can('see-own-addresses')) {
-            $addresses = Address::where('user_id', $user->id)->get();
         } else {
-            abort(403, 'Forbidden');
+            $addresses = Address::where('user_id', $user->id)->get();
         }
 
         $data = new AddressCollection($addresses);
@@ -37,7 +37,7 @@ class AddressController extends Controller
     {
         $user = $storeRequest->user();
 
-        if (!$user->can('store-address')) {
+        if (!$user->can('create-address')) {
             return abort(403, 'Forbidden');
         }
 
