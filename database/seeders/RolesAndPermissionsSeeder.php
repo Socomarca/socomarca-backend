@@ -16,11 +16,11 @@ class RolesAndPermissionsSeeder extends Seeder
     {
         // Lista de permisos
         $permissions = [
-            "see-own-purchases",
-            "see-all-reports",
-            "see-all-products",
-            "see-all-clients",
-            "see-all-purchases",
+            "read-own-purchases",
+            "read-all-reports",
+            "read-all-products",
+            "read-all-customers",
+            "read-all-purchases",
             "edit-content",
             "edit-products",
             "manage-users",
@@ -28,20 +28,31 @@ class RolesAndPermissionsSeeder extends Seeder
             "manage-admins",
 
             // Address related permissions
-            "see-all-addresses",
-            "see-own-addresses",
-            "store-address",
+            "read-all-addresses",
+            "read-own-addresses",
+            "create-address",
             "update-address",
             "delete-address",
 
             // FAQ related permissions
             "manage-faq",
-            "store-faq",
+            "create-faq",
             "update-faq",
             "delete-faq",
 
+            // Favorite permissions
+            "read-own-favorites",
+            "create-favorites",
+            "delete-favorites",
+
+            // FavoritesList permissions
+            "read-own-favorites-list",
+            "create-favorites-list",
+            "update-favorites-list",
+            "delete-favorites-list",
+
             // List permissions names
-            "see-all-permissions",
+            "read-all-permissions",
         ];
 
         // Crear permisos si no existen
@@ -52,11 +63,11 @@ class RolesAndPermissionsSeeder extends Seeder
         // Roles y sus permisos
         $roles = [
             'superadmin' => [
-                "see-own-purchases",
-                "see-all-reports",
-                "see-all-products",
-                "see-all-clients",
-                "see-all-purchases",
+                "read-own-purchases",
+                "read-all-reports",
+                "read-all-products",
+                "read-all-customers",
+                "read-all-purchases",
                 "edit-content",
                 "edit-products",
                 "manage-users",
@@ -64,66 +75,73 @@ class RolesAndPermissionsSeeder extends Seeder
                 "manage-admins",
 
                 // Address related permissions
-                "see-all-addresses",
-                "see-own-addresses",
-                "store-address",
+                "read-all-addresses",
+                "read-own-addresses",
+                "create-address",
                 "update-address",
                 "delete-address",
 
                 // FAQ related permissions
                 "manage-faq",
-                "store-faq",
+                "create-faq",
                 "update-faq",
                 "delete-faq",
 
                 // List permissions names
-                "see-all-permissions",
+                "read-all-permissions",
             ],
             'admin' => [
-                "see-own-purchases",
-                "see-all-reports",
-                "see-all-products",
-                "see-all-clients",
-                "see-all-purchases",
+                "read-own-purchases",
+                "read-all-reports",
+                "read-all-products",
+                "read-all-customers",
+                "read-all-purchases",
                 "edit-content",
                 "edit-products",
                 "manage-users",
                 "manage-categories",
 
                 // Address related permissions
-                "see-all-addresses",
-                "see-own-addresses",
-                "store-address",
+                "read-all-addresses",
+                "read-own-addresses",
+                "create-address",
                 "update-address",
                 "delete-address",
 
                 // FAQ related permissions
                 "manage-faq",
-                "store-faq",
+                "create-faq",
                 "update-faq",
                 "delete-faq",
 
                 // List permissions names
-                "see-all-permissions",
+                "read-all-permissions",
             ],
             'supervisor' => [
-                "see-own-purchases",
-                "see-all-reports",
-                "see-all-products",
-                "see-all-clients",
-                "see-all-purchases"
+                "read-own-purchases",
+                "read-all-reports",
+                "read-all-products",
+                "read-all-customers",
+                "read-all-purchases"
             ],
             'editor' => [
-                "see-own-purchases",
-                "see-all-products",
+                "read-own-purchases",
+                "read-all-products",
                 "edit-content"
             ],
             'cliente' => [
-                "see-own-purchases",
-                "see-own-addresses",
-                "store-address",
+                "read-own-purchases",
+                "read-own-addresses",
+                "create-address",
                 "update-address",
                 "delete-address",
+                "read-own-favorites",
+                "create-favorites",
+                "delete-favorites",
+                "read-own-favorites-list",
+                "create-favorites-list",
+                "update-favorites-list",
+                "read-all-products",
             ],
         ];
 
@@ -138,8 +156,8 @@ class RolesAndPermissionsSeeder extends Seeder
         if ($superadmin) {
             $superadmin->assignRole('superadmin');
             $superadmin->givePermissionTo([
-                "see-all-addresses",
-                "store-address",
+                "read-all-addresses",
+                "create-address",
             ]);
         }
 
@@ -152,7 +170,7 @@ class RolesAndPermissionsSeeder extends Seeder
         if ($supervisor) {
             $supervisor->assignRole('supervisor');
             $supervisor->givePermissionTo([
-                "see-all-addresses",
+                "read-all-addresses",
 
             ]);
         }
@@ -166,12 +184,12 @@ class RolesAndPermissionsSeeder extends Seeder
         if ($cliente) {
             $cliente->assignRole('cliente');
             $cliente->givePermissionTo([
-                "store-address",
+                "create-address",
                 "update-address",
                 "delete-address",
-                "see-own-addresses",
-                "see-own-purchases",
-                "see-all-products",
+                "read-own-addresses",
+                "read-own-purchases",
+                "read-all-products",
             ]);
         }
     }
